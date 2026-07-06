@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\darkk\OneDrive\Desktop\straight\native\qwen_wrapper\qwen_wrapper.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\darkk\OneDrive\Desktop\straight\native\qwen_wrapper\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{DA31EF33-97FB-382B-881B-CE1D9436F9AD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

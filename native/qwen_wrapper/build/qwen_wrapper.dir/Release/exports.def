@@ -1,0 +1,5 @@
+EXPORTS 
+	qwen_wrapper_complete
+	qwen_wrapper_free
+	qwen_wrapper_free_string
+	qwen_wrapper_init
