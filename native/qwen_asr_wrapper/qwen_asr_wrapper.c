@@ -3,9 +3,6 @@
  *
  * Dynamically loads the antirez/qwen-asr library at runtime and wraps
  * pointer-based signatures for Dart FFI consumption.
- *
- * Build: cmake .. && cmake --build . --config Release
- * Output: qwen_asr_wrapper.dll (placed in native/prebuilt/)
  */
 
 #ifdef _WIN32
@@ -30,6 +27,30 @@ typedef struct qwen_ctx qwen_ctx_t;
 /* Token callback type from the original API */
 typedef void (*qwen_token_cb)(const char *piece, void *userdata);
 
+static char _last_error[512] = "";
+
+static void _set_error(const char *message) {
+    snprintf(_last_error, sizeof(_last_error), "%s", message ? message : "unknown error");
+}
+static char* _copy_result_string(const char *source) {
+    if (!source) return NULL;
+    size_t len = strlen(source);
+    char *copy = (char*)malloc(len + 1);
+    if (!copy) {
+        _set_error("malloc failed while copying result string");
+        return NULL;
+    }
+    memcpy(copy, source, len + 1);
+    return copy;
+}
+
+#ifdef _WIN32
+static void _set_windows_error(const char *prefix) {
+    DWORD err = GetLastError();
+    snprintf(_last_error, sizeof(_last_error), "%s (GetLastError=%lu)", prefix, (unsigned long)err);
+}
+#endif
+
 /* Dynamically loaded function pointers */
 static struct {
     qwen_ctx_t* (*load)(const char *model_dir);
@@ -44,13 +65,51 @@ static struct {
 
 static int _load_qwen_asr(void) {
 #ifdef _WIN32
-    HMODULE mod = LoadLibraryW(L"qwen_asr.dll");
-    if (!mod) return 0;
-#define LOAD(name) _q. name = (void*)GetProcAddress(mod, "qwen_" #name); if (!_q. name) return 0
+    HMODULE mod = NULL;
+    HMODULE wrapper = NULL;
+    wchar_t dll_path[MAX_PATH];
+
+    if (GetModuleHandleExW(
+            GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+            (LPCWSTR)&_load_qwen_asr,
+            &wrapper)) {
+        DWORD len = GetModuleFileNameW(wrapper, dll_path, MAX_PATH);
+        if (len > 0 && len < MAX_PATH) {
+            wchar_t *slash = wcsrchr(dll_path, L'\\');
+            if (slash) {
+                *(slash + 1) = L'\0';
+                SetDllDirectoryW(dll_path);
+                wcsncat_s(dll_path, MAX_PATH, L"qwen_asr.dll", _TRUNCATE);
+                mod = LoadLibraryW(dll_path);
+            }
+        }
+    }
+
+    if (!mod) {
+        mod = LoadLibraryW(L"qwen_asr.dll");
+    }
+    if (!mod) {
+        _set_windows_error("LoadLibraryW(qwen_asr.dll) failed");
+        return 0;
+    }
+#define LOAD(name) \
+    _q.name = (void*)GetProcAddress(mod, "qwen_" #name); \
+    if (!_q.name) { \
+        snprintf(_last_error, sizeof(_last_error), "Missing export: qwen_%s", #name); \
+        return 0; \
+    }
 #else
     void *mod = dlopen("libqwen_asr.so", RTLD_NOW | RTLD_GLOBAL);
-    if (!mod) return 0;
-#define LOAD(name) _q. name = (void*)dlsym(mod, "qwen_" #name); if (!_q. name) return 0
+    if (!mod) {
+        _set_error(dlerror());
+        return 0;
+    }
+#define LOAD(name) \
+    _q.name = (void*)dlsym(mod, "qwen_" #name); \
+    if (!_q.name) { \
+        snprintf(_last_error, sizeof(_last_error), "Missing export: qwen_%s", #name); \
+        return 0; \
+    }
 #endif
     LOAD(load);
     LOAD(free);
@@ -59,87 +118,67 @@ static int _load_qwen_asr(void) {
     LOAD(set_token_callback);
     LOAD(set_prompt);
     LOAD(set_force_language);
+    _set_error("");
     return 1;
 #undef LOAD
 }
 
-/*
- * qwen_asr_wrapper_init: Load model from directory
- * Returns: opaque context pointer, or NULL on failure
- */
+QWEN_WRAPPER_API const char*
+qwen_asr_wrapper_last_error(void) {
+    return _last_error;
+}
+
 QWEN_WRAPPER_API qwen_ctx_t*
 qwen_asr_wrapper_init(const char *model_dir) {
     if (!_q.loaded) { _q.loaded = _load_qwen_asr(); }
     if (!_q.loaded) return NULL;
-    return _q.load(model_dir);
+    qwen_ctx_t *ctx = _q.load(model_dir);
+    if (!ctx) {
+        snprintf(_last_error, sizeof(_last_error), "qwen_load returned NULL for model dir: %s", model_dir ? model_dir : "(null)");
+    }
+    return ctx;
 }
 
-/*
- * qwen_asr_wrapper_free: Release all resources
- */
 QWEN_WRAPPER_API void
 qwen_asr_wrapper_free(qwen_ctx_t *ctx) {
     if (_q.loaded && ctx) _q.free(ctx);
 }
 
-/*
- * qwen_asr_wrapper_transcribe: Transcribe raw audio samples
- * samples: mono float32 array at 16kHz
- * n_samples: number of samples
- * Returns: allocated UTF-8 string (caller must free with qwen_asr_wrapper_free_string)
- */
 QWEN_WRAPPER_API char*
 qwen_asr_wrapper_transcribe(qwen_ctx_t *ctx, const float *samples, int n_samples) {
     if (!_q.loaded || !ctx) return NULL;
-    return _q.transcribe_audio(ctx, samples, n_samples);
+    return _copy_result_string(_q.transcribe_audio(ctx, samples, n_samples));
 }
 
-/*
- * qwen_asr_wrapper_transcribe_file: Transcribe a WAV file
- * Returns: allocated UTF-8 string (caller must free)
- */
 QWEN_WRAPPER_API char*
 qwen_asr_wrapper_transcribe_file(qwen_ctx_t *ctx, const char *wav_path) {
     if (!_q.loaded || !ctx) return NULL;
-    return _q.transcribe(ctx, wav_path);
+    return _copy_result_string(_q.transcribe(ctx, wav_path));
 }
 
-/*
- * qwen_asr_wrapper_free_string: Free a string returned by transcribe functions
- */
 QWEN_WRAPPER_API void
 qwen_asr_wrapper_free_string(char *str) {
     if (str) free(str);
 }
 
-/*
- * qwen_asr_wrapper_set_prompt: Set optional system prompt for biasing
- * Returns: 0 on success, -1 on error
- */
 QWEN_WRAPPER_API int
 qwen_asr_wrapper_set_prompt(qwen_ctx_t *ctx, const char *prompt) {
     if (!_q.loaded || !ctx) return -1;
     return _q.set_prompt(ctx, prompt);
 }
 
-/*
- * qwen_asr_wrapper_set_language: Set forced output language
- * Returns: 0 on success, -1 on error
- */
 QWEN_WRAPPER_API int
 qwen_asr_wrapper_set_language(qwen_ctx_t *ctx, const char *language) {
     if (!_q.loaded || !ctx) return -1;
     return _q.set_force_language(ctx, language);
 }
 
-/*
- * qwen_asr_wrapper_supported_languages: Get comma-separated list of supported languages
- */
 QWEN_WRAPPER_API const char*
 qwen_asr_wrapper_supported_languages(void) {
-    /* This function is not in the dynamic loader, return a static string */
     return "Chinese,English,Cantonese,Arabic,German,French,Spanish,Portuguese,"
            "Indonesian,Italian,Korean,Russian,Thai,Vietnamese,Japanese,Turkish,"
            "Hindi,Malay,Dutch,Swedish,Danish,Finnish,Polish,Czech,Filipino,"
            "Persian,Greek,Hungarian,Macedonian,Romanian";
 }
+
+

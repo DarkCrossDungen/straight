@@ -1,6 +1,6 @@
 import 'dart:ffi';
-import 'dart:io';
 import 'package:ffi/ffi.dart';
+import '../native/native_library_loader.dart';
 import 'stt_engine.dart';
 
 typedef _InitNative = Pointer<Void> Function(Pointer<Utf8> modelDir);
@@ -23,6 +23,9 @@ typedef _SetPromptDart = int Function(Pointer<Void> ctx, Pointer<Utf8> prompt);
 typedef _SetLanguageNative = Int32 Function(Pointer<Void> ctx, Pointer<Utf8> language);
 typedef _SetLanguageDart = int Function(Pointer<Void> ctx, Pointer<Utf8> language);
 
+typedef _LastErrorNative = Pointer<Utf8> Function();
+typedef _LastErrorDart = Pointer<Utf8> Function();
+
 class QwenAsrEngine extends SttEngine {
   DynamicLibrary? _lib;
   Pointer<Void>? _ctx;
@@ -33,18 +36,19 @@ class QwenAsrEngine extends SttEngine {
   _FreeStringDart? _freeString;
   _SetPromptDart? _setPrompt;
   _SetLanguageDart? _setLanguage;
+  _LastErrorDart? _lastError;
 
   bool get isLoaded => _ctx != null && _ctx != nullptr;
 
   @override
   Future<void> init(String modelPath) async {
-    // modelPath for Qwen is actually the model directory
     final dir = modelPath;
 
     try {
-      _lib = Platform.isWindows
-          ? DynamicLibrary.open('native/prebuilt/qwen_asr_wrapper.dll')
-          : DynamicLibrary.open('native/prebuilt/libqwen_asr_wrapper.so');
+      _lib = openNativeLibrary(
+        'qwen_asr_wrapper.dll',
+        'libqwen_asr_wrapper.so',
+      );
     } catch (e) {
       throw Exception('Failed to load qwen_asr_wrapper.dll: $e');
     }
@@ -59,6 +63,8 @@ class QwenAsrEngine extends SttEngine {
         'qwen_asr_wrapper_set_prompt');
     _setLanguage = _lib!.lookupFunction<_SetLanguageNative, _SetLanguageDart>(
         'qwen_asr_wrapper_set_language');
+    _lastError = _lib!.lookupFunction<_LastErrorNative, _LastErrorDart>(
+        'qwen_asr_wrapper_last_error');
 
     final dirPtr = dir.toNativeUtf8();
     try {
@@ -68,7 +74,11 @@ class QwenAsrEngine extends SttEngine {
     }
 
     if (_ctx == null || _ctx == nullptr) {
-      throw Exception('Failed to load Qwen3-ASR model from: $dir');
+      final errorPtr = _lastError?.call();
+      final detail = errorPtr == null || errorPtr == nullptr
+          ? 'unknown native error'
+          : errorPtr.toDartString();
+      throw Exception('Failed to load Qwen3-ASR model from: $dir ($detail)');
     }
   }
 
@@ -76,7 +86,6 @@ class QwenAsrEngine extends SttEngine {
   Future<String> transcribe(List<int> pcmAudio) async {
     if (!isLoaded) throw Exception('Qwen3-ASR not initialized');
 
-    // Convert int16 PCM to float32 [-1.0, 1.0]
     final floatSamples = calloc<Float>(pcmAudio.length);
     try {
       for (var i = 0; i < pcmAudio.length; i++) {
@@ -87,8 +96,7 @@ class QwenAsrEngine extends SttEngine {
       if (resultPtr == nullptr) return '';
 
       try {
-        final text = resultPtr.toDartString();
-        return text;
+        return resultPtr.toDartString();
       } finally {
         _freeString!(resultPtr);
       }
@@ -126,4 +134,3 @@ class QwenAsrEngine extends SttEngine {
     }
   }
 }
-
