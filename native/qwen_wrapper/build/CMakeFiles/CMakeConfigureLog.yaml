@@ -4,18 +4,153 @@ events:
   -
     kind: "message-v1"
     backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineSystem.cmake:212 (message)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineSystem.cmake:212 (message)"
       - "CMakeLists.txt:2 (project)"
     message: |
       The system is: Windows - 10.0.26200 - AMD64
   -
     kind: "find-v1"
     backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:468 (find_file)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:506 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeUnixFindMake.cmake:5 (find_program)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_MAKE_PROGRAM"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gmake"
+      - "make"
+      - "smake"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/gmake.com"
+      - "C:/msys64/mingw64/bin/gmake.exe"
+      - "C:/msys64/mingw64/bin/gmake"
+      - "C:/msys64/usr/local/bin/gmake.com"
+      - "C:/msys64/usr/local/bin/gmake.exe"
+      - "C:/msys64/usr/local/bin/gmake"
+      - "C:/msys64/usr/bin/gmake.com"
+      - "C:/msys64/usr/bin/gmake.exe"
+      - "C:/msys64/usr/bin/gmake"
+      - "C:/Windows/System32/gmake.com"
+      - "C:/Windows/System32/gmake.exe"
+      - "C:/Windows/System32/gmake"
+      - "C:/Windows/gmake.com"
+      - "C:/Windows/gmake.exe"
+      - "C:/Windows/gmake"
+      - "C:/Windows/System32/wbem/gmake.com"
+      - "C:/Windows/System32/wbem/gmake.exe"
+      - "C:/Windows/System32/wbem/gmake"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gmake.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gmake.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gmake"
+      - "C:/msys64/usr/bin/site_perl/gmake.com"
+      - "C:/msys64/usr/bin/site_perl/gmake.exe"
+      - "C:/msys64/usr/bin/site_perl/gmake"
+      - "C:/msys64/usr/bin/vendor_perl/gmake.com"
+      - "C:/msys64/usr/bin/vendor_perl/gmake.exe"
+      - "C:/msys64/usr/bin/vendor_perl/gmake"
+      - "C:/msys64/usr/bin/core_perl/gmake.com"
+      - "C:/msys64/usr/bin/core_perl/gmake.exe"
+      - "C:/msys64/usr/bin/core_perl/gmake"
+      - "C:/msys64/mingw64/bin/make.com"
+      - "C:/msys64/mingw64/bin/make.exe"
+      - "C:/msys64/mingw64/bin/make"
+      - "C:/msys64/usr/local/bin/make.com"
+      - "C:/msys64/usr/local/bin/make.exe"
+      - "C:/msys64/usr/local/bin/make"
+      - "C:/msys64/usr/bin/make.com"
+    found: "C:/msys64/usr/bin/make.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompiler.cmake:73 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:64 (_cmake_find_compiler)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_C_COMPILER"
+    description: "C compiler"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "cc"
+      - "gcc"
+      - "cl"
+      - "bcc"
+      - "xlc"
+      - "icx"
+      - "clang"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/cc.com"
+    found: "C:/msys64/mingw64/bin/cc.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerId.cmake:468 (find_file)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerId.cmake:506 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
       - "CMakeLists.txt:2 (project)"
     mode: "file"
     variable: "src_in"
@@ -31,677 +166,48 @@ events:
     names:
       - "CMakeCCompilerId.c.in"
     candidate_directories:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/"
-    found: "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeCCompilerId.c.in"
+      - "C:/msys64/mingw64/share/cmake/Modules/"
+    found: "C:/msys64/mingw64/share/cmake/Modules/CMakeCCompilerId.c.in"
     search_context:
       ENV{PATH}:
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\VCPackages"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\bin\\Roslyn"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Team Tools\\DiagnosticsHub\\Collector"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\Extensions\\Microsoft\\CodeCoverage.Console"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.22621.0\\\\x64"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\\\MSBuild\\Current\\Bin\\amd64"
-        - "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\"
-        - "C:\\Program Files\\PowerShell\\7"
-        - "C:\\WINDOWS\\system32"
-        - "C:\\WINDOWS"
-        - "C:\\WINDOWS\\System32\\Wbem"
-        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
-        - "C:\\WINDOWS\\System32\\OpenSSH\\"
-        - "C:\\Program Files\\nodejs\\"
-        - "C:\\Program Files\\PowerShell\\7\\"
-        - "C:\\Program Files\\Git\\cmd"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\"
-        - "C:\\Users\\darkk\\.cargo\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WindowsApps"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Antigravity IDE\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Python\\bin"
-        - "C:\\Users\\darkk\\AppData\\Roaming\\npm"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Ollama"
-        - "C:\\Users\\darkk\\.local\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\flutter\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\Ninja"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\Linux\\bin\\ConnectionManagerExe"
-      ENV{INCLUDE}:
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\include"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\VS\\include"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22621.0\\ucrt"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\um"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\shared"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\winrt"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\cppwinrt"
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
   -
     kind: "message-v1"
     backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
       - "CMakeLists.txt:2 (project)"
     message: |
       Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
-      Compiler:  
+      Compiler: C:/msys64/mingw64/bin/cc.exe 
       Build flags: 
       Id flags:  
       
       The output was:
       0
-      MSBuild version 17.14.40+3e7442088 for .NET Framework
-      Build started 05-07-2026 13:41:43.
-      
-      Project "C:\\Users\\darkk\\OneDrive\\Desktop\\straight\\native\\qwen_wrapper\\build\\CMakeFiles\\4.3.4\\CompilerIdC\\CompilerIdC.vcxproj" on node 1 (default targets).
-      PrepareForBuild:
-        Creating directory "Debug\\".
-        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
-        Creating directory "Debug\\CompilerIdC.tlog\\".
-      InitializeBuildStatus:
-        Creating "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
-        Touching "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
-      ClCompile:
-        C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
-        CMakeCCompilerId.c
-      Link:
-        C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
-        CompilerIdC.vcxproj -> C:\\Users\\darkk\\OneDrive\\Desktop\\straight\\native\\qwen_wrapper\\build\\CMakeFiles\\4.3.4\\CompilerIdC\\CompilerIdC.exe
-      PostBuildEvent:
-        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
-        :VCEnd
-        CMAKE_C_COMPILER=C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe
-      FinalizeBuildStatus:
-        Deleting file "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
-        Touching "Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate".
-      Done Building Project "C:\\Users\\darkk\\OneDrive\\Desktop\\straight\\native\\qwen_wrapper\\build\\CMakeFiles\\4.3.4\\CompilerIdC\\CompilerIdC.vcxproj" (default targets).
-      
-      Build succeeded.
-          0 Warning(s)
-          0 Error(s)
-      
-      Time Elapsed 00:00:01.30
       
       
-      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.exe"
       
-      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
-      
-      The C compiler identification is MSVC, found in:
-        C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/4.3.4/CompilerIdC/CompilerIdC.exe
+      The C compiler identification is GNU, found in:
+        C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/4.3.3/CompilerIdC/a.exe
       
   -
     kind: "find-v1"
     backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:103 (__resolve_linker_path)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
-      - "CMakeLists.txt:2 (project)"
-    mode: "program"
-    variable: "_CMAKE_TOOL_WITH_PATH"
-    description: "Path to a program."
-    settings:
-      SearchFramework: "NEVER"
-      SearchAppBundle: "NEVER"
-      CMAKE_FIND_USE_CMAKE_PATH: false
-      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
-      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
-      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
-      CMAKE_FIND_USE_INSTALL_PREFIX: true
-    names:
-      - "link"
-    candidate_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/"
-      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/"
-      - "C:/Program Files/PowerShell/7/"
-      - "C:/Windows/System32/"
-      - "C:/Windows/"
-      - "C:/Windows/System32/wbem/"
-      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
-      - "C:/Windows/System32/OpenSSH/"
-      - "C:/Program Files/nodejs/"
-      - "C:/Program Files/Git/cmd/"
-      - "C:/Program Files/CMake/bin/"
-      - "C:/Users/darkk/AppData/Local/hermes/hermes-agent/venv/Scripts/"
-      - "C:/Users/darkk/AppData/Local/hermes/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/Scripts/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/"
-      - "C:/Users/darkk/.cargo/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WindowsApps/"
-      - "C:/Users/darkk/AppData/Local/Programs/Antigravity IDE/bin/"
-      - "C:/Users/darkk/AppData/Local/Python/bin/"
-      - "C:/Users/darkk/AppData/Roaming/npm/"
-      - "C:/Users/darkk/AppData/Local/Programs/Ollama/"
-      - "C:/Users/darkk/.local/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Microsoft VS Code/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe/ripgrep-15.1.0-x86_64-pc-windows-msvc/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.1-full_build/bin/"
-      - "C:/flutter/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/Linux/bin/ConnectionManagerExe/"
-    searched_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/link.com"
-    found: "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/link.exe"
-    search_context:
-      ENV{PATH}:
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\VCPackages"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\bin\\Roslyn"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Team Tools\\DiagnosticsHub\\Collector"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\Extensions\\Microsoft\\CodeCoverage.Console"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.22621.0\\\\x64"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\\\MSBuild\\Current\\Bin\\amd64"
-        - "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\"
-        - "C:\\Program Files\\PowerShell\\7"
-        - "C:\\WINDOWS\\system32"
-        - "C:\\WINDOWS"
-        - "C:\\WINDOWS\\System32\\Wbem"
-        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
-        - "C:\\WINDOWS\\System32\\OpenSSH\\"
-        - "C:\\Program Files\\nodejs\\"
-        - "C:\\Program Files\\PowerShell\\7\\"
-        - "C:\\Program Files\\Git\\cmd"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\"
-        - "C:\\Users\\darkk\\.cargo\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WindowsApps"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Antigravity IDE\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Python\\bin"
-        - "C:\\Users\\darkk\\AppData\\Roaming\\npm"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Ollama"
-        - "C:\\Users\\darkk\\.local\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\flutter\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\Ninja"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\Linux\\bin\\ConnectionManagerExe"
-  -
-    kind: "find-v1"
-    backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:104 (__resolve_linker_path)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
-      - "CMakeLists.txt:2 (project)"
-    mode: "program"
-    variable: "_CMAKE_TOOL_WITH_PATH"
-    description: "Path to a program."
-    settings:
-      SearchFramework: "NEVER"
-      SearchAppBundle: "NEVER"
-      CMAKE_FIND_USE_CMAKE_PATH: false
-      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
-      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
-      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
-      CMAKE_FIND_USE_INSTALL_PREFIX: true
-    names:
-      - "lld-link"
-    candidate_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/"
-      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/"
-      - "C:/Program Files/PowerShell/7/"
-      - "C:/Windows/System32/"
-      - "C:/Windows/"
-      - "C:/Windows/System32/wbem/"
-      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
-      - "C:/Windows/System32/OpenSSH/"
-      - "C:/Program Files/nodejs/"
-      - "C:/Program Files/Git/cmd/"
-      - "C:/Program Files/CMake/bin/"
-      - "C:/Users/darkk/AppData/Local/hermes/hermes-agent/venv/Scripts/"
-      - "C:/Users/darkk/AppData/Local/hermes/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/Scripts/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/"
-      - "C:/Users/darkk/.cargo/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WindowsApps/"
-      - "C:/Users/darkk/AppData/Local/Programs/Antigravity IDE/bin/"
-      - "C:/Users/darkk/AppData/Local/Python/bin/"
-      - "C:/Users/darkk/AppData/Roaming/npm/"
-      - "C:/Users/darkk/AppData/Local/Programs/Ollama/"
-      - "C:/Users/darkk/.local/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Microsoft VS Code/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe/ripgrep-15.1.0-x86_64-pc-windows-msvc/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.1-full_build/bin/"
-      - "C:/flutter/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/Linux/bin/ConnectionManagerExe/"
-    searched_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/lld-link"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/lld-link.com"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/lld-link.exe"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/lld-link"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/x64/lld-link.com"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/x64/lld-link.exe"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/x64/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/lld-link"
-      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/lld-link.com"
-      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/lld-link.exe"
-      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/lld-link"
-      - "C:/Program Files/PowerShell/7/lld-link.com"
-      - "C:/Program Files/PowerShell/7/lld-link.exe"
-      - "C:/Program Files/PowerShell/7/lld-link"
-      - "C:/Windows/System32/lld-link.com"
-      - "C:/Windows/System32/lld-link.exe"
-      - "C:/Windows/System32/lld-link"
-      - "C:/Windows/lld-link.com"
-      - "C:/Windows/lld-link.exe"
-      - "C:/Windows/lld-link"
-      - "C:/Windows/System32/wbem/lld-link.com"
-      - "C:/Windows/System32/wbem/lld-link.exe"
-      - "C:/Windows/System32/wbem/lld-link"
-      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.com"
-      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.exe"
-      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link"
-      - "C:/Windows/System32/OpenSSH/lld-link.com"
-      - "C:/Windows/System32/OpenSSH/lld-link.exe"
-      - "C:/Windows/System32/OpenSSH/lld-link"
-      - "C:/Program Files/nodejs/lld-link.com"
-      - "C:/Program Files/nodejs/lld-link.exe"
-      - "C:/Program Files/nodejs/lld-link"
-      - "C:/Program Files/Git/cmd/lld-link.com"
-      - "C:/Program Files/Git/cmd/lld-link.exe"
-      - "C:/Program Files/Git/cmd/lld-link"
-      - "C:/Program Files/CMake/bin/lld-link.com"
-      - "C:/Program Files/CMake/bin/lld-link.exe"
-      - "C:/Program Files/CMake/bin/lld-link"
-      - "C:/Users/darkk/AppData/Local/hermes/hermes-agent/venv/Scripts/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/hermes/hermes-agent/venv/Scripts/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/hermes/hermes-agent/venv/Scripts/lld-link"
-      - "C:/Users/darkk/AppData/Local/hermes/bin/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/hermes/bin/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/hermes/bin/lld-link"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/Scripts/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/Scripts/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/Scripts/lld-link"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/lld-link"
-      - "C:/Users/darkk/.cargo/bin/lld-link.com"
-      - "C:/Users/darkk/.cargo/bin/lld-link.exe"
-      - "C:/Users/darkk/.cargo/bin/lld-link"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WindowsApps/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WindowsApps/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WindowsApps/lld-link"
-      - "C:/Users/darkk/AppData/Local/Programs/Antigravity IDE/bin/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/Programs/Antigravity IDE/bin/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/Programs/Antigravity IDE/bin/lld-link"
-      - "C:/Users/darkk/AppData/Local/Python/bin/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/Python/bin/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/Python/bin/lld-link"
-      - "C:/Users/darkk/AppData/Roaming/npm/lld-link.com"
-      - "C:/Users/darkk/AppData/Roaming/npm/lld-link.exe"
-      - "C:/Users/darkk/AppData/Roaming/npm/lld-link"
-      - "C:/Users/darkk/AppData/Local/Programs/Ollama/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/Programs/Ollama/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/Programs/Ollama/lld-link"
-      - "C:/Users/darkk/.local/bin/lld-link.com"
-      - "C:/Users/darkk/.local/bin/lld-link.exe"
-      - "C:/Users/darkk/.local/bin/lld-link"
-      - "C:/Users/darkk/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/Programs/Microsoft VS Code/bin/lld-link"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe/ripgrep-15.1.0-x86_64-pc-windows-msvc/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe/ripgrep-15.1.0-x86_64-pc-windows-msvc/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe/ripgrep-15.1.0-x86_64-pc-windows-msvc/lld-link"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.1-full_build/bin/lld-link.com"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.1-full_build/bin/lld-link.exe"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.1-full_build/bin/lld-link"
-      - "C:/flutter/bin/lld-link.com"
-      - "C:/flutter/bin/lld-link.exe"
-      - "C:/flutter/bin/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/lld-link"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/Linux/bin/ConnectionManagerExe/lld-link.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/Linux/bin/ConnectionManagerExe/lld-link.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/Linux/bin/ConnectionManagerExe/lld-link"
-    found: false
-    search_context:
-      ENV{PATH}:
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\VCPackages"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\bin\\Roslyn"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Team Tools\\DiagnosticsHub\\Collector"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\Extensions\\Microsoft\\CodeCoverage.Console"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.22621.0\\\\x64"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\\\MSBuild\\Current\\Bin\\amd64"
-        - "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\"
-        - "C:\\Program Files\\PowerShell\\7"
-        - "C:\\WINDOWS\\system32"
-        - "C:\\WINDOWS"
-        - "C:\\WINDOWS\\System32\\Wbem"
-        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
-        - "C:\\WINDOWS\\System32\\OpenSSH\\"
-        - "C:\\Program Files\\nodejs\\"
-        - "C:\\Program Files\\PowerShell\\7\\"
-        - "C:\\Program Files\\Git\\cmd"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\"
-        - "C:\\Users\\darkk\\.cargo\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WindowsApps"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Antigravity IDE\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Python\\bin"
-        - "C:\\Users\\darkk\\AppData\\Roaming\\npm"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Ollama"
-        - "C:\\Users\\darkk\\.local\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\flutter\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\Ninja"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\Linux\\bin\\ConnectionManagerExe"
-  -
-    kind: "find-v1"
-    backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
-      - "CMakeLists.txt:2 (project)"
-    mode: "program"
-    variable: "CMAKE_LINKER"
-    description: "Path to a program."
-    settings:
-      SearchFramework: "NEVER"
-      SearchAppBundle: "NEVER"
-      CMAKE_FIND_USE_CMAKE_PATH: false
-      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
-      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
-      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
-      CMAKE_FIND_USE_INSTALL_PREFIX: true
-    names:
-      - "link"
-    candidate_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/"
-      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/"
-      - "C:/Program Files/PowerShell/7/"
-      - "C:/Windows/System32/"
-      - "C:/Windows/"
-      - "C:/Windows/System32/wbem/"
-      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
-      - "C:/Windows/System32/OpenSSH/"
-      - "C:/Program Files/nodejs/"
-      - "C:/Program Files/Git/cmd/"
-      - "C:/Program Files/CMake/bin/"
-      - "C:/Users/darkk/AppData/Local/hermes/hermes-agent/venv/Scripts/"
-      - "C:/Users/darkk/AppData/Local/hermes/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/Scripts/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/"
-      - "C:/Users/darkk/.cargo/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WindowsApps/"
-      - "C:/Users/darkk/AppData/Local/Programs/Antigravity IDE/bin/"
-      - "C:/Users/darkk/AppData/Local/Python/bin/"
-      - "C:/Users/darkk/AppData/Roaming/npm/"
-      - "C:/Users/darkk/AppData/Local/Programs/Ollama/"
-      - "C:/Users/darkk/.local/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Microsoft VS Code/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe/ripgrep-15.1.0-x86_64-pc-windows-msvc/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.1-full_build/bin/"
-      - "C:/flutter/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/Linux/bin/ConnectionManagerExe/"
-    searched_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/link.com"
-    found: "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/link.exe"
-    search_context:
-      ENV{PATH}:
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\VCPackages"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\bin\\Roslyn"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Team Tools\\DiagnosticsHub\\Collector"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\Extensions\\Microsoft\\CodeCoverage.Console"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.22621.0\\\\x64"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\\\MSBuild\\Current\\Bin\\amd64"
-        - "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\"
-        - "C:\\Program Files\\PowerShell\\7"
-        - "C:\\WINDOWS\\system32"
-        - "C:\\WINDOWS"
-        - "C:\\WINDOWS\\System32\\Wbem"
-        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
-        - "C:\\WINDOWS\\System32\\OpenSSH\\"
-        - "C:\\Program Files\\nodejs\\"
-        - "C:\\Program Files\\PowerShell\\7\\"
-        - "C:\\Program Files\\Git\\cmd"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\"
-        - "C:\\Users\\darkk\\.cargo\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WindowsApps"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Antigravity IDE\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Python\\bin"
-        - "C:\\Users\\darkk\\AppData\\Roaming\\npm"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Ollama"
-        - "C:\\Users\\darkk\\.local\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\flutter\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\Ninja"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\Linux\\bin\\ConnectionManagerExe"
-  -
-    kind: "find-v1"
-    backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
-      - "CMakeLists.txt:2 (project)"
-    mode: "program"
-    variable: "CMAKE_MT"
-    description: "Path to a program."
-    settings:
-      SearchFramework: "NEVER"
-      SearchAppBundle: "NEVER"
-      CMAKE_FIND_USE_CMAKE_PATH: false
-      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
-      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
-      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
-      CMAKE_FIND_USE_INSTALL_PREFIX: true
-    names:
-      - "mt"
-    candidate_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/"
-      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/"
-      - "C:/Program Files/PowerShell/7/"
-      - "C:/Windows/System32/"
-      - "C:/Windows/"
-      - "C:/Windows/System32/wbem/"
-      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
-      - "C:/Windows/System32/OpenSSH/"
-      - "C:/Program Files/nodejs/"
-      - "C:/Program Files/Git/cmd/"
-      - "C:/Program Files/CMake/bin/"
-      - "C:/Users/darkk/AppData/Local/hermes/hermes-agent/venv/Scripts/"
-      - "C:/Users/darkk/AppData/Local/hermes/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/Scripts/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/"
-      - "C:/Users/darkk/.cargo/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WindowsApps/"
-      - "C:/Users/darkk/AppData/Local/Programs/Antigravity IDE/bin/"
-      - "C:/Users/darkk/AppData/Local/Python/bin/"
-      - "C:/Users/darkk/AppData/Roaming/npm/"
-      - "C:/Users/darkk/AppData/Local/Programs/Ollama/"
-      - "C:/Users/darkk/.local/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Microsoft VS Code/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe/ripgrep-15.1.0-x86_64-pc-windows-msvc/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.1-full_build/bin/"
-      - "C:/flutter/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/Linux/bin/ConnectionManagerExe/"
-    searched_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/mt.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/mt.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/mt"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/mt.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/mt.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/mt"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/mt.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/mt.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/mt"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/mt.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/mt.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/mt"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/mt.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/mt.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/mt"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/mt.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/mt.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/mt"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/mt.com"
-    found: "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/mt.exe"
-    search_context:
-      ENV{PATH}:
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\VCPackages"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\bin\\Roslyn"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Team Tools\\DiagnosticsHub\\Collector"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\Extensions\\Microsoft\\CodeCoverage.Console"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.22621.0\\\\x64"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\\\MSBuild\\Current\\Bin\\amd64"
-        - "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\"
-        - "C:\\Program Files\\PowerShell\\7"
-        - "C:\\WINDOWS\\system32"
-        - "C:\\WINDOWS"
-        - "C:\\WINDOWS\\System32\\Wbem"
-        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
-        - "C:\\WINDOWS\\System32\\OpenSSH\\"
-        - "C:\\Program Files\\nodejs\\"
-        - "C:\\Program Files\\PowerShell\\7\\"
-        - "C:\\Program Files\\Git\\cmd"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\"
-        - "C:\\Users\\darkk\\.cargo\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WindowsApps"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Antigravity IDE\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Python\\bin"
-        - "C:\\Users\\darkk\\AppData\\Roaming\\npm"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Ollama"
-        - "C:\\Users\\darkk\\.local\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\flutter\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\Ninja"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\Linux\\bin\\ConnectionManagerExe"
-  -
-    kind: "find-v1"
-    backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
       - "CMakeLists.txt:2 (project)"
     mode: "program"
     variable: "CMAKE_AR"
@@ -715,101 +221,808 @@ events:
       CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
       CMAKE_FIND_USE_INSTALL_PREFIX: true
     names:
-      - "lib"
+      - "ar"
     candidate_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/"
-      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/"
-      - "C:/Program Files/PowerShell/7/"
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
       - "C:/Windows/System32/"
       - "C:/Windows/"
       - "C:/Windows/System32/wbem/"
       - "C:/Windows/System32/WindowsPowerShell/v1.0/"
-      - "C:/Windows/System32/OpenSSH/"
-      - "C:/Program Files/nodejs/"
-      - "C:/Program Files/Git/cmd/"
-      - "C:/Program Files/CMake/bin/"
-      - "C:/Users/darkk/AppData/Local/hermes/hermes-agent/venv/Scripts/"
-      - "C:/Users/darkk/AppData/Local/hermes/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/Scripts/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/"
-      - "C:/Users/darkk/.cargo/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WindowsApps/"
-      - "C:/Users/darkk/AppData/Local/Programs/Antigravity IDE/bin/"
-      - "C:/Users/darkk/AppData/Local/Python/bin/"
-      - "C:/Users/darkk/AppData/Roaming/npm/"
-      - "C:/Users/darkk/AppData/Local/Programs/Ollama/"
-      - "C:/Users/darkk/.local/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Microsoft VS Code/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe/ripgrep-15.1.0-x86_64-pc-windows-msvc/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.1-full_build/bin/"
-      - "C:/flutter/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/Linux/bin/ConnectionManagerExe/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
     searched_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lib.com"
-    found: "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/lib.exe"
+      - "C:/msys64/mingw64/bin/ar.com"
+    found: "C:/msys64/mingw64/bin/ar.exe"
     search_context:
       ENV{PATH}:
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\VCPackages"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\bin\\Roslyn"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Team Tools\\DiagnosticsHub\\Collector"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\Extensions\\Microsoft\\CodeCoverage.Console"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.22621.0\\\\x64"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\\\MSBuild\\Current\\Bin\\amd64"
-        - "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\"
-        - "C:\\Program Files\\PowerShell\\7"
-        - "C:\\WINDOWS\\system32"
-        - "C:\\WINDOWS"
-        - "C:\\WINDOWS\\System32\\Wbem"
-        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
-        - "C:\\WINDOWS\\System32\\OpenSSH\\"
-        - "C:\\Program Files\\nodejs\\"
-        - "C:\\Program Files\\PowerShell\\7\\"
-        - "C:\\Program Files\\Git\\cmd"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\"
-        - "C:\\Users\\darkk\\.cargo\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WindowsApps"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Antigravity IDE\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Python\\bin"
-        - "C:\\Users\\darkk\\AppData\\Roaming\\npm"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Ollama"
-        - "C:\\Users\\darkk\\.local\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\flutter\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\Ninja"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\Linux\\bin\\ConnectionManagerExe"
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
   -
     kind: "find-v1"
     backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineRCCompiler.cmake:40 (find_program)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC.cmake:592 (enable_language)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC.cmake:565 (__windows_compiler_msvc_enable_rc)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC-C.cmake:5 (__windows_compiler_msvc)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeCInformation.cmake:48 (include)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_RANLIB"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "ranlib"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/ranlib.com"
+    found: "C:/msys64/mingw64/bin/ranlib.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_STRIP"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "strip"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/strip.com"
+    found: "C:/msys64/mingw64/bin/strip.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_LINKER"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "ld"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/ld.com"
+    found: "C:/msys64/mingw64/bin/ld.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_NM"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "nm"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/nm.com"
+    found: "C:/msys64/mingw64/bin/nm.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_OBJDUMP"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "objdump"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/objdump.com"
+    found: "C:/msys64/mingw64/bin/objdump.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_OBJCOPY"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "objcopy"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/objcopy.com"
+    found: "C:/msys64/mingw64/bin/objcopy.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_READELF"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "readelf"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/readelf.com"
+    found: "C:/msys64/mingw64/bin/readelf.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_DLLTOOL"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "dlltool"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/dlltool.com"
+    found: "C:/msys64/mingw64/bin/dlltool.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_ADDR2LINE"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "addr2line"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/addr2line.com"
+    found: "C:/msys64/mingw64/bin/addr2line.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_TAPI"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "tapi"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/tapi.com"
+      - "C:/msys64/mingw64/bin/tapi.exe"
+      - "C:/msys64/mingw64/bin/tapi"
+      - "C:/msys64/usr/local/bin/tapi.com"
+      - "C:/msys64/usr/local/bin/tapi.exe"
+      - "C:/msys64/usr/local/bin/tapi"
+      - "C:/msys64/usr/bin/tapi.com"
+      - "C:/msys64/usr/bin/tapi.exe"
+      - "C:/msys64/usr/bin/tapi"
+      - "C:/Windows/System32/tapi.com"
+      - "C:/Windows/System32/tapi.exe"
+      - "C:/Windows/System32/tapi"
+      - "C:/Windows/tapi.com"
+      - "C:/Windows/tapi.exe"
+      - "C:/Windows/tapi"
+      - "C:/Windows/System32/wbem/tapi.com"
+      - "C:/Windows/System32/wbem/tapi.exe"
+      - "C:/Windows/System32/wbem/tapi"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/tapi.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/tapi.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/tapi"
+      - "C:/msys64/usr/bin/site_perl/tapi.com"
+      - "C:/msys64/usr/bin/site_perl/tapi.exe"
+      - "C:/msys64/usr/bin/site_perl/tapi"
+      - "C:/msys64/usr/bin/vendor_perl/tapi.com"
+      - "C:/msys64/usr/bin/vendor_perl/tapi.exe"
+      - "C:/msys64/usr/bin/vendor_perl/tapi"
+      - "C:/msys64/usr/bin/core_perl/tapi.com"
+      - "C:/msys64/usr/bin/core_perl/tapi.exe"
+      - "C:/msys64/usr/bin/core_perl/tapi"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/Compiler/GNU-FindBinUtils.cmake:18 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:201 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_C_COMPILER_AR"
+    description: "A wrapper around 'ar' adding the appropriate '--plugin' option for the GCC compiler"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gcc-ar-16.1"
+      - "gcc-ar-16"
+      - "gcc-ar16"
+      - "gcc-ar"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/gcc-ar-16.1.com"
+      - "C:/msys64/mingw64/bin/gcc-ar-16.1.exe"
+      - "C:/msys64/mingw64/bin/gcc-ar-16.1"
+      - "C:/msys64/usr/local/bin/gcc-ar-16.1.com"
+      - "C:/msys64/usr/local/bin/gcc-ar-16.1.exe"
+      - "C:/msys64/usr/local/bin/gcc-ar-16.1"
+      - "C:/msys64/usr/bin/gcc-ar-16.1.com"
+      - "C:/msys64/usr/bin/gcc-ar-16.1.exe"
+      - "C:/msys64/usr/bin/gcc-ar-16.1"
+      - "C:/Windows/System32/gcc-ar-16.1.com"
+      - "C:/Windows/System32/gcc-ar-16.1.exe"
+      - "C:/Windows/System32/gcc-ar-16.1"
+      - "C:/Windows/gcc-ar-16.1.com"
+      - "C:/Windows/gcc-ar-16.1.exe"
+      - "C:/Windows/gcc-ar-16.1"
+      - "C:/Windows/System32/wbem/gcc-ar-16.1.com"
+      - "C:/Windows/System32/wbem/gcc-ar-16.1.exe"
+      - "C:/Windows/System32/wbem/gcc-ar-16.1"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ar-16.1.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ar-16.1.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ar-16.1"
+      - "C:/msys64/usr/bin/site_perl/gcc-ar-16.1.com"
+      - "C:/msys64/usr/bin/site_perl/gcc-ar-16.1.exe"
+      - "C:/msys64/usr/bin/site_perl/gcc-ar-16.1"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ar-16.1.com"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ar-16.1.exe"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ar-16.1"
+      - "C:/msys64/usr/bin/core_perl/gcc-ar-16.1.com"
+      - "C:/msys64/usr/bin/core_perl/gcc-ar-16.1.exe"
+      - "C:/msys64/usr/bin/core_perl/gcc-ar-16.1"
+      - "C:/msys64/mingw64/bin/gcc-ar-16.com"
+      - "C:/msys64/mingw64/bin/gcc-ar-16.exe"
+      - "C:/msys64/mingw64/bin/gcc-ar-16"
+      - "C:/msys64/usr/local/bin/gcc-ar-16.com"
+      - "C:/msys64/usr/local/bin/gcc-ar-16.exe"
+      - "C:/msys64/usr/local/bin/gcc-ar-16"
+      - "C:/msys64/usr/bin/gcc-ar-16.com"
+      - "C:/msys64/usr/bin/gcc-ar-16.exe"
+      - "C:/msys64/usr/bin/gcc-ar-16"
+      - "C:/Windows/System32/gcc-ar-16.com"
+      - "C:/Windows/System32/gcc-ar-16.exe"
+      - "C:/Windows/System32/gcc-ar-16"
+      - "C:/Windows/gcc-ar-16.com"
+      - "C:/Windows/gcc-ar-16.exe"
+      - "C:/Windows/gcc-ar-16"
+      - "C:/Windows/System32/wbem/gcc-ar-16.com"
+      - "C:/Windows/System32/wbem/gcc-ar-16.exe"
+      - "C:/Windows/System32/wbem/gcc-ar-16"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ar-16.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ar-16.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ar-16"
+      - "C:/msys64/usr/bin/site_perl/gcc-ar-16.com"
+      - "C:/msys64/usr/bin/site_perl/gcc-ar-16.exe"
+      - "C:/msys64/usr/bin/site_perl/gcc-ar-16"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ar-16.com"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ar-16.exe"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ar-16"
+      - "C:/msys64/usr/bin/core_perl/gcc-ar-16.com"
+      - "C:/msys64/usr/bin/core_perl/gcc-ar-16.exe"
+      - "C:/msys64/usr/bin/core_perl/gcc-ar-16"
+      - "C:/msys64/mingw64/bin/gcc-ar16.com"
+      - "C:/msys64/mingw64/bin/gcc-ar16.exe"
+      - "C:/msys64/mingw64/bin/gcc-ar16"
+      - "C:/msys64/usr/local/bin/gcc-ar16.com"
+      - "C:/msys64/usr/local/bin/gcc-ar16.exe"
+      - "C:/msys64/usr/local/bin/gcc-ar16"
+      - "C:/msys64/usr/bin/gcc-ar16.com"
+      - "C:/msys64/usr/bin/gcc-ar16.exe"
+      - "C:/msys64/usr/bin/gcc-ar16"
+      - "C:/Windows/System32/gcc-ar16.com"
+      - "C:/Windows/System32/gcc-ar16.exe"
+      - "C:/Windows/System32/gcc-ar16"
+      - "C:/Windows/gcc-ar16.com"
+      - "C:/Windows/gcc-ar16.exe"
+      - "C:/Windows/gcc-ar16"
+      - "C:/Windows/System32/wbem/gcc-ar16.com"
+      - "C:/Windows/System32/wbem/gcc-ar16.exe"
+      - "C:/Windows/System32/wbem/gcc-ar16"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ar16.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ar16.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ar16"
+      - "C:/msys64/usr/bin/site_perl/gcc-ar16.com"
+      - "C:/msys64/usr/bin/site_perl/gcc-ar16.exe"
+      - "C:/msys64/usr/bin/site_perl/gcc-ar16"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ar16.com"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ar16.exe"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ar16"
+      - "C:/msys64/usr/bin/core_perl/gcc-ar16.com"
+      - "C:/msys64/usr/bin/core_perl/gcc-ar16.exe"
+      - "C:/msys64/usr/bin/core_perl/gcc-ar16"
+      - "C:/msys64/mingw64/bin/gcc-ar.com"
+    found: "C:/msys64/mingw64/bin/gcc-ar.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/Compiler/GNU-FindBinUtils.cmake:30 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCCompiler.cmake:201 (include)"
+      - "CMakeLists.txt:2 (project)"
+    mode: "program"
+    variable: "CMAKE_C_COMPILER_RANLIB"
+    description: "A wrapper around 'ranlib' adding the appropriate '--plugin' option for the GCC compiler"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gcc-ranlib-16.1"
+      - "gcc-ranlib-16"
+      - "gcc-ranlib16"
+      - "gcc-ranlib"
+    candidate_directories:
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+    searched_directories:
+      - "C:/msys64/mingw64/bin/gcc-ranlib-16.1.com"
+      - "C:/msys64/mingw64/bin/gcc-ranlib-16.1.exe"
+      - "C:/msys64/mingw64/bin/gcc-ranlib-16.1"
+      - "C:/msys64/usr/local/bin/gcc-ranlib-16.1.com"
+      - "C:/msys64/usr/local/bin/gcc-ranlib-16.1.exe"
+      - "C:/msys64/usr/local/bin/gcc-ranlib-16.1"
+      - "C:/msys64/usr/bin/gcc-ranlib-16.1.com"
+      - "C:/msys64/usr/bin/gcc-ranlib-16.1.exe"
+      - "C:/msys64/usr/bin/gcc-ranlib-16.1"
+      - "C:/Windows/System32/gcc-ranlib-16.1.com"
+      - "C:/Windows/System32/gcc-ranlib-16.1.exe"
+      - "C:/Windows/System32/gcc-ranlib-16.1"
+      - "C:/Windows/gcc-ranlib-16.1.com"
+      - "C:/Windows/gcc-ranlib-16.1.exe"
+      - "C:/Windows/gcc-ranlib-16.1"
+      - "C:/Windows/System32/wbem/gcc-ranlib-16.1.com"
+      - "C:/Windows/System32/wbem/gcc-ranlib-16.1.exe"
+      - "C:/Windows/System32/wbem/gcc-ranlib-16.1"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ranlib-16.1.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ranlib-16.1.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ranlib-16.1"
+      - "C:/msys64/usr/bin/site_perl/gcc-ranlib-16.1.com"
+      - "C:/msys64/usr/bin/site_perl/gcc-ranlib-16.1.exe"
+      - "C:/msys64/usr/bin/site_perl/gcc-ranlib-16.1"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ranlib-16.1.com"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ranlib-16.1.exe"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ranlib-16.1"
+      - "C:/msys64/usr/bin/core_perl/gcc-ranlib-16.1.com"
+      - "C:/msys64/usr/bin/core_perl/gcc-ranlib-16.1.exe"
+      - "C:/msys64/usr/bin/core_perl/gcc-ranlib-16.1"
+      - "C:/msys64/mingw64/bin/gcc-ranlib-16.com"
+      - "C:/msys64/mingw64/bin/gcc-ranlib-16.exe"
+      - "C:/msys64/mingw64/bin/gcc-ranlib-16"
+      - "C:/msys64/usr/local/bin/gcc-ranlib-16.com"
+      - "C:/msys64/usr/local/bin/gcc-ranlib-16.exe"
+      - "C:/msys64/usr/local/bin/gcc-ranlib-16"
+      - "C:/msys64/usr/bin/gcc-ranlib-16.com"
+      - "C:/msys64/usr/bin/gcc-ranlib-16.exe"
+      - "C:/msys64/usr/bin/gcc-ranlib-16"
+      - "C:/Windows/System32/gcc-ranlib-16.com"
+      - "C:/Windows/System32/gcc-ranlib-16.exe"
+      - "C:/Windows/System32/gcc-ranlib-16"
+      - "C:/Windows/gcc-ranlib-16.com"
+      - "C:/Windows/gcc-ranlib-16.exe"
+      - "C:/Windows/gcc-ranlib-16"
+      - "C:/Windows/System32/wbem/gcc-ranlib-16.com"
+      - "C:/Windows/System32/wbem/gcc-ranlib-16.exe"
+      - "C:/Windows/System32/wbem/gcc-ranlib-16"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ranlib-16.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ranlib-16.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ranlib-16"
+      - "C:/msys64/usr/bin/site_perl/gcc-ranlib-16.com"
+      - "C:/msys64/usr/bin/site_perl/gcc-ranlib-16.exe"
+      - "C:/msys64/usr/bin/site_perl/gcc-ranlib-16"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ranlib-16.com"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ranlib-16.exe"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ranlib-16"
+      - "C:/msys64/usr/bin/core_perl/gcc-ranlib-16.com"
+      - "C:/msys64/usr/bin/core_perl/gcc-ranlib-16.exe"
+      - "C:/msys64/usr/bin/core_perl/gcc-ranlib-16"
+      - "C:/msys64/mingw64/bin/gcc-ranlib16.com"
+      - "C:/msys64/mingw64/bin/gcc-ranlib16.exe"
+      - "C:/msys64/mingw64/bin/gcc-ranlib16"
+      - "C:/msys64/usr/local/bin/gcc-ranlib16.com"
+      - "C:/msys64/usr/local/bin/gcc-ranlib16.exe"
+      - "C:/msys64/usr/local/bin/gcc-ranlib16"
+      - "C:/msys64/usr/bin/gcc-ranlib16.com"
+      - "C:/msys64/usr/bin/gcc-ranlib16.exe"
+      - "C:/msys64/usr/bin/gcc-ranlib16"
+      - "C:/Windows/System32/gcc-ranlib16.com"
+      - "C:/Windows/System32/gcc-ranlib16.exe"
+      - "C:/Windows/System32/gcc-ranlib16"
+      - "C:/Windows/gcc-ranlib16.com"
+      - "C:/Windows/gcc-ranlib16.exe"
+      - "C:/Windows/gcc-ranlib16"
+      - "C:/Windows/System32/wbem/gcc-ranlib16.com"
+      - "C:/Windows/System32/wbem/gcc-ranlib16.exe"
+      - "C:/Windows/System32/wbem/gcc-ranlib16"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ranlib16.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ranlib16.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/gcc-ranlib16"
+      - "C:/msys64/usr/bin/site_perl/gcc-ranlib16.com"
+      - "C:/msys64/usr/bin/site_perl/gcc-ranlib16.exe"
+      - "C:/msys64/usr/bin/site_perl/gcc-ranlib16"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ranlib16.com"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ranlib16.exe"
+      - "C:/msys64/usr/bin/vendor_perl/gcc-ranlib16"
+      - "C:/msys64/usr/bin/core_perl/gcc-ranlib16.com"
+      - "C:/msys64/usr/bin/core_perl/gcc-ranlib16.exe"
+      - "C:/msys64/usr/bin/core_perl/gcc-ranlib16"
+      - "C:/msys64/mingw64/bin/gcc-ranlib.com"
+    found: "C:/msys64/mingw64/bin/gcc-ranlib.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineRCCompiler.cmake:40 (find_program)"
+      - "C:/msys64/mingw64/share/cmake/Modules/Platform/Windows-GNU.cmake:169 (enable_language)"
+      - "C:/msys64/mingw64/share/cmake/Modules/Platform/Windows-GNU-C.cmake:2 (__windows_compiler_gnu)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeCInformation.cmake:48 (include)"
       - "CMakeLists.txt:2 (project)"
     mode: "program"
     variable: "CMAKE_RC_COMPILER"
@@ -823,209 +1036,329 @@ events:
       CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
       CMAKE_FIND_USE_INSTALL_PREFIX: true
     names:
-      - "rc"
+      - "windres"
+      - "windres"
     candidate_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/x64/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/"
-      - "C:/Windows/Microsoft.NET/Framework64/v4.0.30319/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/"
-      - "C:/Program Files/PowerShell/7/"
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/usr/local/bin/"
+      - "C:/msys64/usr/bin/"
       - "C:/Windows/System32/"
       - "C:/Windows/"
       - "C:/Windows/System32/wbem/"
       - "C:/Windows/System32/WindowsPowerShell/v1.0/"
-      - "C:/Windows/System32/OpenSSH/"
-      - "C:/Program Files/nodejs/"
-      - "C:/Program Files/Git/cmd/"
-      - "C:/Program Files/CMake/bin/"
-      - "C:/Users/darkk/AppData/Local/hermes/hermes-agent/venv/Scripts/"
-      - "C:/Users/darkk/AppData/Local/hermes/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/Scripts/"
-      - "C:/Users/darkk/AppData/Local/Programs/Python/Python313/"
-      - "C:/Users/darkk/.cargo/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WindowsApps/"
-      - "C:/Users/darkk/AppData/Local/Programs/Antigravity IDE/bin/"
-      - "C:/Users/darkk/AppData/Local/Python/bin/"
-      - "C:/Users/darkk/AppData/Roaming/npm/"
-      - "C:/Users/darkk/AppData/Local/Programs/Ollama/"
-      - "C:/Users/darkk/.local/bin/"
-      - "C:/Users/darkk/AppData/Local/Programs/Microsoft VS Code/bin/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe/ripgrep-15.1.0-x86_64-pc-windows-msvc/"
-      - "C:/Users/darkk/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.1-full_build/bin/"
-      - "C:/flutter/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/Linux/bin/ConnectionManagerExe/"
+      - "C:/msys64/usr/bin/site_perl/"
+      - "C:/msys64/usr/bin/vendor_perl/"
+      - "C:/msys64/usr/bin/core_perl/"
+      - "C:/msys64/mingw64/bin/"
+      - "C:/msys64/mingw64/sbin/"
+      - "C:/msys64/mingw64/"
       - "C:/Program Files/bin/"
       - "C:/Program Files/sbin/"
       - "C:/Program Files/"
       - "C:/Program Files (x86)/bin/"
       - "C:/Program Files (x86)/sbin/"
       - "C:/Program Files (x86)/"
-      - "C:/Program Files/CMake/bin/"
-      - "C:/Program Files/CMake/sbin/"
-      - "C:/Program Files/CMake/"
-      - "C:/Program Files/qwen_wrapper/bin/"
-      - "C:/Program Files/qwen_wrapper/sbin/"
-      - "C:/Program Files/qwen_wrapper/"
+      - "C:/Program Files (x86)/qwen_wrapper/bin/"
+      - "C:/Program Files (x86)/qwen_wrapper/sbin/"
+      - "C:/Program Files (x86)/qwen_wrapper/"
     searched_directories:
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/rc.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/rc.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/rc"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/rc.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/rc.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/VC/vcpackages/rc"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/rc.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/rc.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/CommonExtensions/Microsoft/TestWindow/rc"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/rc.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/rc.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/Roslyn/rc"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/rc.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/rc.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Team Tools/DiagnosticsHub/Collector/rc"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/rc.com"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/rc.exe"
-      - "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/IDE/Extensions/Microsoft/CodeCoverage.Console/rc"
-      - "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/rc.com"
-    found: "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/rc.exe"
+      - "C:/msys64/mingw64/bin/windres.com"
+    found: "C:/msys64/mingw64/bin/windres.exe"
     search_context:
       ENV{PATH}:
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\VCPackages"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\bin\\Roslyn"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Team Tools\\DiagnosticsHub\\Collector"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\Extensions\\Microsoft\\CodeCoverage.Console"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.22621.0\\\\x64"
-        - "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\\\x64"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\\\MSBuild\\Current\\Bin\\amd64"
-        - "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\Tools\\"
-        - "C:\\Program Files\\PowerShell\\7"
-        - "C:\\WINDOWS\\system32"
-        - "C:\\WINDOWS"
-        - "C:\\WINDOWS\\System32\\Wbem"
-        - "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\"
-        - "C:\\WINDOWS\\System32\\OpenSSH\\"
-        - "C:\\Program Files\\nodejs\\"
-        - "C:\\Program Files\\PowerShell\\7\\"
-        - "C:\\Program Files\\Git\\cmd"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\hermes-agent\\venv\\Scripts"
-        - "C:\\Users\\darkk\\AppData\\Local\\hermes\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Python\\Python313\\"
-        - "C:\\Users\\darkk\\.cargo\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WindowsApps"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Antigravity IDE\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Python\\bin"
-        - "C:\\Users\\darkk\\AppData\\Roaming\\npm"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Ollama"
-        - "C:\\Users\\darkk\\.local\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc"
-        - "C:\\Users\\darkk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.1-full_build\\bin"
-        - "C:\\Program Files\\CMake\\bin"
-        - "C:\\flutter\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\Ninja"
-        - "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\Common7\\IDE\\VC\\Linux\\bin\\ConnectionManagerExe"
-      CMAKE_INSTALL_PREFIX: "C:/Program Files/qwen_wrapper"
+        - "C:\\msys64\\mingw64\\bin"
+        - "C:\\msys64\\usr\\local\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\msys64\\usr\\bin"
+        - "C:\\Windows\\System32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\msys64\\usr\\bin\\site_perl"
+        - "C:\\msys64\\usr\\bin\\vendor_perl"
+        - "C:\\msys64\\usr\\bin\\core_perl"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files (x86)/qwen_wrapper"
       CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/msys64/mingw64"
         - "C:/Program Files"
         - "C:/Program Files (x86)"
-        - "C:/Program Files/CMake"
-        - "C:/Program Files/qwen_wrapper"
+        - "C:/msys64/mingw64"
+        - "C:/Program Files (x86)/qwen_wrapper"
   -
     kind: "try_compile-v1"
     backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
       - "CMakeLists.txt:2 (project)"
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-ruo272"
-      binary: "C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-ruo272"
+      source: "C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-zx4tgj"
+      binary: "C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-zx4tgj"
     cmakeVariables:
-      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
-      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
-      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
     buildResult:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-ruo272'
+        Change Dir: 'C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-zx4tgj'
         
-        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_4ddd1.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
-        MSBuild version 17.14.40+3e7442088 for .NET Framework
-        Build started 05-07-2026 13:41:45.
+        Run Build Command(s): C:/msys64/mingw64/bin/cmake.exe -E env VERBOSE=1 C:/msys64/usr/bin/make.exe -f Makefile cmTC_48819/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_48819.dir/build.make CMakeFiles/cmTC_48819.dir/build
+        make[1]: Entering directory '/c/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-zx4tgj'
+        Building C object CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj
+        C:/msys64/mingw64/bin/cc.exe   -v -o CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj -c C:/msys64/mingw64/share/cmake/Modules/CMakeCCompilerABI.c
+        Using built-in specs.
+        COLLECT_GCC=C:\\msys64\\mingw64\\bin\\cc.exe
+        Target: x86_64-w64-mingw32
+        Configured with: ../gcc-16.1.0/configure --prefix=/mingw64 --with-local-prefix=/mingw64/local --libexecdir=/mingw64/lib --enable-bootstrap --enable-checking=release --with-arch=nocona --with-tune=generic --enable-mingw-wildcard --enable-languages=c,c++,ada,fortran,lto,objc,obj-c++,jit --enable-shared --enable-static --enable-libatomic --enable-threads=posix --enable-tls --enable-graphite --enable-fully-dynamic-string --enable-libstdcxx-backtrace=yes --enable-libstdcxx-filesystem-ts --enable-libstdcxx-time --disable-libstdcxx-pch --enable-libgomp --disable-libssp --disable-multilib --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-libiconv --with-system-zlib --with-gmp=/mingw64 --with-mpfr=/mingw64 --with-mpc=/mingw64 --with-isl=/mingw64 --with-pkgversion='Rev5, Built by MSYS2 project' --with-bugurl=https://github.com/msys2/MINGW-packages/issues --with-gnu-as --with-gnu-ld --with-libstdcxx-zoneinfo=yes --disable-libstdcxx-debug --enable-lto --with-boot-ldflags=-static-libstdc++ --with-stage1-ldflags=-static-libstdc++
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 16.1.0 (Rev5, Built by MSYS2 project) 
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=nocona' '-dumpdir' 'CMakeFiles/cmTC_48819.dir/'
+         C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/cc1.exe -quiet -v -iprefix C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/ -D_REENTRANT C:/msys64/mingw64/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_48819.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=nocona -version -o C:\\msys64\\tmp\\cc6xRB96.s
+        GNU C23 (Rev5, Built by MSYS2 project) version 16.1.0 (x86_64-w64-mingw32)
+        	compiled by GNU C version 16.1.0, GMP version 6.3.0, MPFR version 4.2.2, MPC version 1.4.1, isl version isl-0.27-GMP
         
-        Project "C:\\Users\\darkk\\OneDrive\\Desktop\\straight\\native\\qwen_wrapper\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ruo272\\cmTC_4ddd1.vcxproj" on node 1 (default targets).
-        PrepareForBuild:
-          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
-          Creating directory "C:\\Users\\darkk\\OneDrive\\Desktop\\straight\\native\\qwen_wrapper\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ruo272\\Debug\\".
-          Creating directory "cmTC_4ddd1.dir\\Debug\\cmTC_4ddd1.tlog\\".
-        InitializeBuildStatus:
-          Creating "cmTC_4ddd1.dir\\Debug\\cmTC_4ddd1.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
-          Touching "cmTC_4ddd1.dir\\Debug\\cmTC_4ddd1.tlog\\unsuccessfulbuild".
-        ClCompile:
-          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_4ddd1.dir\\Debug\\\\" /Fd"cmTC_4ddd1.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
-          Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35227 for x64
-          Copyright (C) Microsoft Corporation.  All rights reserved.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_4ddd1.dir\\Debug\\\\" /Fd"cmTC_4ddd1.dir\\Debug\\vc143.pdb" /external:W1 /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
-          CMakeCCompilerABI.c
-        Link:
-          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\Users\\darkk\\OneDrive\\Desktop\\straight\\native\\qwen_wrapper\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ruo272\\Debug\\cmTC_4ddd1.exe" /INCREMENTAL /ILK:"cmTC_4ddd1.dir\\Debug\\cmTC_4ddd1.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-ruo272/Debug/cmTC_4ddd1.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-ruo272/Debug/cmTC_4ddd1.lib" /MACHINE:X64  /machine:x64 cmTC_4ddd1.dir\\Debug\\CMakeCCompilerABI.obj
-          cmTC_4ddd1.vcxproj -> C:\\Users\\darkk\\OneDrive\\Desktop\\straight\\native\\qwen_wrapper\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ruo272\\Debug\\cmTC_4ddd1.exe
-        FinalizeBuildStatus:
-          Deleting file "cmTC_4ddd1.dir\\Debug\\cmTC_4ddd1.tlog\\unsuccessfulbuild".
-          Touching "cmTC_4ddd1.dir\\Debug\\cmTC_4ddd1.tlog\\cmTC_4ddd1.lastbuildstate".
-        Done Building Project "C:\\Users\\darkk\\OneDrive\\Desktop\\straight\\native\\qwen_wrapper\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ruo272\\cmTC_4ddd1.vcxproj" (default targets).
-        
-        Build succeeded.
-            0 Warning(s)
-            0 Error(s)
-        
-        Time Elapsed 00:00:01.39
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring nonexistent directory "C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/include"
+        ignoring duplicate directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/include"
+        ignoring nonexistent directory "D:/M/msys64/mingw64/include"
+        ignoring nonexistent directory "/mingw64/include"
+        ignoring duplicate directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed"
+        ignoring nonexistent directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include
+         C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include
+         C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed
+        End of search list.
+        Compiler executable checksum: cd9eda65214e4da1d4af48941408d625
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=nocona' '-dumpdir' 'CMakeFiles/cmTC_48819.dir/'
+         C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/bin/as.exe -v -o CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj C:\\msys64\\tmp\\cc6xRB96.s
+        GNU assembler version 2.46 (x86_64-w64-mingw32) using BFD version (GNU Binutils) 2.46
+        COMPILER_PATH=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/;C:/msys64/mingw64/bin/../lib/gcc/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/bin/
+        LIBRARY_PATH=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/;C:/msys64/mingw64/bin/../lib/gcc/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=nocona' '-dumpdir' 'CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.'
+        Linking C executable cmTC_48819.exe
+        C:/msys64/mingw64/bin/cmake.exe -E rm -f CMakeFiles/cmTC_48819.dir/objects.a
+        C:/msys64/mingw64/bin/ar.exe qc CMakeFiles/cmTC_48819.dir/objects.a @CMakeFiles/cmTC_48819.dir/objects1.rsp
+        C:/msys64/mingw64/bin/cc.exe  -v -Wl,-v -Wl,--whole-archive CMakeFiles/cmTC_48819.dir/objects.a -Wl,--no-whole-archive -o cmTC_48819.exe -Wl,--out-implib,libcmTC_48819.dll.a -Wl,--major-image-version,0,--minor-image-version,0
+        Using built-in specs.
+        COLLECT_GCC=C:\\msys64\\mingw64\\bin\\cc.exe
+        COLLECT_LTO_WRAPPER=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/lto-wrapper.exe
+        Target: x86_64-w64-mingw32
+        Configured with: ../gcc-16.1.0/configure --prefix=/mingw64 --with-local-prefix=/mingw64/local --libexecdir=/mingw64/lib --enable-bootstrap --enable-checking=release --with-arch=nocona --with-tune=generic --enable-mingw-wildcard --enable-languages=c,c++,ada,fortran,lto,objc,obj-c++,jit --enable-shared --enable-static --enable-libatomic --enable-threads=posix --enable-tls --enable-graphite --enable-fully-dynamic-string --enable-libstdcxx-backtrace=yes --enable-libstdcxx-filesystem-ts --enable-libstdcxx-time --disable-libstdcxx-pch --enable-libgomp --disable-libssp --disable-multilib --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-libiconv --with-system-zlib --with-gmp=/mingw64 --with-mpfr=/mingw64 --with-mpc=/mingw64 --with-isl=/mingw64 --with-pkgversion='Rev5, Built by MSYS2 project' --with-bugurl=https://github.com/msys2/MINGW-packages/issues --with-gnu-as --with-gnu-ld --with-libstdcxx-zoneinfo=yes --disable-libstdcxx-debug --enable-lto --with-boot-ldflags=-static-libstdc++ --with-stage1-ldflags=-static-libstdc++
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 16.1.0 (Rev5, Built by MSYS2 project) 
+        COMPILER_PATH=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/;C:/msys64/mingw64/bin/../lib/gcc/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/bin/
+        LIBRARY_PATH=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/;C:/msys64/mingw64/bin/../lib/gcc/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/;C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_48819.exe' '-mtune=generic' '-march=nocona' '-dumpdir' 'cmTC_48819.'
+         C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/collect2.exe -plugin C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/liblto_plugin.dll -plugin-opt=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/lto-wrapper.exe -plugin-opt=-fresolution=C:\\msys64\\tmp\\ccB9MfMt.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -m i386pep -Bdynamic -o cmTC_48819.exe C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/crt2.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtbegin.o -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0 -LC:/msys64/mingw64/bin/../lib/gcc -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../.. -v --whole-archive CMakeFiles/cmTC_48819.dir/objects.a --no-whole-archive --out-implib libcmTC_48819.dll.a --major-image-version 0 --minor-image-version 0 -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/default-manifest.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtend.o
+        collect2 version 16.1.0
+        C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/bin/ld.exe -plugin C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/liblto_plugin.dll -plugin-opt=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/lto-wrapper.exe -plugin-opt=-fresolution=C:\\msys64\\tmp\\ccB9MfMt.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -m i386pep -Bdynamic -o cmTC_48819.exe C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/crt2.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtbegin.o -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0 -LC:/msys64/mingw64/bin/../lib/gcc -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../.. -v --whole-archive CMakeFiles/cmTC_48819.dir/objects.a --no-whole-archive --out-implib libcmTC_48819.dll.a --major-image-version 0 --minor-image-version 0 -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/default-manifest.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtend.o
+        GNU ld (GNU Binutils) 2.46
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_48819.exe' '-mtune=generic' '-march=nocona' '-dumpdir' 'cmTC_48819.'
+        make[1]: Leaving directory '/c/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-zx4tgj'
         
       exitCode: 0
   -
     kind: "message-v1"
     backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:217 (message)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:2 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include]
+          add: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include]
+          add: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed]
+        end of search list found
+        collapse include dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include] ==> [C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0/include]
+        collapse include dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include] ==> [C:/msys64/mingw64/include]
+        collapse include dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed] ==> [C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed]
+        implicit include dirs: [C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0/include;C:/msys64/mingw64/include;C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
       - "CMakeLists.txt:2 (project)"
     message: |
       Parsed C implicit link information:
-        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
-        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
-        linker tool for 'C': C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe
-        implicit libs: []
-        implicit objs: []
-        implicit dirs: []
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
+        ignore line: [Change Dir: 'C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-zx4tgj']
+        ignore line: []
+        ignore line: [Run Build Command(s): C:/msys64/mingw64/bin/cmake.exe -E env VERBOSE=1 C:/msys64/usr/bin/make.exe -f Makefile cmTC_48819/fast]
+        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_48819.dir/build.make CMakeFiles/cmTC_48819.dir/build]
+        ignore line: [make[1]: Entering directory '/c/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/CMakeFiles/CMakeScratch/TryCompile-zx4tgj']
+        ignore line: [Building C object CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj]
+        ignore line: [C:/msys64/mingw64/bin/cc.exe   -v -o CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj -c C:/msys64/mingw64/share/cmake/Modules/CMakeCCompilerABI.c]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=C:\\msys64\\mingw64\\bin\\cc.exe]
+        ignore line: [Target: x86_64-w64-mingw32]
+        ignore line: [Configured with: ../gcc-16.1.0/configure --prefix=/mingw64 --with-local-prefix=/mingw64/local --libexecdir=/mingw64/lib --enable-bootstrap --enable-checking=release --with-arch=nocona --with-tune=generic --enable-mingw-wildcard --enable-languages=c,c++,ada,fortran,lto,objc,obj-c++,jit --enable-shared --enable-static --enable-libatomic --enable-threads=posix --enable-tls --enable-graphite --enable-fully-dynamic-string --enable-libstdcxx-backtrace=yes --enable-libstdcxx-filesystem-ts --enable-libstdcxx-time --disable-libstdcxx-pch --enable-libgomp --disable-libssp --disable-multilib --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-libiconv --with-system-zlib --with-gmp=/mingw64 --with-mpfr=/mingw64 --with-mpc=/mingw64 --with-isl=/mingw64 --with-pkgversion='Rev5, Built by MSYS2 project' --with-bugurl=https://github.com/msys2/MINGW-packages/issues --with-gnu-as --with-gnu-ld --with-libstdcxx-zoneinfo=yes --disable-libstdcxx-debug --enable-lto --with-boot-ldflags=-static-libstdc++ --with-stage1-ldflags=-static-libstdc++]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 16.1.0 (Rev5  Built by MSYS2 project) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=nocona' '-dumpdir' 'CMakeFiles/cmTC_48819.dir/']
+        ignore line: [ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/cc1.exe -quiet -v -iprefix C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/ -D_REENTRANT C:/msys64/mingw64/share/cmake/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_48819.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=nocona -version -o C:\\msys64\\tmp\\cc6xRB96.s]
+        ignore line: [GNU C23 (Rev5  Built by MSYS2 project) version 16.1.0 (x86_64-w64-mingw32)]
+        ignore line: [	compiled by GNU C version 16.1.0  GMP version 6.3.0  MPFR version 4.2.2  MPC version 1.4.1  isl version isl-0.27-GMP]
+        ignore line: []
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring nonexistent directory "C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/include"]
+        ignore line: [ignoring duplicate directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/include"]
+        ignore line: [ignoring nonexistent directory "D:/M/msys64/mingw64/include"]
+        ignore line: [ignoring nonexistent directory "/mingw64/include"]
+        ignore line: [ignoring duplicate directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed"]
+        ignore line: [ignoring nonexistent directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include]
+        ignore line: [ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include]
+        ignore line: [ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed]
+        ignore line: [End of search list.]
+        ignore line: [Compiler executable checksum: cd9eda65214e4da1d4af48941408d625]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=nocona' '-dumpdir' 'CMakeFiles/cmTC_48819.dir/']
+        ignore line: [ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/bin/as.exe -v -o CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj C:\\msys64\\tmp\\cc6xRB96.s]
+        ignore line: [GNU assembler version 2.46 (x86_64-w64-mingw32) using BFD version (GNU Binutils) 2.46]
+        ignore line: [COMPILER_PATH=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/bin/]
+        ignore line: [LIBRARY_PATH=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.obj' '-c' '-mtune=generic' '-march=nocona' '-dumpdir' 'CMakeFiles/cmTC_48819.dir/CMakeCCompilerABI.c.']
+        ignore line: [Linking C executable cmTC_48819.exe]
+        ignore line: [C:/msys64/mingw64/bin/cmake.exe -E rm -f CMakeFiles/cmTC_48819.dir/objects.a]
+        ignore line: [C:/msys64/mingw64/bin/ar.exe qc CMakeFiles/cmTC_48819.dir/objects.a @CMakeFiles/cmTC_48819.dir/objects1.rsp]
+        ignore line: [C:/msys64/mingw64/bin/cc.exe  -v -Wl -v -Wl --whole-archive CMakeFiles/cmTC_48819.dir/objects.a -Wl --no-whole-archive -o cmTC_48819.exe -Wl --out-implib libcmTC_48819.dll.a -Wl --major-image-version 0 --minor-image-version 0]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=C:\\msys64\\mingw64\\bin\\cc.exe]
+        ignore line: [COLLECT_LTO_WRAPPER=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/lto-wrapper.exe]
+        ignore line: [Target: x86_64-w64-mingw32]
+        ignore line: [Configured with: ../gcc-16.1.0/configure --prefix=/mingw64 --with-local-prefix=/mingw64/local --libexecdir=/mingw64/lib --enable-bootstrap --enable-checking=release --with-arch=nocona --with-tune=generic --enable-mingw-wildcard --enable-languages=c,c++,ada,fortran,lto,objc,obj-c++,jit --enable-shared --enable-static --enable-libatomic --enable-threads=posix --enable-tls --enable-graphite --enable-fully-dynamic-string --enable-libstdcxx-backtrace=yes --enable-libstdcxx-filesystem-ts --enable-libstdcxx-time --disable-libstdcxx-pch --enable-libgomp --disable-libssp --disable-multilib --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-libiconv --with-system-zlib --with-gmp=/mingw64 --with-mpfr=/mingw64 --with-mpc=/mingw64 --with-isl=/mingw64 --with-pkgversion='Rev5, Built by MSYS2 project' --with-bugurl=https://github.com/msys2/MINGW-packages/issues --with-gnu-as --with-gnu-ld --with-libstdcxx-zoneinfo=yes --disable-libstdcxx-debug --enable-lto --with-boot-ldflags=-static-libstdc++ --with-stage1-ldflags=-static-libstdc++]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 16.1.0 (Rev5  Built by MSYS2 project) ]
+        ignore line: [COMPILER_PATH=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/bin/]
+        ignore line: [LIBRARY_PATH=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_48819.exe' '-mtune=generic' '-march=nocona' '-dumpdir' 'cmTC_48819.']
+        link line: [ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/collect2.exe -plugin C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/liblto_plugin.dll -plugin-opt=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/lto-wrapper.exe -plugin-opt=-fresolution=C:\\msys64\\tmp\\ccB9MfMt.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -m i386pep -Bdynamic -o cmTC_48819.exe C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/crt2.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtbegin.o -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0 -LC:/msys64/mingw64/bin/../lib/gcc -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../.. -v --whole-archive CMakeFiles/cmTC_48819.dir/objects.a --no-whole-archive --out-implib libcmTC_48819.dll.a --major-image-version 0 --minor-image-version 0 -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/default-manifest.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtend.o]
+          arg [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/collect2.exe] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/liblto_plugin.dll] ==> ignore
+          arg [-plugin-opt=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/lto-wrapper.exe] ==> ignore
+          arg [-plugin-opt=-fresolution=C:\\msys64\\tmp\\ccB9MfMt.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lmingw32] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_eh] ==> ignore
+          arg [-plugin-opt=-pass-through=-lmingwex] ==> ignore
+          arg [-plugin-opt=-pass-through=-lmsvcrt] ==> ignore
+          arg [-plugin-opt=-pass-through=-lkernel32] ==> ignore
+          arg [-plugin-opt=-pass-through=-lpthread] ==> ignore
+          arg [-plugin-opt=-pass-through=-ladvapi32] ==> ignore
+          arg [-plugin-opt=-pass-through=-lshell32] ==> ignore
+          arg [-plugin-opt=-pass-through=-luser32] ==> ignore
+          arg [-plugin-opt=-pass-through=-lkernel32] ==> ignore
+          arg [-plugin-opt=-pass-through=-lmingw32] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_eh] ==> ignore
+          arg [-plugin-opt=-pass-through=-lmingwex] ==> ignore
+          arg [-plugin-opt=-pass-through=-lmsvcrt] ==> ignore
+          arg [-plugin-opt=-pass-through=-lkernel32] ==> ignore
+          arg [-m] ==> ignore
+          arg [i386pep] ==> ignore
+          arg [-Bdynamic] ==> search dynamic
+          arg [-o] ==> ignore
+          arg [cmTC_48819.exe] ==> ignore
+          arg [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/crt2.o] ==> obj [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/crt2.o]
+          arg [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtbegin.o] ==> obj [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtbegin.o]
+          arg [-LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0] ==> dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0]
+          arg [-LC:/msys64/mingw64/bin/../lib/gcc] ==> dir [C:/msys64/mingw64/bin/../lib/gcc]
+          arg [-LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib] ==> dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib]
+          arg [-LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib] ==> dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib]
+          arg [-LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib] ==> dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib]
+          arg [-LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../..] ==> dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../..]
+          arg [-v] ==> ignore
+          arg [--whole-archive] ==> ignore
+          arg [CMakeFiles/cmTC_48819.dir/objects.a] ==> ignore
+          arg [--no-whole-archive] ==> ignore
+          arg [--out-implib] ==> ignore
+          arg [libcmTC_48819.dll.a] ==> ignore
+          arg [--major-image-version] ==> ignore
+          arg [0] ==> ignore
+          arg [--minor-image-version] ==> ignore
+          arg [0] ==> ignore
+          arg [-lmingw32] ==> lib [mingw32]
+          arg [-lgcc] ==> lib [gcc]
+          arg [-lgcc_eh] ==> lib [gcc_eh]
+          arg [-lmingwex] ==> lib [mingwex]
+          arg [-lmsvcrt] ==> lib [msvcrt]
+          arg [-lkernel32] ==> lib [kernel32]
+          arg [-lpthread] ==> lib [pthread]
+          arg [-ladvapi32] ==> lib [advapi32]
+          arg [-lshell32] ==> lib [shell32]
+          arg [-luser32] ==> lib [user32]
+          arg [-lkernel32] ==> lib [kernel32]
+          arg [-lmingw32] ==> lib [mingw32]
+          arg [-lgcc] ==> lib [gcc]
+          arg [-lgcc_eh] ==> lib [gcc_eh]
+          arg [-lmingwex] ==> lib [mingwex]
+          arg [-lmsvcrt] ==> lib [msvcrt]
+          arg [-lkernel32] ==> lib [kernel32]
+          arg [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/default-manifest.o] ==> obj [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/default-manifest.o]
+          arg [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtend.o] ==> obj [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtend.o]
+        ignore line: [collect2 version 16.1.0]
+        ignore line: [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/bin/ld.exe -plugin C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/liblto_plugin.dll -plugin-opt=C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/lto-wrapper.exe -plugin-opt=-fresolution=C:\\msys64\\tmp\\ccB9MfMt.res -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-ladvapi32 -plugin-opt=-pass-through=-lshell32 -plugin-opt=-pass-through=-luser32 -plugin-opt=-pass-through=-lkernel32 -plugin-opt=-pass-through=-lmingw32 -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_eh -plugin-opt=-pass-through=-lmingwex -plugin-opt=-pass-through=-lmsvcrt -plugin-opt=-pass-through=-lkernel32 -m i386pep -Bdynamic -o cmTC_48819.exe C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/crt2.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtbegin.o -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0 -LC:/msys64/mingw64/bin/../lib/gcc -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib -LC:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../.. -v --whole-archive CMakeFiles/cmTC_48819.dir/objects.a --no-whole-archive --out-implib libcmTC_48819.dll.a --major-image-version 0 --minor-image-version 0 -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 -lpthread -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 -lgcc -lgcc_eh -lmingwex -lmsvcrt -lkernel32 C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/default-manifest.o C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtend.o]
+        linker tool for 'C': C:/msys64/mingw64/x86_64-w64-mingw32/bin/ld.exe
+        remove lib [gcc_eh]
+        remove lib [msvcrt]
+        remove lib [gcc_eh]
+        remove lib [msvcrt]
+        collapse obj [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/crt2.o] ==> [C:/msys64/mingw64/lib/crt2.o]
+        collapse obj [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtbegin.o] ==> [C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0/crtbegin.o]
+        collapse obj [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib/default-manifest.o] ==> [C:/msys64/mingw64/lib/default-manifest.o]
+        collapse obj [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/crtend.o] ==> [C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0/crtend.o]
+        collapse library dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0] ==> [C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0]
+        collapse library dir [C:/msys64/mingw64/bin/../lib/gcc] ==> [C:/msys64/mingw64/lib/gcc]
+        collapse library dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib/../lib] ==> [C:/msys64/mingw64/x86_64-w64-mingw32/lib]
+        collapse library dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../lib] ==> [C:/msys64/mingw64/lib]
+        collapse library dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/lib] ==> [C:/msys64/mingw64/x86_64-w64-mingw32/lib]
+        collapse library dir [C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../..] ==> [C:/msys64/mingw64/lib]
+        implicit libs: [mingw32;gcc;mingwex;kernel32;pthread;advapi32;shell32;user32;kernel32;mingw32;gcc;mingwex;kernel32]
+        implicit objs: [C:/msys64/mingw64/lib/crt2.o;C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0/crtbegin.o;C:/msys64/mingw64/lib/default-manifest.o;C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0/crtend.o]
+        implicit dirs: [C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/16.1.0;C:/msys64/mingw64/lib/gcc;C:/msys64/mingw64/x86_64-w64-mingw32/lib;C:/msys64/mingw64/lib]
         implicit fwks: []
       
       
   -
     kind: "message-v1"
     backtrace:
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/Internal/CMakeDetermineLinkerId.cmake:38 (message)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:299 (cmake_determine_linker_id)"
-      - "C:/Program Files/CMake/share/cmake-4.3/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "C:/msys64/mingw64/share/cmake/Modules/Internal/CMakeDetermineLinkerId.cmake:38 (message)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeDetermineCompilerABI.cmake:299 (cmake_determine_linker_id)"
+      - "C:/msys64/mingw64/share/cmake/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
       - "CMakeLists.txt:2 (project)"
     message: |
-      Running the C compiler's linker: "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/link.exe" "-v"
-      Microsoft (R) Incremental Linker Version 14.44.35227.0
-      Copyright (C) Microsoft Corporation.  All rights reserved.
+      Running the C compiler's linker: "C:/msys64/mingw64/x86_64-w64-mingw32/bin/ld.exe" "-v"
+      GNU ld (GNU Binutils) 2.46
 ...

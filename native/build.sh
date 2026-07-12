@@ -48,3 +48,16 @@ cmake --build qwen_wrapper/build --config "$BUILD_TYPE"
 
 cp "qwen_wrapper/build/$BUILD_TYPE/qwen_wrapper.dll" prebuilt/
 echo "qwen_wrapper.dll built and copied to prebuilt/"
+
+echo "Building qwen_asr_wrapper..."
+cmake -S qwen_asr_wrapper -B qwen_asr_wrapper/build \
+  -G "Visual Studio 17 2022" -A x64
+cmake --build qwen_asr_wrapper/build --config "$BUILD_TYPE"
+
+cp "qwen_asr_wrapper/build/$BUILD_TYPE/qwen_asr_wrapper.dll" prebuilt/
+echo "qwen_asr_wrapper.dll built and copied to prebuilt/"
+
+echo ""
+echo "=== Build Complete ==="
+echo "All DLLs are in native/prebuilt/"
+ls -la prebuilt/*.dll 2>/dev/null || dir prebuilt\\*.dll 2>/dev/null

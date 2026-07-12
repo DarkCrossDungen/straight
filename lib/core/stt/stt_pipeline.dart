@@ -2,24 +2,31 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:record/record.dart';
 import '../audio/vad.dart';
+import 'stt_engine.dart';
 import 'whisper_engine.dart';
+import 'qwen_asr_engine.dart';
 
 enum SttPipelineState { idle, listening, processing }
 
 class SttPipeline {
   final AudioRecorder _recorder = AudioRecorder();
   final VoiceActivityDetector _vad = VoiceActivityDetector();
-  final WhisperEngine _engine = WhisperEngine();
+  SttEngine? _engine;
 
   StreamSubscription<Uint8List>? _subscription;
   List<int> _buffer = [];
   bool _initialized = false;
   bool _isProcessing = false;
   Future<void>? _pendingTranscription;
+  int _lastSpeechTimestamp = 0;
 
   SttPipelineState _state = SttPipelineState.idle;
   SttPipelineState get state => _state;
   bool get isInitialized => _initialized;
+  int get lastPauseDurationMs {
+    if (_lastSpeechTimestamp == 0) return 0;
+    return DateTime.now().millisecondsSinceEpoch - _lastSpeechTimestamp;
+  }
 
   void Function(SttPipelineState state)? onStateChanged;
   void Function(String text)? onResult;
@@ -27,10 +34,19 @@ class SttPipeline {
 
   Future<void> init(String modelPath) async {
     if (_initialized) {
-      await _engine.dispose();
+      await _engine?.dispose();
       _initialized = false;
     }
-    await _engine.init(modelPath);
+
+    // Choose engine based on model path
+    final normalizedPath = modelPath.toLowerCase();
+    if (normalizedPath.contains('qwen3-asr') || normalizedPath.contains('qwen_asr')) {
+      _engine = QwenAsrEngine();
+    } else {
+      _engine = WhisperEngine();
+    }
+
+    await _engine!.init(modelPath);
     _initialized = true;
   }
 
@@ -70,13 +86,17 @@ class SttPipeline {
     final samples = _convertToInt16(chunk);
     _buffer.addAll(samples);
 
+    if (_vad.isSpeaking) {
+      _lastSpeechTimestamp = DateTime.now().millisecondsSinceEpoch;
+    }
+
     if (!_vad.isSpeaking && !_isProcessing && _buffer.length > 16000) {
       _pendingTranscription = _flushBuffer();
     }
   }
 
   Future<void> _flushBuffer() async {
-    if (_buffer.isEmpty || _isProcessing) return;
+    if (_buffer.isEmpty || _isProcessing || _engine == null) return;
     _isProcessing = true;
     _setState(SttPipelineState.processing);
 
@@ -85,7 +105,7 @@ class SttPipeline {
     _vad.reset();
 
     try {
-      final text = await _engine.transcribe(samples);
+      final text = await _engine!.transcribe(samples);
       if (text.isNotEmpty && !text.startsWith('Transcription returned code:')) {
         onResult?.call(text);
       }
@@ -116,7 +136,7 @@ class SttPipeline {
   Future<void> dispose() async {
     await stop();
     _recorder.dispose();
-    await _engine.dispose();
+    await _engine?.dispose();
   }
 
   List<int> _convertToInt16(Uint8List bytes) {

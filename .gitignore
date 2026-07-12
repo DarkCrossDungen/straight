@@ -33,6 +33,14 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Local generated/native outputs
+linux/flutter/ephemeral/
+native/**/build/
+native/prebuilt/Release/
+
+# Local model files are kept for development, not source control.
+models/
+
 # Symbolication related
 app.*.symbols
 

@@ -22,6 +22,11 @@ class _ModelSelectorState extends State<ModelSelector> {
       subtitle: 'Better accuracy, more RAM',
     ),
     _ModelOption(
+      id: 'whisper-medium',
+      title: 'Whisper Medium',
+      subtitle: 'Best accuracy, heaviest',
+    ),
+    _ModelOption(
       id: 'qwen3-asr-0.6b',
       title: 'Qwen3-ASR 0.6B',
       subtitle: 'Target model for the final build',
@@ -143,20 +148,26 @@ class _ChoiceDialogState extends State<_ChoiceDialog> {
             const SizedBox(height: 14),
             const Divider(height: 1),
             const SizedBox(height: 12),
-            ...widget.options.map((option) {
-              return RadioListTile<String>(
-                value: option.id,
-                groupValue: _selectedId,
-                onChanged: (value) {
-                  if (value == null) return;
-                  setState(() => _selectedId = value);
-                },
-                title: Text(option.title),
-                subtitle: Text(option.subtitle),
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              );
-            }),
+            RadioGroup<String>(
+              groupValue: _selectedId,
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _selectedId = value);
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final option in widget.options)
+                    RadioListTile<String>(
+                      value: option.id,
+                      title: Text(option.title),
+                      subtitle: Text(option.subtitle),
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                    ),
+                ],
+              ),
+            ),
             const SizedBox(height: 12),
             const Divider(height: 1),
             const SizedBox(height: 12),
