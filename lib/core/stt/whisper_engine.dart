@@ -97,3 +97,4 @@ class WhisperEngine implements SttEngine {
     _initialized = false;
   }
 }
+

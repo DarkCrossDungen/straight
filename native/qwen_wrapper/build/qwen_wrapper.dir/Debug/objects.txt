@@ -1,1 +1,0 @@
-C:/Users/darkk/OneDrive/Desktop/straight/native/qwen_wrapper/build/qwen_wrapper.dir/Debug/qwen_wrapper.obj

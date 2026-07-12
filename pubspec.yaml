@@ -10,9 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # State Management
-  flutter_riverpod: ^2.6.1
-
   # UUID Generation
   uuid: ^3.0.7
 
@@ -32,7 +29,6 @@ dependencies:
   # System Utilities
   path_provider: ^2.1.5
   window_manager: ^0.4.3
-  system_tray: ^2.0.3
 
   # Download Manager
   http: ^1.3.0

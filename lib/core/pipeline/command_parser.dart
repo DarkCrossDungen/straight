@@ -36,8 +36,8 @@ class CommandParser {
     _CommandDef(RegExp(r'\bcomma\b', caseSensitive: false), DictationCommand.comma, ','),
     _CommandDef(RegExp(r'\bquestion\s+mark\b', caseSensitive: false), DictationCommand.questionMark, '?'),
     _CommandDef(RegExp(r'\bexclamation\s+(point|mark)\b', caseSensitive: false), DictationCommand.exclamation, '!'),
-    _CommandDef(RegExp(r'\bcolon\b', caseSensitive: false), DictationCommand.colon, ':'),
     _CommandDef(RegExp(r'\bsemi\s+colon\b', caseSensitive: false), DictationCommand.semiColon, ';'),
+    _CommandDef(RegExp(r'\bcolon\b', caseSensitive: false), DictationCommand.colon, ':'),
     _CommandDef(RegExp(r'\bopen\s+quote\b', caseSensitive: false), DictationCommand.openQuote, '"'),
     _CommandDef(RegExp(r'\bclose\s+quote\b', caseSensitive: false), DictationCommand.closeQuote, '"'),
   ];

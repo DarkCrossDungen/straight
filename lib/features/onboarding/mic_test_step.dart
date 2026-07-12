@@ -1,5 +1,7 @@
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:record/record.dart';
 import 'package:straight/shared/theme/colors.dart';
 
 class MicTestStep extends StatefulWidget {
@@ -13,8 +15,10 @@ class _MicTestStepState extends State<MicTestStep> with SingleTickerProviderStat
   bool _isRecording = false;
   bool _tested = false;
   bool _success = false;
+  double _audioLevel = 0.0;
   late AnimationController _animController;
-  final _random = Random();
+  AudioRecorder? _recorder;
+  Stream<Uint8List>? _stream;
 
   @override
   void initState() {
@@ -28,31 +32,86 @@ class _MicTestStepState extends State<MicTestStep> with SingleTickerProviderStat
   @override
   void dispose() {
     _animController.dispose();
+    _recorder?.dispose();
     super.dispose();
   }
 
-  void _toggleRecording() {
+  Future<void> _toggleRecording() async {
     if (!_isRecording) {
-      setState(() {
-        _isRecording = true;
-        _tested = false;
-      });
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
+      _recorder = AudioRecorder();
+      final hasPermission = await _recorder!.hasPermission();
+      if (!hasPermission) {
+        setState(() {
+          _tested = true;
+          _success = false;
+        });
+        return;
+      }
+
+      final config = RecordConfig(
+        encoder: AudioEncoder.pcm16bits,
+        numChannels: 1,
+        sampleRate: 16000,
+      );
+
+      try {
+        _stream = await _recorder!.startStream(config);
+        setState(() {
+          _isRecording = true;
+          _tested = false;
+          _audioLevel = 0.0;
+        });
+
+        _stream?.listen((chunk) {
+          if (!mounted) return;
+          final samples = _convertToInt16(chunk);
+          if (samples.isEmpty) return;
+
+          double sum = 0;
+          for (final sample in samples) {
+            sum += sample.abs();
+          }
+          final avgLevel = sum / samples.length / 32768.0;
           setState(() {
-            _isRecording = false;
+            _audioLevel = avgLevel.clamp(0.0, 1.0);
+          });
+        });
+
+        await Future.delayed(const Duration(seconds: 3));
+        if (mounted) {
+          await _stopRecording();
+          setState(() {
             _tested = true;
-            _success = _random.nextBool();
+            _success = _audioLevel > 0.005;
           });
         }
-      });
+      } catch (e) {
+        setState(() {
+          _isRecording = false;
+          _tested = true;
+          _success = false;
+        });
+      }
     } else {
+      await _stopRecording();
       setState(() {
-        _isRecording = false;
         _tested = true;
-        _success = false;
+        _success = _audioLevel > 0.005;
       });
     }
+  }
+
+  Future<void> _stopRecording() async {
+    await _recorder?.stop();
+    _isRecording = false;
+  }
+
+  List<int> _convertToInt16(Uint8List bytes) {
+    final samples = <int>[];
+    for (var i = 0; i + 1 < bytes.length; i += 2) {
+      samples.add(((bytes[i + 1] << 8) | bytes[i]).toSigned(16));
+    }
+    return samples;
   }
 
   @override
@@ -161,6 +220,10 @@ class _MicTestStepState extends State<MicTestStep> with SingleTickerProviderStat
         animation: _animController,
         builder: (context, _) {
           final currentHeights = List.generate(barCount, (i) {
+            if (_isRecording && _audioLevel > 0) {
+              final phase = sin((i / barCount) * pi * 2 + _animController.value * pi * 2);
+              return (_audioLevel * 2 * (0.5 + 0.5 * phase)).clamp(0.1, 1.0);
+            }
             final phase = sin((i / barCount) * pi * 2 + _animController.value * pi * 2);
             return (_isRecording ? 0.5 + 0.5 * phase : 0.2 + 0.1 * sin(i * 2.5)).clamp(0.1, 1.0);
           });

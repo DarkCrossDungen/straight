@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:straight/core/app_context.dart';
+import 'package:straight/core/coordinator.dart';
 import 'package:straight/features/bubble/bubble_controller.dart';
 import 'package:straight/features/bubble/waveform_painter.dart';
 import 'package:straight/shared/theme/colors.dart';
@@ -575,11 +577,12 @@ class _BubbleOverlayState extends State<BubbleOverlay>
   String _hotkeyLabel() {
     final hotkey = coordinator.hotkeyService.currentHotkey;
     final modifiers = <String>[];
-    if (hotkey.modifiers.contains(HotKeyModifier.alt)) modifiers.add('Alt');
-    if (hotkey.modifiers.contains(HotKeyModifier.control)) modifiers.add('Ctrl');
-    if (hotkey.modifiers.contains(HotKeyModifier.shift)) modifiers.add('Shift');
-    if (hotkey.modifiers.contains(HotKeyModifier.meta)) modifiers.add('Win');
-    modifiers.add(hotkey.key.keyLabel.isEmpty ? 'Space' : hotkey.key.keyLabel);
+    if (hotkey.modifiers?.contains(HotKeyModifier.alt) == true) modifiers.add('Alt');
+    if (hotkey.modifiers?.contains(HotKeyModifier.control) == true) modifiers.add('Ctrl');
+    if (hotkey.modifiers?.contains(HotKeyModifier.shift) == true) modifiers.add('Shift');
+    if (hotkey.modifiers?.contains(HotKeyModifier.meta) == true) modifiers.add('Win');
+    final keyLabel = hotkey.key.keyLabel;
+    modifiers.add(keyLabel.isEmpty ? 'Space' : keyLabel);
     return modifiers.join(' + ');
   }
 }

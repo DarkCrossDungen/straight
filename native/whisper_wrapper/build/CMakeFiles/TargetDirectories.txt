@@ -1,3 +1,0 @@
-C:/Users/darkk/OneDrive/Desktop/straight/native/whisper_wrapper/build/CMakeFiles/whisper_wrapper.dir
-C:/Users/darkk/OneDrive/Desktop/straight/native/whisper_wrapper/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/darkk/OneDrive/Desktop/straight/native/whisper_wrapper/build/CMakeFiles/ZERO_CHECK.dir

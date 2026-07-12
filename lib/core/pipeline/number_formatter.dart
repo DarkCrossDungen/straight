@@ -9,6 +9,16 @@ class NumberFormatter {
     '', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety',
   ];
 
+  static const _ordinalOnes = [
+    '', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth',
+    'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth',
+    'seventeenth', 'eighteenth', 'nineteenth',
+  ];
+
+  static const _ordinalTens = [
+    '', '', 'twentieth', 'thirtieth', 'fortieth', 'fiftieth', 'sixtieth', 'seventieth', 'eightieth', 'ninetieth',
+  ];
+
   static final _numberPattern = RegExp(r'\b\d{1,15}\b');
   static final _currencyPattern = RegExp(r'\$\s*(\d+)\b');
   static final _ordinalPattern = RegExp(r'\b(\d+)(st|nd|rd|th)\b', caseSensitive: false);
@@ -19,8 +29,7 @@ class NumberFormatter {
     result = result.replaceAllMapped(_ordinalPattern, (m) {
       final num = int.tryParse(m[1]!);
       if (num == null) return m[0]!;
-      final suffix = m[2]!.toLowerCase();
-      return '${_numberToWords(num)}$suffix';
+      return _ordinalToWords(num);
     });
 
     result = result.replaceAllMapped(_currencyPattern, (m) {
@@ -38,6 +47,23 @@ class NumberFormatter {
     });
 
     return result;
+  }
+
+  String _ordinalToWords(int n) {
+    if (n < 20) return _ordinalOnes[n];
+    if (n < 100) {
+      final t = n ~/ 10;
+      final o = n % 10;
+      if (o == 0) return _ordinalTens[t];
+      return '${_tens[t]}-${_ordinalOnes[o]}';
+    }
+    if (n < 1000) {
+      final h = n ~/ 100;
+      final r = n % 100;
+      if (r == 0) return '${_ones[h]} hundredth';
+      return '${_ones[h]} hundred ${_ordinalToWords(r)}';
+    }
+    return '${_numberToWords(n)}th';
   }
 
   String _numberToWords(int n) {

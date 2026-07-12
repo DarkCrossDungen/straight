@@ -16,9 +16,13 @@ class HotkeyService extends ChangeNotifier {
   HotKey get currentHotkey => _currentHotkey;
 
   VoidCallback? _onHotkeyTriggered;
+  VoidCallback? _onKeyDown;
+  VoidCallback? _onKeyUp;
 
-  void init({VoidCallback? onHotkeyTriggered}) {
+  void init({VoidCallback? onHotkeyTriggered, VoidCallback? onKeyDown, VoidCallback? onKeyUp}) {
     _onHotkeyTriggered = onHotkeyTriggered;
+    _onKeyDown = onKeyDown;
+    _onKeyUp = onKeyUp;
   }
 
   HotKey _hotkeyFromStoredMap(Map hotkey) {
@@ -60,10 +64,19 @@ class HotkeyService extends ChangeNotifier {
 
   Future<void> start() async {
     try {
-      await hotKeyManager.register(
-        _currentHotkey,
-        keyDownHandler: (_) => _onHotkeyTriggered?.call(),
-      );
+      final isPushToTalk = SettingsStore.getPushToTalk();
+      if (isPushToTalk) {
+        await hotKeyManager.register(
+          _currentHotkey,
+          keyDownHandler: (_) => _onKeyDown?.call(),
+          keyUpHandler: (_) => _onKeyUp?.call(),
+        );
+      } else {
+        await hotKeyManager.register(
+          _currentHotkey,
+          keyDownHandler: (_) => _onHotkeyTriggered?.call(),
+        );
+      }
     } catch (e) {
       debugPrint('Hotkey registration failed: $e');
     }

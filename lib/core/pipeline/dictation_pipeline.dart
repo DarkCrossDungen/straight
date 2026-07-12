@@ -64,7 +64,7 @@ class DictationPipeline {
     var result = process(rawText, pauseDurationMs: pauseDurationMs);
     if (_llm == null || result.text.isEmpty) return result;
 
-    final cleaned = await _llm.complete(
+    final cleaned = await _llm!.complete(
       'Clean up this dictated text. Fix grammar, remove filler words, make it natural. Keep the exact meaning.\n\nText: ${result.text}\n\nCleaned:',
       maxTokens: 256,
     );

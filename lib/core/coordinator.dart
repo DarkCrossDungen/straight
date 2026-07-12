@@ -41,7 +41,11 @@ class StraightCoordinator extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    hotkeyService.init(onHotkeyTriggered: toggleDictation);
+    hotkeyService.init(
+      onHotkeyTriggered: toggleDictation,
+      onKeyDown: _onKeyDown,
+      onKeyUp: _onKeyUp,
+    );
     await hotkeyService.reloadFromSettings();
 
     sttPipeline.onStateChanged = (s) {
@@ -67,6 +71,24 @@ class StraightCoordinator extends ChangeNotifier {
 
     _selectedSttModel = SettingsStore.getSttModel();
     _selectedLlmModel = SettingsStore.getLlmModel();
+    refreshDictionary();
+  }
+
+  void _onKeyDown() {
+    if (SettingsStore.getPushToTalk() && _state == DictationState.idle) {
+      _startDictation();
+    }
+  }
+
+  void _onKeyUp() {
+    if (SettingsStore.getPushToTalk() && _state == DictationState.listening) {
+      _stopDictation();
+    }
+  }
+
+  void refreshDictionary() {
+    final dictionary = DictionaryStore.getAll();
+    dictationPipeline.setDictionary(dictionary);
   }
 
   Future<void> bootstrap() async {
@@ -108,9 +130,10 @@ class StraightCoordinator extends ChangeNotifier {
   void _onTranscription(String rawText) async {
     _setState(DictationState.processing);
 
+    final pauseDuration = sttPipeline.lastPauseDurationMs;
     final result = _cleanupModelReady
-        ? await dictationPipeline.processWithLlm(rawText)
-        : dictationPipeline.process(rawText);
+        ? await dictationPipeline.processWithLlm(rawText, pauseDurationMs: pauseDuration)
+        : dictationPipeline.process(rawText, pauseDurationMs: pauseDuration);
 
     textInjector.inject(result.text);
 
@@ -125,7 +148,32 @@ class StraightCoordinator extends ChangeNotifier {
     _setState(DictationState.idle);
   }
 
+  String _devWhisperPath(String modelId) {
+    switch (modelId) {
+      case 'whisper-small':
+        return 'models${Platform.pathSeparator}whisper${Platform.pathSeparator}ggml-small.bin';
+      case 'whisper-medium':
+        return 'models${Platform.pathSeparator}whisper${Platform.pathSeparator}ggml-medium.bin';
+      case 'whisper-base':
+      default:
+        return 'models${Platform.pathSeparator}whisper${Platform.pathSeparator}ggml-base.bin';
+    }
+  }
+
+  String _devQwenPath() =>
+      'models${Platform.pathSeparator}qwen${Platform.pathSeparator}Qwen3-ASR-0.6B';
+
   Future<String> _resolveSpeechModelPath(String modelId) async {
+    // Try dev-tree path first
+    if (modelId == 'qwen3-asr-0.6b') {
+      final devQwen = Directory(_devQwenPath());
+      if (await devQwen.exists()) return _devQwenPath();
+    } else {
+      final devWhisper = File(_devWhisperPath(modelId));
+      if (await devWhisper.exists()) return _devWhisperPath(modelId);
+    }
+
+    // Fall back to app data directory
     final appDir = await getApplicationSupportDirectory();
     final modelsDir = Directory('${appDir.path}${Platform.pathSeparator}models');
     final whisperDir = Directory('${modelsDir.path}${Platform.pathSeparator}whisper');
@@ -137,7 +185,7 @@ class StraightCoordinator extends ChangeNotifier {
       case 'whisper-medium':
         return '${whisperDir.path}${Platform.pathSeparator}ggml-medium.bin';
       case 'qwen3-asr-0.6b':
-        return '${qwenDir.path}${Platform.pathSeparator}qwen3-asr-0.6b.gguf';
+        return '${qwenDir.path}${Platform.pathSeparator}Qwen3-ASR-0.6B';
       case 'whisper-base':
       default:
         return '${whisperDir.path}${Platform.pathSeparator}ggml-base.bin';
@@ -150,8 +198,10 @@ class StraightCoordinator extends ChangeNotifier {
     _setStatus('Loading speech model...');
 
     final modelPath = await _resolveSpeechModelPath(_selectedSttModel);
-    final file = File(modelPath);
-    if (!await file.exists()) {
+    final modelExists = _selectedSttModel == 'qwen3-asr-0.6b'
+        ? await Directory(modelPath).exists()
+        : await File(modelPath).exists();
+    if (!modelExists) {
       _setStatus('Speech model missing: $_selectedSttModel');
       return;
     }
@@ -169,13 +219,23 @@ class StraightCoordinator extends ChangeNotifier {
   Future<String?> _resolveCleanupModelPath(String modelId) async {
     if (modelId == 'none') return null;
 
+    final gaufFile = 'qwen2.5-0.5b-instruct-q4_k_m.gguf';
+    // Try dev-tree path first
+    final devGauf = File('models${Platform.pathSeparator}qwen${Platform.pathSeparator}$gaufFile');
+    if (await devGauf.exists()) {
+      return devGauf.path;
+    }
+
+    // Fall back to app data directory
     final appDir = await getApplicationSupportDirectory();
     final modelsDir = Directory('${appDir.path}${Platform.pathSeparator}models');
     final qwenDir = Directory('${modelsDir.path}${Platform.pathSeparator}qwen');
 
     switch (modelId) {
       case 'qwen2.5-0.5b':
-        return '${qwenDir.path}${Platform.pathSeparator}qwen2.5-0.5b-instruct-q4_k_m.gguf';
+        return '${qwenDir.path}${Platform.pathSeparator}$gaufFile';
+      case 'qwen2.5-1.5b':
+        return '${qwenDir.path}${Platform.pathSeparator}qwen2.5-1.5b-instruct-q4_k_m.gguf';
       default:
         return null;
     }

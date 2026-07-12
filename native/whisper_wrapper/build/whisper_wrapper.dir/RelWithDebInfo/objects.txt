@@ -1,1 +1,0 @@
-C:/Users/darkk/OneDrive/Desktop/straight/native/whisper_wrapper/build/whisper_wrapper.dir/RelWithDebInfo/whisper_wrapper.obj

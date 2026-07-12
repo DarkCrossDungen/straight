@@ -1,9 +1,0 @@
-EXPORTS 
-	whisper_wrapper_default_params
-	whisper_wrapper_free
-	whisper_wrapper_free_params
-	whisper_wrapper_full
-	whisper_wrapper_init
-	whisper_wrapper_n_segments
-	whisper_wrapper_segment_text
-	whisper_wrapper_system_info
