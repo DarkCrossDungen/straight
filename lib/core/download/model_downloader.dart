@@ -44,10 +44,10 @@ class ModelDownloader extends ChangeNotifier {
       'url': 'https://huggingface.co/Qwen/Qwen3-ASR-0.6B/resolve/main/model.safetensors',
       'filename': 'Qwen3-ASR-0.6B',
       'subdir': 'qwen',
-      'size': 600_000_000,
+      'size': 1_876_000_000,
       'type': 'stt',
       'isDirectory': true,
-      'note': 'Download full model directory from: huggingface-cli download Qwen/Qwen3-ASR-0.6B --local-dir <path>/qwen/Qwen3-ASR-0.6B',
+      'note': 'Experimental in this app until the native Qwen ASR DLL is rebuilt with acceleration. Download full model directory from: huggingface-cli download Qwen/Qwen3-ASR-0.6B --local-dir <path>/qwen/Qwen3-ASR-0.6B',
     },
     'qwen2.5-0.5b': {
       'name': 'Qwen2.5-0.5B Instruct',

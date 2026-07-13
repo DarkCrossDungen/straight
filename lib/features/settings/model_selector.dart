@@ -14,7 +14,7 @@ class _ModelSelectorState extends State<ModelSelector> {
     _ModelOption(
       id: 'whisper-base',
       title: 'Whisper Base',
-      subtitle: 'Safer start, lighter memory',
+      subtitle: 'Recommended now, stable and light',
     ),
     _ModelOption(
       id: 'whisper-small',
@@ -29,7 +29,7 @@ class _ModelSelectorState extends State<ModelSelector> {
     _ModelOption(
       id: 'qwen3-asr-0.6b',
       title: 'Qwen3-ASR 0.6B',
-      subtitle: 'Target model for the final build',
+      subtitle: 'Experimental here, currently too slow',
     ),
   ];
 
@@ -42,7 +42,7 @@ class _ModelSelectorState extends State<ModelSelector> {
     _ModelOption(
       id: 'qwen2.5-0.5b',
       title: 'Qwen2.5 0.5B',
-      subtitle: 'Small helper model for polish',
+      subtitle: 'Optional polish, loaded only when selected',
     ),
   ];
 

@@ -5,10 +5,15 @@
 ## What this project is
 
 Free, offline, private Windows dictation app. Hotkey → speak → text typed into the
-active app. Flutter (Dart) desktop on Windows. Stack: Qwen3-ASR (target) /
-whisper.cpp (proven fallback), rules-based cleanup (+ optional small Qwen helper),
+active app. Flutter (Dart) desktop on Windows. Current stack: whisper.cpp
+Whisper Base as the working STT, rules-based cleanup (+ optional small Qwen helper),
 Hive local storage, `hotkey_manager`, `window_manager`, Win32 `SendInput` for
 text injection, `record` package + energy VAD for audio.
+
+Current model decision: use **Whisper Base** for STT. `Qwen3-ASR-0.6B` loads in
+the isolated smoke test, but the current `qwen_asr.dll` is too slow for real-time
+dictation (~60s for 1s fake audio) because it is not built with proper
+acceleration. Do not make Qwen ASR the default until it is rebuilt and benchmarked.
 
 ## Actual directory structure (verified, not assumed)
 
@@ -25,10 +30,10 @@ lib/
       stt_engine.dart                        # abstract SttEngine
       stt_pipeline.dart                      # AudioRecorder + VAD + engine + race-safe stop()
       whisper_engine.dart                    # FFI → whisper_wrapper.dll (PROVEN)
-      qwen_asr_engine.dart                   # FFI → qwen_asr_wrapper.dll (UNTESTED)
+      qwen_asr_engine.dart                   # FFI → qwen_asr_wrapper.dll (loads, slow)
     llm/
       llm_engine.dart                        # abstract LlmEngine
-      qwen_engine.dart                       # FFI → qwen_wrapper.dll (UNTESTED, opt-in)
+      qwen_engine.dart                       # FFI → qwen_wrapper.dll (opt-in helper)
     pipeline/
       dictation_pipeline.dart                # rules pipeline + optional LLM pass
       command_parser.dart                    # "new line", "period", "scratch that"...
@@ -93,7 +98,7 @@ native/
     libqwen_wrapper.dll
     ll*.dll                                 # llama.cpp runtime
     ggml*.dll
-  qwen-asr/                                  # upstream antirez/qwen-asr source
+  qwen-asr/                                  # MISSING locally; needed for rebuild work
   qwen_asr_wrapper/                          # our C wrapper that loads qwen_asr.dll
   qwen_wrapper/                              # llama-based LLM wrapper
   whisper.cpp/                               # Local checkout of whisper.cpp
@@ -111,19 +116,20 @@ build/                                       # Flutter build artifacts
 
 ## What's actually broken (verified)
 
-1. **Model file is corrupt** — `model.safetensors` is 406 MB; expected ~1.74 GB.
-2. **`qwen2.5-0.5b-instruct-q4_k_m.gguf` is missing entirely** from `models/qwen/`.
-3. **The end-to-end pipeline has never been run.** No one has spoken into this app
+1. **The end-to-end voice pipeline still needs user mic testing.** No one has spoken into this app
    and gotten text out.
-4. **DLL load + FFI never validated end-to-end.** The C signatures were inspected
-   and DO match the Dart FFI typedefs, so this is likely OK — but untested.
-5. **`qwen_asr.dll` was built without OpenBLAS.** Inference will be slow without
-   BLAS. Acceptable for first pass; can be rebuilt with OpenBLAS later.
+2. **`qwen_asr.dll` is too slow for real-time dictation.** It loads and runs, but
+   measured ~60s for 1s generated audio. Treat Qwen ASR as experimental until the
+   upstream source is restored and the DLL is rebuilt with acceleration.
+3. **The helper Qwen LLM is optional.** Do not load it by default; rules should
+   carry the default experience.
 
 ## What's actually working (verified)
 
-- `flutter analyze` — 7 minor warnings, **no errors**.
-- `flutter test` — **83/83 passing** (82 pipeline unit tests + 1 widget).
+- `flutter analyze` — clean.
+- `flutter test` — **85/85 passing**.
+- Whisper Base native smoke test passes.
+- Qwen ASR isolated smoke test loads and completes, but is too slow for real-time use.
 - Storage layer (Hive boxes for settings/dictionary/history/snippets).
 - Text inject (Win32 SendInput, Unicode + newlines).
 - Pipeline (rules only) — fillers, contractions, commands, etc. are unit tested.
@@ -178,10 +184,10 @@ Write a small Dart FFI test that:
 
 If it crashes, fix it here before running the full app.
 
-### Step 5 — Wire Qwen as the active engine (only after 3 and 4 both pass)
-Flip the default `sttModel` in `settings_store.dart` (or just via the
-ModelSelector in the UI) from `whisper-base` to `qwen3-asr-0.6b` and verify
-the full pipeline: mic → VAD → Qwen3-ASR → rules → text inject.
+### Step 5 — Keep Whisper Base as active engine
+Do **not** flip the default `sttModel` to Qwen ASR. Use Whisper Base for the
+full pipeline: mic → VAD → Whisper Base → rules → optional helper → text inject.
+Qwen ASR work is deferred until native acceleration is rebuilt and benchmarked.
 
 ### Step 6 — Bubble UI smoke test
 - Window appears, dark theme.
@@ -212,11 +218,10 @@ the full pipeline: mic → VAD → Qwen3-ASR → rules → text inject.
 - Full pipeline flow verified: coordinator → stt_pipeline → engine → transcribe →
   dictation_pipeline → text_injector
 
-## What still requires runtime testing (Steps 3-6)
+## What still requires runtime testing
 These cannot be verified from code analysis alone:
 - **Step 3** — Run `flutter run`, whisper loads, speak, text appears in Notepad
-- **Step 4** — Minimal FFI test to confirm qwen_asr_wrapper.dll loads and initializes
-- **Step 5** — Switch to Qwen3-ASR in settings, confirm dictation works
+- **Qwen ASR** — Rebuild native Qwen ASR with acceleration before full-app use
 - **Step 6** — Bubble UI smoke test (dark theme, hotkey toggle, idle return)
 
 - Alt+Space → bubble turns red → speak → Alt+Space → text in the other app.

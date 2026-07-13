@@ -557,7 +557,7 @@ class _BubbleOverlayState extends State<BubbleOverlay>
       case 'whisper-medium':
         return 'Whisper Medium';
       case 'qwen3-asr-0.6b':
-        return 'Qwen3-ASR 0.6B';
+        return 'Qwen3-ASR 0.6B (experimental)';
       case 'whisper-base':
       default:
         return 'Whisper Base';
@@ -567,7 +567,7 @@ class _BubbleOverlayState extends State<BubbleOverlay>
   String _friendlyCleanup(String id) {
     switch (id) {
       case 'qwen2.5-0.5b':
-        return 'Rules + Qwen2.5 0.5B';
+        return 'Rules + optional Qwen2.5';
       case 'none':
       default:
         return 'Rules only';
