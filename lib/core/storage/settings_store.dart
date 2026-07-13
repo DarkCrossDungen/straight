@@ -6,6 +6,13 @@ class SettingsStore {
 
   static const _defaultHotkey = {
     'alt': true,
+    'ctrl': true,
+    'shift': false,
+    'key': 'Space',
+  };
+
+  static const _oldReservedDefaultHotkey = {
+    'alt': true,
     'ctrl': false,
     'shift': false,
     'key': 'Space',
@@ -17,11 +24,21 @@ class SettingsStore {
   static Future<void> setThemeMode(String value) async =>
       StorageService.settings.put('theme', value);
 
-  static Map getHotkey() =>
-      StorageService.settings.get('hotkey', defaultValue: _defaultHotkey) as Map;
+  static Map getHotkey() {
+    final value = StorageService.settings.get('hotkey', defaultValue: _defaultHotkey) as Map;
+    if (_isOldReservedDefault(value)) return _defaultHotkey;
+    return value;
+  }
 
   static Future<void> setHotkey(Map value) async =>
       StorageService.settings.put('hotkey', value);
+
+  static bool _isOldReservedDefault(Map value) {
+    for (final entry in _oldReservedDefaultHotkey.entries) {
+      if (value[entry.key] != entry.value) return false;
+    }
+    return value['meta'] != true;
+  }
 
   static String getSttModel() =>
       StorageService.settings.get('sttModel', defaultValue: defaultSttModel) as String;

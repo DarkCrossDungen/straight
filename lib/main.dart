@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 import 'core/app_context.dart';
@@ -10,6 +11,7 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await hotKeyManager.unregisterAll();
 
   await Hive.initFlutter();
   await Hive.openBox('settings');

@@ -10,7 +10,7 @@ class HotkeyService extends ChangeNotifier {
 
   HotKey _currentHotkey = HotKey(
     key: LogicalKeyboardKey.space,
-    modifiers: [HotKeyModifier.alt],
+    modifiers: [HotKeyModifier.control, HotKeyModifier.alt],
   );
 
   HotKey get currentHotkey => _currentHotkey;
@@ -18,6 +18,7 @@ class HotkeyService extends ChangeNotifier {
   VoidCallback? _onHotkeyTriggered;
   VoidCallback? _onKeyDown;
   VoidCallback? _onKeyUp;
+  HotKey? _registeredHotkey;
 
   void init({VoidCallback? onHotkeyTriggered, VoidCallback? onKeyDown, VoidCallback? onKeyUp}) {
     _onHotkeyTriggered = onHotkeyTriggered;
@@ -63,6 +64,8 @@ class HotkeyService extends ChangeNotifier {
   }
 
   Future<void> start() async {
+    if (_registeredHotkey != null) return;
+
     try {
       final isPushToTalk = SettingsStore.getPushToTalk();
       if (isPushToTalk) {
@@ -77,16 +80,23 @@ class HotkeyService extends ChangeNotifier {
           keyDownHandler: (_) => _onHotkeyTriggered?.call(),
         );
       }
+      _registeredHotkey = _currentHotkey;
     } catch (e) {
+      _registeredHotkey = null;
       debugPrint('Hotkey registration failed: $e');
     }
   }
 
   Future<void> stop() async {
+    final hotkey = _registeredHotkey;
+    if (hotkey == null) return;
+
     try {
-      await hotKeyManager.unregister(_currentHotkey);
+      await hotKeyManager.unregister(hotkey);
     } catch (e) {
       debugPrint('Hotkey unregister failed: $e');
+    } finally {
+      _registeredHotkey = null;
     }
   }
 

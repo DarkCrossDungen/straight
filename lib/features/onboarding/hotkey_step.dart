@@ -14,7 +14,7 @@ class HotkeyStep extends StatefulWidget {
 
 class _HotkeyStepState extends State<HotkeyStep> {
   bool _capturing = false;
-  String _hotkey = 'Alt + Space';
+  String _hotkey = 'Ctrl + Alt + Space';
 
   @override
   void initState() {
@@ -172,7 +172,7 @@ class _HotkeyStepState extends State<HotkeyStep> {
           ),
           const SizedBox(height: 16),
           Text(
-            _capturing ? 'Press any key combination' : 'Default: Alt + Space',
+            _capturing ? 'Press any key combination' : 'Default: Ctrl + Alt + Space',
             style: TextStyle(
               fontFamily: 'SF Mono',
               fontSize: 11,
