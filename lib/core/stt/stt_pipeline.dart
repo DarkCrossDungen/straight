@@ -19,6 +19,7 @@ class SttPipeline {
   bool _isProcessing = false;
   Future<void>? _pendingTranscription;
   int _lastSpeechTimestamp = 0;
+  bool _heardSpeechInBuffer = false;
 
   SttPipelineState _state = SttPipelineState.idle;
   SttPipelineState get state => _state;
@@ -65,6 +66,7 @@ class SttPipeline {
     _buffer = [];
     _vad.reset();
     _isProcessing = false;
+    _heardSpeechInBuffer = false;
 
     final config = RecordConfig(
       encoder: AudioEncoder.pcm16bits,
@@ -96,6 +98,14 @@ class SttPipeline {
 
     if (_vad.isSpeaking) {
       _lastSpeechTimestamp = DateTime.now().millisecondsSinceEpoch;
+      _heardSpeechInBuffer = true;
+    }
+
+    // Never ask Whisper to interpret an open microphone that has contained
+    // only silence. It can return labels such as [BLANK_AUDIO] for silence.
+    if (!_heardSpeechInBuffer) {
+      if (_buffer.length > 16000) _buffer.clear();
+      return;
     }
 
     if (!_vad.isSpeaking && !_isProcessing && _buffer.length > 16000) {
@@ -104,17 +114,20 @@ class SttPipeline {
   }
 
   Future<void> _flushBuffer() async {
-    if (_buffer.isEmpty || _isProcessing || _engine == null) return;
+    if (_buffer.isEmpty || !_heardSpeechInBuffer || _isProcessing || _engine == null) {
+      return;
+    }
     _isProcessing = true;
     _setState(SttPipelineState.processing);
 
     final samples = List<int>.from(_buffer);
     _buffer.clear();
     _vad.reset();
+    _heardSpeechInBuffer = false;
 
     try {
       final text = await _engine!.transcribe(samples);
-      if (text.isNotEmpty && !text.startsWith('Transcription returned code:')) {
+      if (_isUsableTranscription(text)) {
         onResult?.call(text);
       }
     } catch (e) {
@@ -132,13 +145,14 @@ class SttPipeline {
     _subscription = null;
     await _recorder.stop();
 
-    if (_buffer.isNotEmpty && !_isProcessing) {
+    if (_buffer.isNotEmpty && _heardSpeechInBuffer && !_isProcessing) {
       await _flushBuffer();
     }
     if (_pendingTranscription != null) {
       await _pendingTranscription;
     }
     _buffer = [];
+    _heardSpeechInBuffer = false;
     _isProcessing = false;
     _pendingTranscription = null;
     _setState(SttPipelineState.idle);
@@ -155,6 +169,15 @@ class SttPipeline {
       samples.add(((bytes[i + 1] << 8) | bytes[i]).toSigned(16));
     }
     return samples;
+  }
+
+  bool _isUsableTranscription(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty || trimmed.startsWith('Transcription returned code:')) {
+      return false;
+    }
+
+    return !RegExp(r'^(?:\[[^\]]+\]\s*)+$').hasMatch(trimmed);
   }
 
   void _setState(SttPipelineState newState) {
