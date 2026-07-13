@@ -229,7 +229,9 @@ class StraightCoordinator extends ChangeNotifier {
     }
 
     try {
-      await sttPipeline.dispose();
+      // A reload can be requested while dictation is active. Stop and replace
+      // the engine without disposing the recorder used by later dictation.
+      await sttPipeline.unloadModel();
       await sttPipeline.init(modelPath);
       _setStatus('Ready to dictate');
     } catch (e) {

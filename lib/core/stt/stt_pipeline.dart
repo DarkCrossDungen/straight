@@ -34,8 +34,7 @@ class SttPipeline {
 
   Future<void> init(String modelPath) async {
     if (_initialized) {
-      await _engine?.dispose();
-      _initialized = false;
+      await unloadModel();
     }
 
     // Choose engine based on model path
@@ -48,6 +47,15 @@ class SttPipeline {
 
     await _engine!.init(modelPath);
     _initialized = true;
+  }
+
+  /// Stops capture and releases only the speech engine. The recorder remains
+  /// usable so a model can be reloaded while the app is open.
+  Future<void> unloadModel() async {
+    await stop();
+    await _engine?.dispose();
+    _engine = null;
+    _initialized = false;
   }
 
   Future<void> start() async {
@@ -134,9 +142,8 @@ class SttPipeline {
   }
 
   Future<void> dispose() async {
-    await stop();
+    await unloadModel();
     _recorder.dispose();
-    await _engine?.dispose();
   }
 
   List<int> _convertToInt16(Uint8List bytes) {
