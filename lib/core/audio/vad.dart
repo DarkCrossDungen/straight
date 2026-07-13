@@ -2,7 +2,9 @@ import 'dart:math';
 import 'dart:typed_data';
 
 class VoiceActivityDetector {
-  static const double _speechThreshold = 0.015;
+  // A conservative level that still works with laptop microphones at normal
+  // speaking volume. Blank-audio filtering protects against quiet rooms.
+  static const double _speechThreshold = 0.006;
   static const int _sampleRate = 16000;
   static const double _silenceDurationMs = 800;
   static const int _minSpeechDurationMs = 200;

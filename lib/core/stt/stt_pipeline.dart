@@ -76,6 +76,10 @@ class SttPipeline {
 
     Stream<Uint8List> stream;
     try {
+      final hasPermission = await _recorder.hasPermission();
+      if (!hasPermission) {
+        throw StateError('Microphone permission denied');
+      }
       stream = await _recorder.startStream(config);
     } catch (e) {
       _setState(SttPipelineState.idle);

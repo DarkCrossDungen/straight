@@ -65,7 +65,12 @@ class StraightCoordinator extends ChangeNotifier {
     sttPipeline.onResult = _onTranscription;
     sttPipeline.onError = (e) {
       debugPrint('STT error: $e');
-      _setStatus('Speech engine error');
+      final message = e.toString();
+      _setStatus(
+        message.contains('Microphone permission denied')
+            ? 'Microphone permission denied'
+            : 'Speech engine error',
+      );
       _setState(DictationState.idle);
     };
 

@@ -19,6 +19,7 @@ class HotkeyService extends ChangeNotifier {
   VoidCallback? _onKeyDown;
   VoidCallback? _onKeyUp;
   HotKey? _registeredHotkey;
+  DateTime? _lastToggleAt;
 
   void init({VoidCallback? onHotkeyTriggered, VoidCallback? onKeyDown, VoidCallback? onKeyUp}) {
     _onHotkeyTriggered = onHotkeyTriggered;
@@ -77,7 +78,7 @@ class HotkeyService extends ChangeNotifier {
       } else {
         await hotKeyManager.register(
           _currentHotkey,
-          keyDownHandler: (_) => _onHotkeyTriggered?.call(),
+          keyDownHandler: (_) => _triggerToggle(),
         );
       }
       _registeredHotkey = _currentHotkey;
@@ -85,6 +86,17 @@ class HotkeyService extends ChangeNotifier {
       _registeredHotkey = null;
       debugPrint('Hotkey registration failed: $e');
     }
+  }
+
+  void _triggerToggle() {
+    // Windows can repeat WM_HOTKEY while the keys are still held. Without a
+    // short guard, one press can stop dictation and immediately start it again.
+    final now = DateTime.now();
+    if (_lastToggleAt != null && now.difference(_lastToggleAt!).inMilliseconds < 800) {
+      return;
+    }
+    _lastToggleAt = now;
+    _onHotkeyTriggered?.call();
   }
 
   Future<void> stop() async {
