@@ -3,12 +3,14 @@ class FillerRemover {
     r'\b(?:um|uh|er|ah|hmm|mm|like|you know|sort of|kind of|'
     r'actually|basically|literally|honestly|seriously|'
     r'I mean|you see|well|so anyway|anyway|'
-    r'right|okay|alright|you know what I mean)\b',
+    r'right|okay|ok|alright|all right|'
+    r'you know what I mean|at the end of the day|to be honest|'
+    r'to be fair|I guess|I suppose|I think|maybe)\b',
     caseSensitive: false,
   );
 
   static final _repeatedWords = RegExp(
-    r'\b(\w+)(?:[\s,]+(\1))\b',
+    r'\b(\w+)(?:[\s,]+(\1))+\b',
     caseSensitive: false,
   );
 

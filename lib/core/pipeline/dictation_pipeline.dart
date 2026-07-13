@@ -65,7 +65,13 @@ class DictationPipeline {
     if (_llm == null || result.text.isEmpty) return result;
 
     final cleaned = await _llm!.complete(
-      'Clean up this dictated text. Fix grammar, remove filler words, make it natural. Keep the exact meaning.\n\nText: ${result.text}\n\nCleaned:',
+      'You are the offline polish step for a dictation app.\n'
+      'Return only the final cleaned text. Do not explain anything.\n'
+      'Preserve the speaker\'s meaning, names, technical terms, line breaks, and punctuation intent.\n'
+      'Fix obvious speech-recognition mistakes, grammar, repeated words, spacing, and awkward phrasing.\n'
+      'Do not add new facts. Do not make the text longer unless needed for grammar.\n\n'
+      'Dictated text:\n${result.text}\n\n'
+      'Final cleaned text:',
       maxTokens: 256,
     );
 

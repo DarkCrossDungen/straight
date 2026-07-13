@@ -174,6 +174,11 @@ void main() {
       expect(result, isNot(contains('basically')));
     });
 
+    test('removes soft uncertainty fillers', () {
+      final result = remover.process('I think maybe we should ship this');
+      expect(result, 'we should ship this');
+    });
+
     test('removes duplicate words', () {
       final result = remover.process('I I went to the the store');
       expect(result, isNot(contains('I I')));
@@ -416,6 +421,11 @@ void main() {
     test('capitalizes standalone I', () {
       final result = cleaner.process('i went to the store');
       expect(result, contains('I'));
+    });
+
+    test('cleans repeated punctuation and bracket spacing', () {
+      final result = cleaner.process('hello !!! ( world )');
+      expect(result, 'hello! (world)');
     });
 
     test('empty text returns empty', () {
