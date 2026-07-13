@@ -20,6 +20,7 @@ class SttPipeline {
   Future<void>? _pendingTranscription;
   int _lastSpeechTimestamp = 0;
   bool _heardSpeechInBuffer = false;
+  bool _isAutoStopping = false;
 
   SttPipelineState _state = SttPipelineState.idle;
   SttPipelineState get state => _state;
@@ -113,7 +114,24 @@ class SttPipeline {
     }
 
     if (!_vad.isSpeaking && !_isProcessing && _buffer.length > 16000) {
-      _pendingTranscription = _flushBuffer();
+      _pendingTranscription = _stopAfterSpeechPause();
+    }
+  }
+
+  Future<void> _stopAfterSpeechPause() async {
+    if (_isAutoStopping) return;
+    _isAutoStopping = true;
+    try {
+      await _subscription?.cancel();
+      _subscription = null;
+      await _recorder.stop();
+      await _flushBuffer();
+    } finally {
+      _buffer = [];
+      _heardSpeechInBuffer = false;
+      _pendingTranscription = null;
+      _setState(SttPipelineState.idle);
+      _isAutoStopping = false;
     }
   }
 
@@ -143,6 +161,10 @@ class SttPipeline {
   }
 
   Future<void> stop() async {
+    if (_isAutoStopping) {
+      await _pendingTranscription;
+      return;
+    }
     // Stop incoming audio before starting a potentially long transcription.
     // Otherwise fresh chunks can race with the buffer being transcribed.
     await _subscription?.cancel();
