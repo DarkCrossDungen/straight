@@ -11,7 +11,8 @@ class MicTestStep extends StatefulWidget {
   State<MicTestStep> createState() => _MicTestStepState();
 }
 
-class _MicTestStepState extends State<MicTestStep> with SingleTickerProviderStateMixin {
+class _MicTestStepState extends State<MicTestStep>
+    with SingleTickerProviderStateMixin {
   bool _isRecording = false;
   bool _tested = false;
   bool _success = false;
@@ -118,7 +119,9 @@ class _MicTestStepState extends State<MicTestStep> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fgColor = isDark ? AppColors.darkFg : AppColors.lightFg;
-    final primaryColor = isDark ? AppColors.primaryDark : AppColors.primaryLight;
+    final primaryColor = isDark
+        ? AppColors.primaryDark
+        : AppColors.primaryLight;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -146,18 +149,18 @@ class _MicTestStepState extends State<MicTestStep> with SingleTickerProviderStat
           Text(
             'TEST MICROPHONE',
             style: TextStyle(
-              fontFamily: 'SF Mono',
+              fontFamily: 'Space Mono',
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: fgColor,
-              letterSpacing: 1,
+              letterSpacing: 0,
             ),
           ),
           const SizedBox(height: 12),
           Text(
             'Speak to see if your microphone\nis working.',
             style: TextStyle(
-              fontFamily: 'Inter',
+              fontFamily: 'DM Sans',
               fontSize: 14,
               color: fgColor.withValues(alpha: 0.7),
               height: 1.6,
@@ -197,7 +200,7 @@ class _MicTestStepState extends State<MicTestStep> with SingleTickerProviderStat
                   Text(
                     _success ? 'MICROPHONE WORKING' : 'MICROPHONE NOT DETECTED',
                     style: TextStyle(
-                      fontFamily: 'SF Mono',
+                      fontFamily: 'Space Mono',
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: _success ? AppColors.success : AppColors.error,
@@ -221,11 +224,16 @@ class _MicTestStepState extends State<MicTestStep> with SingleTickerProviderStat
         builder: (context, _) {
           final currentHeights = List.generate(barCount, (i) {
             if (_isRecording && _audioLevel > 0) {
-              final phase = sin((i / barCount) * pi * 2 + _animController.value * pi * 2);
+              final phase = sin(
+                (i / barCount) * pi * 2 + _animController.value * pi * 2,
+              );
               return (_audioLevel * 2 * (0.5 + 0.5 * phase)).clamp(0.1, 1.0);
             }
-            final phase = sin((i / barCount) * pi * 2 + _animController.value * pi * 2);
-            return (_isRecording ? 0.5 + 0.5 * phase : 0.2 + 0.1 * sin(i * 2.5)).clamp(0.1, 1.0);
+            final phase = sin(
+              (i / barCount) * pi * 2 + _animController.value * pi * 2,
+            );
+            return (_isRecording ? 0.5 + 0.5 * phase : 0.2 + 0.1 * sin(i * 2.5))
+                .clamp(0.1, 1.0);
           });
 
           return Row(

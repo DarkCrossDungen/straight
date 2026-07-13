@@ -47,15 +47,18 @@ class _HotkeyCaptureTileState extends State<HotkeyCaptureTile> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 0),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 0,
+            vertical: 2,
+          ),
           leading: const Icon(Icons.keyboard, size: 20),
           title: Text(_isRecording ? 'Press your hotkey' : 'Hotkey'),
           subtitle: Text(
             _formatHotkey(_hotkey),
             style: TextStyle(
-              fontFamily: 'SF Mono',
+              fontFamily: 'Space Mono',
               fontSize: 14,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w700,
               color: _isRecording ? colors.primary : colors.onSurface,
             ),
           ),

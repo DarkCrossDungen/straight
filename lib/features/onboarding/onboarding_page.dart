@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:straight/shared/theme/colors.dart';
-import 'package:straight/features/onboarding/permission_step.dart';
 import 'package:straight/features/onboarding/hotkey_step.dart';
 import 'package:straight/features/onboarding/mic_test_step.dart';
+import 'package:straight/features/onboarding/permission_step.dart';
 import 'package:straight/features/onboarding/tutorial_step.dart';
+import 'package:straight/shared/theme/colors.dart';
+import 'package:straight/shared/widgets/app_surface.dart';
+import 'package:straight/shared/widgets/background_shapes.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -25,8 +27,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void _goNext() {
     if (_currentPage < 4) {
       _controller.nextPage(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.linear,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
       );
     } else {
       Navigator.pushReplacementNamed(context, '/');
@@ -36,8 +38,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void _goBack() {
     if (_currentPage > 0) {
       _controller.previousPage(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.linear,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
       );
     }
   }
@@ -45,11 +47,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? AppColors.darkBg : AppColors.lightBg;
-    final fgColor = isDark ? AppColors.darkFg : AppColors.lightFg;
-
     final pages = <Widget>[
-      _WelcomePage(fgColor: fgColor),
+      const _WelcomePage(),
       const PermissionStep(),
       const HotkeyStep(),
       const MicTestStep(),
@@ -57,7 +56,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     ];
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
       body: SafeArea(
         child: Column(
           children: [
@@ -69,64 +68,65 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 itemBuilder: (context, index) => pages[index],
               ),
             ),
-            _buildBottomNav(isDark),
+            _bottomNav(isDark),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBottomNav(bool isDark) {
+  Widget _bottomNav(bool isDark) {
     final isLast = _currentPage == 4;
     final isFirst = _currentPage == 0;
     final showSkip = _currentPage < 3;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildDots(isDark),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (!isFirst)
-                TextButton(
-                  onPressed: _goBack,
-                  child: const Text('BACK'),
-                )
-              else
-                const SizedBox(width: 72),
-              if (showSkip)
-                TextButton(
-                  onPressed: () => _controller.jumpToPage(4),
-                  child: const Text('SKIP'),
-                )
-              else
-                ElevatedButton(
-                  onPressed: _goNext,
-                  child: Text(isLast ? 'GET STARTED' : 'NEXT'),
-                ),
-            ],
-          ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
+      child: AppSurface(
+        shadow: false,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            if (!isFirst)
+              TextButton(onPressed: _goBack, child: const Text('BACK'))
+            else
+              const SizedBox(width: 72),
+            Expanded(child: _dots(isDark)),
+            if (showSkip)
+              TextButton(
+                onPressed: () => _controller.jumpToPage(4),
+                child: const Text('SKIP'),
+              )
+            else
+              ElevatedButton(
+                onPressed: _goNext,
+                child: Text(isLast ? 'GET STARTED' : 'NEXT'),
+              ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildDots(bool isDark) {
+  Widget _dots(bool isDark) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(5, (i) {
-        final isActive = i == _currentPage;
-        return Container(
+        final active = i == _currentPage;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
           margin: const EdgeInsets.symmetric(horizontal: 3),
-          width: isActive ? 24 : 8,
-          height: 4,
-          color: isActive
-              ? (isDark ? AppColors.primaryDark : AppColors.primaryLight)
-              : (isDark ? AppColors.darkMutedFg : AppColors.lightMutedFg),
+          width: active ? 26 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: active
+                ? (isDark ? AppColors.primaryDark : AppColors.primaryLight)
+                : (isDark ? AppColors.darkMutedFg : AppColors.lightMutedFg),
+            border: Border.all(
+              color: isDark ? AppColors.darkFg : AppColors.lightFg,
+              width: 1,
+            ),
+          ),
         );
       }),
     );
@@ -134,60 +134,76 @@ class _OnboardingPageState extends State<OnboardingPage> {
 }
 
 class _WelcomePage extends StatelessWidget {
-  final Color fgColor;
-
-  const _WelcomePage({required this.fgColor});
+  const _WelcomePage();
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final stageColor = isDark ? AppColors.accentDark : AppColors.accentLight;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: fgColor,
-              border: Border.all(color: fgColor, width: 1),
+      padding: const EdgeInsets.all(24),
+      child: AppSurface(
+        padding: EdgeInsets.zero,
+        shadowColor: scheme.primary,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            DecoratedBox(decoration: BoxDecoration(color: stageColor)),
+            BackgroundShapes(
+              color: AppColors.darkFg,
+              blockColor: AppColors.darkFg.withValues(alpha: 0.16),
+              opacity: 0.86,
             ),
-            child: Icon(Icons.record_voice_over, size: 48, color: fgColor == Colors.white ? Colors.black : Colors.white),
-          ),
-          const SizedBox(height: 48),
-          Text(
-            'STRAIGHT',
-            style: TextStyle(
-              fontFamily: 'SF Mono',
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              color: fgColor,
-              letterSpacing: 0,
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: AppSurface(
+                  color: scheme.surface,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 84,
+                        height: 84,
+                        decoration: BoxDecoration(
+                          color: scheme.secondary,
+                          border: Border.all(color: scheme.onSurface, width: 1),
+                        ),
+                        child: const Icon(
+                          Icons.record_voice_over,
+                          size: 42,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'STRAIGHT',
+                        style: Theme.of(context).textTheme.headlineLarge,
+                      ),
+                      const SizedBox(height: 10),
+                      AppBadge(
+                        label: 'Offline Windows Dictation',
+                        color: scheme.primary,
+                        foregroundColor: scheme.onPrimary,
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        'Press the hotkey, speak, and send cleaned text into the app you are already using.',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          height: 1.45,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'DICTATE. STRAIGHT.',
-            style: TextStyle(
-              fontFamily: 'SF Mono',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: fgColor.withValues(alpha: 0.5),
-              letterSpacing: 4,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Dictate text anywhere with your voice.\nFast, accurate, and always ready.',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 15,
-              color: fgColor.withValues(alpha: 0.7),
-              height: 1.6,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

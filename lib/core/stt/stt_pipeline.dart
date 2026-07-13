@@ -126,12 +126,15 @@ class SttPipeline {
   }
 
   Future<void> stop() async {
-    if (_buffer.isNotEmpty && !_isProcessing) {
-      await _flushBuffer();
-    }
+    // Stop incoming audio before starting a potentially long transcription.
+    // Otherwise fresh chunks can race with the buffer being transcribed.
     await _subscription?.cancel();
     _subscription = null;
     await _recorder.stop();
+
+    if (_buffer.isNotEmpty && !_isProcessing) {
+      await _flushBuffer();
+    }
     if (_pendingTranscription != null) {
       await _pendingTranscription;
     }

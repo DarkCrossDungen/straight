@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:straight/core/app_context.dart';
 import 'package:straight/core/storage/settings_store.dart';
+import 'package:straight/shared/widgets/app_surface.dart';
 
 class ModelSelector extends StatefulWidget {
   const ModelSelector({super.key});
@@ -14,7 +15,7 @@ class _ModelSelectorState extends State<ModelSelector> {
     _ModelOption(
       id: 'whisper-base',
       title: 'Whisper Base',
-      subtitle: 'Recommended now, stable and light',
+      subtitle: 'Safer start, lighter memory',
     ),
     _ModelOption(
       id: 'whisper-small',
@@ -29,7 +30,7 @@ class _ModelSelectorState extends State<ModelSelector> {
     _ModelOption(
       id: 'qwen3-asr-0.6b',
       title: 'Qwen3-ASR 0.6B',
-      subtitle: 'Experimental here, currently too slow',
+      subtitle: 'Target model for the final build',
     ),
   ];
 
@@ -42,7 +43,7 @@ class _ModelSelectorState extends State<ModelSelector> {
     _ModelOption(
       id: 'qwen2.5-0.5b',
       title: 'Qwen2.5 0.5B',
-      subtitle: 'Optional polish, loaded only when selected',
+      subtitle: 'Small helper model for polish',
     ),
   ];
 
@@ -55,7 +56,9 @@ class _ModelSelectorState extends State<ModelSelector> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
       leading: const Icon(Icons.model_training, size: 20),
       title: const Text('Models'),
-      subtitle: Text('Speech: ${_labelFor(_sttOptions, _sttModel)}  |  Cleanup: ${_labelFor(_llmOptions, _llmModel)}'),
+      subtitle: Text(
+        'Speech: ${_labelFor(_sttOptions, _sttModel)}  /  Cleanup: ${_labelFor(_llmOptions, _llmModel)}',
+      ),
       trailing: const Icon(Icons.chevron_right, size: 18),
       onTap: _showModelDialog,
     );
@@ -136,15 +139,7 @@ class _ChoiceDialogState extends State<_ChoiceDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.title,
-              style: const TextStyle(
-                fontFamily: 'SF Mono',
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.5,
-              ),
-            ),
+            AppSectionLabel(widget.title),
             const SizedBox(height: 14),
             const Divider(height: 1),
             const SizedBox(height: 12),

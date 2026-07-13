@@ -154,29 +154,11 @@ void main() {
       expect(result, isNot(contains('uh')));
     });
 
-    test('removes like', () {
-      final result = remover.process('I was like going to the store');
-      expect(result, isNot(contains('like')));
-    });
-
-    test('removes you know', () {
-      final result = remover.process('I was you know going to the store');
-      expect(result, isNot(contains('you know')));
-    });
-
-    test('removes actually', () {
-      final result = remover.process('I was actually going to the store');
-      expect(result, isNot(contains('actually')));
-    });
-
-    test('removes basically', () {
-      final result = remover.process('I was basically going to the store');
-      expect(result, isNot(contains('basically')));
-    });
-
-    test('removes soft uncertainty fillers', () {
-      final result = remover.process('I think maybe we should ship this');
-      expect(result, 'we should ship this');
+    test('preserves words which can carry meaning', () {
+      final result = remover.process(
+        'I think maybe I actually like this approach',
+      );
+      expect(result, 'I think maybe I actually like this approach');
     });
 
     test('removes duplicate words', () {

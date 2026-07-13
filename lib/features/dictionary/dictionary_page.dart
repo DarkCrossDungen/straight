@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:straight/core/storage/dictionary_store.dart';
 import 'package:straight/features/dictionary/add_word_dialog.dart';
+import 'package:straight/shared/widgets/app_surface.dart';
 import 'package:straight/shared/widgets/empty_state.dart';
 import 'package:straight/shared/widgets/search_field.dart';
 
@@ -45,7 +46,9 @@ class _DictionaryPageState extends State<DictionaryPage> {
   }
 
   Future<void> _toggleEnabled(Map entry) async {
-    await DictionaryStore.updateWord(entry['id'], {'enabled': !(entry['enabled'] ?? true)});
+    await DictionaryStore.updateWord(entry['id'], {
+      'enabled': !(entry['enabled'] ?? true),
+    });
     _load();
   }
 
@@ -56,112 +59,132 @@ class _DictionaryPageState extends State<DictionaryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('DICTIONARY'),
         actions: [
-          TextButton.icon(
+          ElevatedButton.icon(
             onPressed: _addWord,
-            icon: const Icon(Icons.add, size: 16),
+            icon: const Icon(Icons.add, size: 18),
             label: const Text('ADD'),
           ),
+          const SizedBox(width: 12),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(color: colors.onSurface, width: 1),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Row(
               children: [
-                Text(
-                  'CUSTOM WORDS',
-                  style: TextStyle(
-                    fontFamily: 'SF Mono',
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: colors.onSurface.withValues(alpha: 0.55),
-                    letterSpacing: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Add replacements for names, acronyms, and terms you want Straight to remember.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.5,
-                    color: colors.onSurface.withValues(alpha: 0.8),
+                AppBadge(label: '${_entries.length} words'),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SearchField(
+                    controller: _searchController,
+                    hintText: 'Search words',
+                    onChanged: (_) => _load(),
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-          SearchField(
-            controller: _searchController,
-            hintText: 'Search dictionary...',
-            onChanged: (_) => _load(),
-          ),
-          const SizedBox(height: 12),
-          if (_filtered.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: EmptyState(
-                message: 'No dictionary entries yet.\nTap ADD to create one.',
-                icon: Icons.book_outlined,
+            const SizedBox(height: 16),
+            AppSurface(
+              padding: EdgeInsets.zero,
+              shadowColor: scheme.secondary,
+              child: _filtered.isEmpty
+                  ? const SizedBox(
+                      height: 280,
+                      child: EmptyState(
+                        message: 'No dictionary entries.',
+                        icon: Icons.spellcheck,
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        _tableHeader(scheme),
+                        for (final entry in _filtered) _entryRow(entry, scheme),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tableHeader(ColorScheme scheme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: scheme.secondary,
+        border: Border(bottom: BorderSide(color: scheme.onSurface, width: 1)),
+      ),
+      child: Row(
+        children: const [
+          Expanded(flex: 2, child: AppSectionLabel('Word')),
+          Expanded(flex: 3, child: AppSectionLabel('Replacement')),
+          SizedBox(width: 104, child: AppSectionLabel('Active')),
+        ],
+      ),
+    );
+  }
+
+  Widget _entryRow(Map entry, ColorScheme scheme) {
+    final enabled = entry['enabled'] ?? true;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: scheme.onSurface, width: 1)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              entry['word'] ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: 'Space Mono',
+                fontWeight: FontWeight.w700,
+                decoration: enabled ? null : TextDecoration.lineThrough,
+                color: enabled
+                    ? scheme.onSurface
+                    : scheme.onSurface.withValues(alpha: 0.45),
               ),
-            )
-          else
-            ..._filtered.map((entry) {
-              final enabled = entry['enabled'] ?? true;
-              return Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: colors.onSurface, width: 1),
-                  ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 3,
+            child: Text(
+              entry['replacement'] ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: scheme.onSurface.withValues(
+                  alpha: enabled ? 0.78 : 0.42,
                 ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-                  title: Text(
-                    entry['word'] ?? '',
-                    style: TextStyle(
-                      fontFamily: 'SF Mono',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      decoration: enabled ? null : TextDecoration.lineThrough,
-                      color: enabled ? colors.onSurface : colors.onSurface.withValues(alpha: 0.45),
-                    ),
-                  ),
-                  subtitle: Text(
-                    entry['replacement'] ?? '',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: colors.onSurface.withValues(alpha: 0.65),
-                    ),
-                  ),
-                  trailing: Wrap(
-                    spacing: 4,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Switch(
-                        value: enabled,
-                        onChanged: (_) => _toggleEnabled(entry),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 18),
-                        onPressed: () => _deleteWord(entry),
-                      ),
-                    ],
-                  ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 104,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Switch(value: enabled, onChanged: (_) => _toggleEnabled(entry)),
+                IconButton(
+                  tooltip: 'Delete word',
+                  icon: const Icon(Icons.delete_outline, size: 19),
+                  onPressed: () => _deleteWord(entry),
                 ),
-              );
-            }),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:straight/shared/widgets/app_surface.dart';
 
 class AddWordDialog extends StatefulWidget {
   const AddWordDialog({super.key});
@@ -34,15 +35,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'ADD WORD',
-              style: TextStyle(
-                fontFamily: 'SF Mono',
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1,
-              ),
-            ),
+            const AppSectionLabel('Add Word'),
             const SizedBox(height: 16),
             const Divider(height: 1),
             const SizedBox(height: 16),
@@ -78,7 +71,10 @@ class _AddWordDialogState extends State<AddWordDialog> {
                     final word = _wordController.text.trim();
                     final replacement = _replacementController.text.trim();
                     if (word.isEmpty || replacement.isEmpty) return;
-                    Navigator.pop(context, {'word': word, 'replacement': replacement});
+                    Navigator.pop(context, {
+                      'word': word,
+                      'replacement': replacement,
+                    });
                   },
                   child: const Text('SAVE'),
                 ),

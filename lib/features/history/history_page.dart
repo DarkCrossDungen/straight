@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:straight/core/storage/history_store.dart';
+import 'package:straight/shared/theme/colors.dart';
+import 'package:straight/shared/widgets/app_surface.dart';
 import 'package:straight/shared/widgets/empty_state.dart';
 import 'package:straight/shared/widgets/search_field.dart';
 
@@ -53,49 +55,19 @@ class _HistoryPageState extends State<HistoryPage> {
   Future<void> _clearAll() async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (ctx) => Dialog(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'CLEAR HISTORY',
-                style: TextStyle(
-                  fontFamily: 'SF Mono',
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Divider(height: 1),
-              const SizedBox(height: 12),
-              const Text('Delete all history entries?\nThis cannot be undone.'),
-              const SizedBox(height: 20),
-              const Divider(height: 1),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('CANCEL'),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(ctx).colorScheme.error,
-                    ),
-                    child: const Text('DELETE ALL'),
-                  ),
-                ],
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear history'),
+        content: const Text('Delete every dictation entry?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('CANCEL'),
           ),
-        ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('DELETE'),
+          ),
+        ],
       ),
     );
     if (confirm != true) return;
@@ -110,7 +82,7 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('HISTORY'),
@@ -118,117 +90,141 @@ class _HistoryPageState extends State<HistoryPage> {
           if (_entries.isNotEmpty)
             TextButton.icon(
               onPressed: _clearAll,
-              icon: const Icon(Icons.delete_sweep, size: 16),
+              icon: const Icon(Icons.delete_sweep, size: 18),
               label: const Text('CLEAR'),
             ),
+          const SizedBox(width: 8),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _statsBand(scheme),
+            const SizedBox(height: 16),
+            SearchField(
+              controller: _searchController,
+              hintText: 'Search history',
+              onChanged: (_) => _load(),
+            ),
+            const SizedBox(height: 16),
+            AppSurface(
+              padding: EdgeInsets.zero,
+              shadowColor: scheme.primary,
+              child: _entries.isEmpty
+                  ? const SizedBox(
+                      height: 280,
+                      child: EmptyState(
+                        message: 'No dictation history.',
+                        icon: Icons.schedule,
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        for (final entry in _entries) _entryRow(entry, scheme),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _statsBand(ColorScheme scheme) {
+    return Row(
+      children: [
+        Expanded(
+          child: _statCard(
+            'Total',
+            '${_stats['total'] ?? 0}',
+            scheme.secondary,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _statCard('Today', '${_stats['today'] ?? 0}', scheme.primary),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _statCard(
+            'Week',
+            '${_stats['thisWeek'] ?? 0}',
+            scheme.surface,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _statCard(String label, String value, Color color) {
+    final scheme = Theme.of(context).colorScheme;
+    final useLightText = color == scheme.primary || color == scheme.onSurface;
+    return AppSurface(
+      color: color,
+      shadow: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(color: colors.onSurface, width: 1),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'RECENT DICTATION',
-                  style: TextStyle(
-                    fontFamily: 'SF Mono',
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: colors.onSurface.withValues(alpha: 0.55),
-                    letterSpacing: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'See what was spoken, what was inserted, and how much the app has used today.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.5,
-                    color: colors.onSurface.withValues(alpha: 0.8),
-                  ),
-                ),
-              ],
+          AppSectionLabel(label),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: useLightText ? scheme.onPrimary : scheme.onSurface,
             ),
           ),
-          const SizedBox(height: 16),
-          if (_stats.isNotEmpty)
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _statChip(colors, '${_stats['total'] ?? 0} TOTAL'),
-                _statChip(colors, '${_stats['today'] ?? 0} TODAY'),
-                _statChip(colors, '${_stats['thisWeek'] ?? 0} THIS WEEK'),
-              ],
-            ),
-          const SizedBox(height: 16),
-          SearchField(
-            controller: _searchController,
-            hintText: 'Search history...',
-            onChanged: (_) => _load(),
-          ),
-          const SizedBox(height: 12),
-          if (_entries.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: EmptyState(
-                message: 'No dictation history yet.',
-                icon: Icons.history,
-              ),
-            )
-          else
-            ..._entries.map((entry) {
-              return Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: colors.onSurface, width: 1),
-                  ),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-                  title: Text(
-                    entry['text'] ?? '',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  subtitle: Text(
-                    '${_formatTimestamp(entry['timestamp'])}${entry['app'] != null && (entry['app'] as String).isNotEmpty ? '  •  ${entry['app']}' : ''}',
-                    style: const TextStyle(fontFamily: 'SF Mono', fontSize: 11),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 18),
-                    onPressed: () => _deleteEntry(entry),
-                  ),
-                ),
-              );
-            }),
         ],
       ),
     );
   }
 
-  Widget _statChip(ColorScheme colors, String label) {
+  Widget _entryRow(Map entry, ColorScheme scheme) {
+    final app = entry['app'];
+    final appLabel = app is String && app.isNotEmpty ? '  /  $app' : '';
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
       decoration: BoxDecoration(
-        border: Border.all(color: colors.onSurface, width: 1),
+        border: Border(bottom: BorderSide(color: scheme.onSurface, width: 1)),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontFamily: 'SF Mono',
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: colors.onSurface,
-        ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry['text'] ?? '',
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${_formatTimestamp(entry['timestamp'])}$appLabel',
+                  style: TextStyle(
+                    fontFamily: 'Space Mono',
+                    fontSize: 11,
+                    color: scheme.onSurface.withValues(alpha: 0.62),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Delete entry',
+            icon: const Icon(
+              Icons.delete_outline,
+              size: 19,
+              color: AppColors.error,
+            ),
+            onPressed: () => _deleteEntry(entry),
+          ),
+        ],
       ),
     );
   }

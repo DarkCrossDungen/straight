@@ -51,10 +51,18 @@ class _HotkeyStepState extends State<HotkeyStep> {
     final key = event.logicalKey;
     final modifiers = <HotKeyModifier>{};
 
-    if (HardwareKeyboard.instance.isAltPressed) modifiers.add(HotKeyModifier.alt);
-    if (HardwareKeyboard.instance.isControlPressed) modifiers.add(HotKeyModifier.control);
-    if (HardwareKeyboard.instance.isShiftPressed) modifiers.add(HotKeyModifier.shift);
-    if (HardwareKeyboard.instance.isMetaPressed) modifiers.add(HotKeyModifier.meta);
+    if (HardwareKeyboard.instance.isAltPressed) {
+      modifiers.add(HotKeyModifier.alt);
+    }
+    if (HardwareKeyboard.instance.isControlPressed) {
+      modifiers.add(HotKeyModifier.control);
+    }
+    if (HardwareKeyboard.instance.isShiftPressed) {
+      modifiers.add(HotKeyModifier.shift);
+    }
+    if (HardwareKeyboard.instance.isMetaPressed) {
+      modifiers.add(HotKeyModifier.meta);
+    }
 
     if (key == LogicalKeyboardKey.alt ||
         key == LogicalKeyboardKey.control ||
@@ -68,7 +76,10 @@ class _HotkeyStepState extends State<HotkeyStep> {
     return true;
   }
 
-  Future<void> _saveHotkey(LogicalKeyboardKey key, Set<HotKeyModifier> modifiers) async {
+  Future<void> _saveHotkey(
+    LogicalKeyboardKey key,
+    Set<HotKeyModifier> modifiers,
+  ) async {
     final keyLabel = key.keyLabel;
     final hotkeyMap = {
       'alt': modifiers.contains(HotKeyModifier.alt),
@@ -80,10 +91,7 @@ class _HotkeyStepState extends State<HotkeyStep> {
 
     await SettingsStore.setHotkey(hotkeyMap);
 
-    final hotkey = HotKey(
-      key: key,
-      modifiers: modifiers.toList(),
-    );
+    final hotkey = HotKey(key: key, modifiers: modifiers.toList());
     await HotkeyService().registerHotkey(hotkey);
 
     _loadCurrentHotkey();
@@ -93,7 +101,9 @@ class _HotkeyStepState extends State<HotkeyStep> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fgColor = isDark ? AppColors.darkFg : AppColors.lightFg;
-    final primaryColor = isDark ? AppColors.primaryDark : AppColors.primaryLight;
+    final primaryColor = isDark
+        ? AppColors.primaryDark
+        : AppColors.primaryLight;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -115,18 +125,18 @@ class _HotkeyStepState extends State<HotkeyStep> {
           Text(
             'SET YOUR HOTKEY',
             style: TextStyle(
-              fontFamily: 'SF Mono',
+              fontFamily: 'Space Mono',
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: fgColor,
-              letterSpacing: 1,
+              letterSpacing: 0,
             ),
           ),
           const SizedBox(height: 12),
           Text(
             'Press a key combination to start/stop\ndictation from anywhere.',
             style: TextStyle(
-              fontFamily: 'Inter',
+              fontFamily: 'DM Sans',
               fontSize: 14,
               color: fgColor.withValues(alpha: 0.7),
               height: 1.6,
@@ -140,10 +150,14 @@ class _HotkeyStepState extends State<HotkeyStep> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               decoration: BoxDecoration(
                 color: _capturing
-                    ? (isDark ? AppColors.primaryDark.withValues(alpha: 0.2) : AppColors.primaryLight.withValues(alpha: 0.2))
+                    ? (isDark
+                          ? AppColors.primaryDark.withValues(alpha: 0.2)
+                          : AppColors.primaryLight.withValues(alpha: 0.2))
                     : (isDark ? AppColors.darkMuted : AppColors.lightMuted),
                 border: Border.all(
-                  color: _capturing ? primaryColor : fgColor.withValues(alpha: 0.3),
+                  color: _capturing
+                      ? primaryColor
+                      : fgColor.withValues(alpha: 0.3),
                   width: _capturing ? 2 : 1,
                 ),
               ),
@@ -159,7 +173,7 @@ class _HotkeyStepState extends State<HotkeyStep> {
                   Text(
                     _capturing ? 'PRESS KEYS...' : _hotkey,
                     style: TextStyle(
-                      fontFamily: 'SF Mono',
+                      fontFamily: 'Space Mono',
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: _capturing ? primaryColor : fgColor,
@@ -172,9 +186,9 @@ class _HotkeyStepState extends State<HotkeyStep> {
           ),
           const SizedBox(height: 16),
           Text(
-            _capturing ? 'Press any key combination' : 'Default: Ctrl + Alt + Space',
+            _capturing ? 'Press any key combination' : 'Default: Alt + Space',
             style: TextStyle(
-              fontFamily: 'SF Mono',
+              fontFamily: 'Space Mono',
               fontSize: 11,
               color: fgColor.withValues(alpha: 0.5),
             ),

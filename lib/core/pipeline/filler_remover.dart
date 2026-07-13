@@ -1,11 +1,8 @@
 class FillerRemover {
   static final _fillers = RegExp(
-    r'\b(?:um|uh|er|ah|hmm|mm|like|you know|sort of|kind of|'
-    r'actually|basically|literally|honestly|seriously|'
-    r'I mean|you see|well|so anyway|anyway|'
-    r'right|okay|ok|alright|all right|'
-    r'you know what I mean|at the end of the day|to be honest|'
-    r'to be fair|I guess|I suppose|I think|maybe)\b',
+    // Only remove clear vocal noise. Words such as "like", "actually",
+    // and "I think" can carry meaning in normal dictation.
+    r'\b(?:um|uh|er|ah|hmm|mm)\b',
     caseSensitive: false,
   );
 

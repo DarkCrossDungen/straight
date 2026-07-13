@@ -32,7 +32,10 @@ class _PermissionStepState extends State<PermissionStep> {
       setState(() {
         _granted = hasPermission;
         _checking = false;
-        if (!hasPermission) _error = 'Microphone permission denied. Please enable it in Windows Settings > Privacy > Microphone.';
+        if (!hasPermission) {
+          _error =
+              'Microphone permission denied. Please enable it in Windows Settings > Privacy > Microphone.';
+        }
       });
     } catch (e) {
       setState(() {
@@ -77,18 +80,18 @@ class _PermissionStepState extends State<PermissionStep> {
           Text(
             'MICROPHONE ACCESS',
             style: TextStyle(
-              fontFamily: 'SF Mono',
+              fontFamily: 'Space Mono',
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: fgColor,
-              letterSpacing: 1,
+              letterSpacing: 0,
             ),
           ),
           const SizedBox(height: 12),
           Text(
             'STRAIGHT needs microphone access to listen and\ntranscribe your voice.',
             style: TextStyle(
-              fontFamily: 'Inter',
+              fontFamily: 'DM Sans',
               fontSize: 14,
               color: fgColor.withValues(alpha: 0.7),
               height: 1.6,
@@ -110,7 +113,7 @@ class _PermissionStepState extends State<PermissionStep> {
                   Text(
                     'GRANTED',
                     style: TextStyle(
-                      fontFamily: 'SF Mono',
+                      fontFamily: 'Space Mono',
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppColors.success,
@@ -123,7 +126,10 @@ class _PermissionStepState extends State<PermissionStep> {
             Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: AppColors.error, width: 1),
                   ),
@@ -136,7 +142,7 @@ class _PermissionStepState extends State<PermissionStep> {
                         child: Text(
                           _error!,
                           style: TextStyle(
-                            fontFamily: 'SF Mono',
+                            fontFamily: 'Space Mono',
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: AppColors.error,

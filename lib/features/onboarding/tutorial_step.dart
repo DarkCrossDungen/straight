@@ -8,7 +8,9 @@ class TutorialStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fgColor = isDark ? AppColors.darkFg : AppColors.lightFg;
-    final primaryColor = isDark ? AppColors.primaryDark : AppColors.primaryLight;
+    final primaryColor = isDark
+        ? AppColors.primaryDark
+        : AppColors.primaryLight;
 
     final items = [
       'Press your hotkey to start dictation',
@@ -35,18 +37,18 @@ class TutorialStep extends StatelessWidget {
           Text(
             'HOW TO USE',
             style: TextStyle(
-              fontFamily: 'SF Mono',
+              fontFamily: 'Space Mono',
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: fgColor,
-              letterSpacing: 1,
+              letterSpacing: 0,
             ),
           ),
           const SizedBox(height: 12),
           Text(
             'Press your hotkey, speak naturally,\nand your words appear as text.',
             style: TextStyle(
-              fontFamily: 'Inter',
+              fontFamily: 'DM Sans',
               fontSize: 14,
               color: fgColor.withValues(alpha: 0.7),
               height: 1.6,
@@ -63,14 +65,18 @@ class TutorialStep extends StatelessWidget {
                     width: 20,
                     height: 20,
                     color: primaryColor,
-                    child: const Icon(Icons.check, size: 14, color: Colors.white),
+                    child: const Icon(
+                      Icons.check,
+                      size: 14,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
                       items[i],
                       style: TextStyle(
-                        fontFamily: 'Inter',
+                        fontFamily: 'DM Sans',
                         fontSize: 14,
                         color: fgColor,
                       ),

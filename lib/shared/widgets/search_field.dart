@@ -14,31 +14,25 @@ class SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final border = Theme.of(context).colorScheme.onSurface;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hintText,
-          prefixIcon: const Icon(Icons.search, size: 18),
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.zero,
-            borderSide: BorderSide(color: border, width: 1),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.zero,
-            borderSide: BorderSide(color: border, width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.zero,
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1),
-          ),
-        ),
-        onChanged: onChanged,
-        style: const TextStyle(fontSize: 14),
+    final scheme = Theme.of(context).colorScheme;
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      decoration: InputDecoration(
+        hintText: hintText,
+        fillColor: scheme.surface,
+        prefixIcon: const Icon(Icons.search, size: 18),
+        suffixIcon: controller == null || controller!.text.isEmpty
+            ? null
+            : IconButton(
+                tooltip: 'Clear search',
+                icon: const Icon(Icons.close, size: 18),
+                onPressed: () {
+                  controller!.clear();
+                  onChanged('');
+                },
+              ),
       ),
     );
   }

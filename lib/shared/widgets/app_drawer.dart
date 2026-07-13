@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:straight/shared/widgets/app_surface.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -10,42 +11,36 @@ class AppDrawer extends StatelessWidget {
       width: 260,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              AppSurface(
+                shadow: false,
+                padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'STRAIGHT',
-                      style: TextStyle(
-                        fontFamily: 'SF Mono',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: colors.onSurface,
-                        letterSpacing: 0,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineMedium?.copyWith(fontSize: 20),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'offline dictation',
-                      style: TextStyle(
-                        fontFamily: 'SF Mono',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: colors.onSurface.withValues(alpha: 0.45),
-                        letterSpacing: 2,
-                      ),
+                      'LOCAL DICTATION',
+                      style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
-              const SizedBox(height: 8),
-              _navItem(Icons.home_outlined, 'Home', () => Navigator.pop(context)),
+              const SizedBox(height: 12),
+              _navItem(
+                Icons.home_outlined,
+                'Home',
+                () => Navigator.pop(context),
+              ),
               _navItem(Icons.settings_outlined, 'Settings', () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/settings');
@@ -59,15 +54,16 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pushNamed(context, '/history');
               }),
               const Spacer(),
-              const Divider(height: 1),
+              const Divider(),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'local only',
+                  'LOCAL ONLY',
                   style: TextStyle(
-                    fontFamily: 'SF Mono',
+                    fontFamily: 'Space Mono',
                     fontSize: 10,
-                    color: colors.onSurface.withValues(alpha: 0.3),
+                    fontWeight: FontWeight.w700,
+                    color: colors.onSurface.withValues(alpha: 0.45),
                   ),
                 ),
               ),
@@ -84,8 +80,12 @@ class AppDrawer extends StatelessWidget {
       child: ListTile(
         leading: Icon(icon, size: 20),
         title: Text(
-          label,
-          style: const TextStyle(fontFamily: 'SF Mono', fontSize: 13, fontWeight: FontWeight.w500),
+          label.toUpperCase(),
+          style: const TextStyle(
+            fontFamily: 'Space Mono',
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         trailing: const Icon(Icons.chevron_right, size: 14),
         onTap: onTap,

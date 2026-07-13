@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:straight/core/storage/settings_store.dart';
 import 'package:straight/features/settings/hotkey_capture_tile.dart';
 import 'package:straight/features/settings/model_selector.dart';
+import 'package:straight/shared/theme/colors.dart';
+import 'package:straight/shared/widgets/app_surface.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -25,132 +27,156 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('SETTINGS'),
         actions: [
-          TextButton(
+          IconButton(
+            tooltip: 'Close settings',
             onPressed: () => Navigator.pop(context),
-            child: const Text('CLOSE'),
+            icon: const Icon(Icons.close, size: 20),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildSummary(colors),
-          const SizedBox(height: 20),
-          _sectionHeader('SPEECH'),
-          const SizedBox(height: 8),
-          const ModelSelector(),
-          const SizedBox(height: 12),
-          const HotkeyCaptureTile(),
-          const SizedBox(height: 20),
-          _sectionHeader('BEHAVIOR'),
-          const SizedBox(height: 8),
-          _settingRow(
-            icon: _isDark ? Icons.dark_mode : Icons.light_mode,
-            title: 'Theme',
-            subtitle: 'Keep the interface dark or switch to light',
-            trailing: Switch(
-              value: _isDark,
-              onChanged: (value) async {
-                setState(() => _isDark = value);
-                await SettingsStore.setThemeMode(value ? 'dark' : 'light');
-              },
-            ),
-          ),
-          const Divider(height: 1),
-          _settingRow(
-            icon: Icons.power_settings_new,
-            title: 'Start on boot',
-            subtitle: 'Open Straight when the computer starts',
-            trailing: Switch(
-              value: _startOnBoot,
-              onChanged: (value) async {
-                setState(() => _startOnBoot = value);
-                await SettingsStore.setStartOnBoot(value);
-              },
-            ),
-          ),
-          const Divider(height: 1),
-          _settingRow(
-            icon: Icons.keyboard_voice,
-            title: 'Push to talk',
-            subtitle: 'Hold the hotkey instead of toggle dictation',
-            trailing: Switch(
-              value: _pushToTalk,
-              onChanged: (value) async {
-                setState(() => _pushToTalk = value);
-                await SettingsStore.setPushToTalk(value);
-              },
-            ),
-          ),
-          const SizedBox(height: 20),
-          _sectionHeader('DATA'),
-          const SizedBox(height: 8),
-          _navRow(
-            icon: Icons.book_outlined,
-            title: 'Dictionary',
-            subtitle: 'Stored replacements and custom terms',
-            onTap: () => Navigator.pushNamed(context, '/dictionary'),
-          ),
-          const Divider(height: 1),
-          _navRow(
-            icon: Icons.history,
-            title: 'History',
-            subtitle: 'Saved dictation history',
-            onTap: () => Navigator.pushNamed(context, '/history'),
-          ),
-          const SizedBox(height: 20),
-          _sectionHeader('ABOUT'),
-          const SizedBox(height: 8),
-          _settingRow(
-            icon: Icons.lock_outline,
-            title: 'Offline by design',
-            subtitle: 'No account, no cloud, no sync',
-            trailing: Text(
-              'LOCAL',
-              style: TextStyle(
-                fontFamily: 'SF Mono',
-                fontSize: 11,
-                color: colors.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-        ],
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= 820;
+            final content = wide
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _speechPanel(scheme)),
+                      const SizedBox(width: 16),
+                      Expanded(child: _behaviorPanel(scheme)),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      _speechPanel(scheme),
+                      const SizedBox(height: 16),
+                      _behaviorPanel(scheme),
+                    ],
+                  );
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [_header(scheme), const SizedBox(height: 16), content],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildSummary(ColorScheme colors) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: colors.onSurface, width: 1),
-      ),
+  Widget _header(ColorScheme scheme) {
+    return Row(
+      children: [
+        AppBadge(label: 'Local'),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            'Speech model, hotkey, launch, and cleanup controls.',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurface.withValues(alpha: 0.76),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _speechPanel(ColorScheme scheme) {
+    return AppSurface(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'TUNE THE VOICE PIPELINE',
-            style: TextStyle(
-              fontFamily: 'SF Mono',
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.5,
-              color: colors.onSurface.withValues(alpha: 0.65),
-            ),
+          const AppSectionLabel('Speech'),
+          const SizedBox(height: 12),
+          const ModelSelector(),
+          const Divider(),
+          const HotkeyCaptureTile(),
+          const SizedBox(height: 16),
+          _linkRow(
+            Icons.spellcheck,
+            'Dictionary',
+            'Words and replacements',
+            () {
+              Navigator.pushNamed(context, '/dictionary');
+            },
           ),
-          const SizedBox(height: 10),
-          Text(
-            'Speech model, hotkey, and cleanup settings live here. Keep it light, local, and predictable.',
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.5,
-              color: colors.onSurface.withValues(alpha: 0.85),
+          const Divider(),
+          _linkRow(Icons.schedule, 'History', 'Recent dictation log', () {
+            Navigator.pushNamed(context, '/history');
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _behaviorPanel(ColorScheme scheme) {
+    return AppSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const AppSectionLabel('Behavior'),
+          const SizedBox(height: 12),
+          _switchRow(
+            icon: _isDark ? Icons.dark_mode : Icons.light_mode,
+            title: 'Dark mode',
+            subtitle: 'Use the black command surface',
+            value: _isDark,
+            onChanged: (value) async {
+              setState(() => _isDark = value);
+              await SettingsStore.setThemeMode(value ? 'dark' : 'light');
+            },
+          ),
+          const Divider(),
+          _switchRow(
+            icon: Icons.power_settings_new,
+            title: 'Start on boot',
+            subtitle: 'Open with Windows',
+            value: _startOnBoot,
+            onChanged: (value) async {
+              setState(() => _startOnBoot = value);
+              await SettingsStore.setStartOnBoot(value);
+            },
+          ),
+          const Divider(),
+          _switchRow(
+            icon: Icons.keyboard_voice,
+            title: 'Push to talk',
+            subtitle: 'Hold the hotkey to record',
+            value: _pushToTalk,
+            onChanged: (value) async {
+              setState(() => _pushToTalk = value);
+              await SettingsStore.setPushToTalk(value);
+            },
+          ),
+          const SizedBox(height: 16),
+          AppSurface(
+            padding: const EdgeInsets.all(12),
+            color: scheme.secondary,
+            shadow: false,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.lock_outline,
+                  color: AppColors.lightFg,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'No account. No cloud sync. Models run on this machine.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.lightFg,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -158,43 +184,28 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _sectionHeader(String title) {
-    final mutedFg = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45);
-    return Text(
-      title,
-      style: TextStyle(
-        fontFamily: 'SF Mono',
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: mutedFg,
-        letterSpacing: 1.3,
-      ),
-    );
-  }
-
-  Widget _settingRow({
+  Widget _switchRow({
     required IconData icon,
     required String title,
     required String subtitle,
-    required Widget trailing,
+    required bool value,
+    required ValueChanged<bool> onChanged,
   }) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
       leading: Icon(icon, size: 20),
       title: Text(title),
       subtitle: Text(subtitle),
-      trailing: trailing,
+      trailing: Switch(value: value, onChanged: onChanged),
     );
   }
 
-  Widget _navRow({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
+  Widget _linkRow(
+    IconData icon,
+    String title,
+    String subtitle,
+    VoidCallback onTap,
+  ) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
       leading: Icon(icon, size: 20),
       title: Text(title),
       subtitle: Text(subtitle),
