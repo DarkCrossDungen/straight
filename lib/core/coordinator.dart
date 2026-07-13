@@ -163,14 +163,36 @@ class StraightCoordinator extends ChangeNotifier {
   String _devQwenPath() =>
       'models${Platform.pathSeparator}qwen${Platform.pathSeparator}Qwen3-ASR-0.6B';
 
+  Future<String?> _findDevPath(String relativePath, {required bool directory}) async {
+    final roots = <Directory>[
+      Directory.current,
+      File(Platform.resolvedExecutable).parent,
+    ];
+
+    for (final root in roots) {
+      var dir = root;
+      for (var i = 0; i < 8; i++) {
+        final path = '${dir.path}${Platform.pathSeparator}$relativePath';
+        final exists = directory ? await Directory(path).exists() : await File(path).exists();
+        if (exists) return path;
+
+        final parent = dir.parent;
+        if (parent.path == dir.path) break;
+        dir = parent;
+      }
+    }
+
+    return null;
+  }
+
   Future<String> _resolveSpeechModelPath(String modelId) async {
     // Try dev-tree path first
     if (modelId == 'qwen3-asr-0.6b') {
-      final devQwen = Directory(_devQwenPath());
-      if (await devQwen.exists()) return _devQwenPath();
+      final devQwen = await _findDevPath(_devQwenPath(), directory: true);
+      if (devQwen != null) return devQwen;
     } else {
-      final devWhisper = File(_devWhisperPath(modelId));
-      if (await devWhisper.exists()) return _devWhisperPath(modelId);
+      final devWhisper = await _findDevPath(_devWhisperPath(modelId), directory: false);
+      if (devWhisper != null) return devWhisper;
     }
 
     // Fall back to app data directory
@@ -221,9 +243,12 @@ class StraightCoordinator extends ChangeNotifier {
 
     final gaufFile = 'qwen2.5-0.5b-instruct-q4_k_m.gguf';
     // Try dev-tree path first
-    final devGauf = File('models${Platform.pathSeparator}qwen${Platform.pathSeparator}$gaufFile');
-    if (await devGauf.exists()) {
-      return devGauf.path;
+    final devGauf = await _findDevPath(
+      'models${Platform.pathSeparator}qwen${Platform.pathSeparator}$gaufFile',
+      directory: false,
+    );
+    if (devGauf != null) {
+      return devGauf;
     }
 
     // Fall back to app data directory
