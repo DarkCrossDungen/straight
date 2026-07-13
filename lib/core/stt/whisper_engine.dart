@@ -1,13 +1,10 @@
 import 'dart:ffi';
-import 'dart:io';
 import 'package:ffi/ffi.dart';
+import '../native/native_library_loader.dart';
 import 'stt_engine.dart';
 
 DynamicLibrary _loadLib() {
-  if (Platform.isWindows) {
-    return DynamicLibrary.open('native/prebuilt/whisper_wrapper.dll');
-  }
-  return DynamicLibrary.open('native/prebuilt/libwhisper_wrapper.so');
+  return openNativeLibrary('whisper_wrapper.dll', 'libwhisper_wrapper.so');
 }
 
 final DynamicLibrary _lib = _loadLib();
@@ -15,6 +12,10 @@ final DynamicLibrary _lib = _loadLib();
 final _whisperInit = _lib.lookupFunction<
     Pointer<Void> Function(Pointer<Utf8>),
     Pointer<Void> Function(Pointer<Utf8>)>('whisper_wrapper_init');
+
+final _whisperLastError = _lib.lookupFunction<
+    Pointer<Utf8> Function(),
+    Pointer<Utf8> Function()>('whisper_wrapper_last_error');
 
 final _whisperFree = _lib.lookupFunction<
     Void Function(Pointer<Void>),
@@ -40,6 +41,13 @@ final _whisperFullGetSegmentText = _lib.lookupFunction<
     Pointer<Utf8> Function(Pointer<Void>, Int32),
     Pointer<Utf8> Function(Pointer<Void>, int)>('whisper_wrapper_segment_text');
 
+String _lastNativeError() {
+  final errorPtr = _whisperLastError();
+  if (errorPtr == nullptr) return 'unknown native error';
+  final error = errorPtr.toDartString();
+  return error.isEmpty ? 'unknown native error' : error;
+}
+
 class WhisperEngine implements SttEngine {
   Pointer<Void>? _ctx;
   bool _initialized = false;
@@ -50,7 +58,7 @@ class WhisperEngine implements SttEngine {
     _ctx = _whisperInit(pathPtr);
     calloc.free(pathPtr);
     if (_ctx == nullptr) {
-      throw Exception('Failed to load whisper model: $modelPath');
+      throw Exception('Failed to load whisper model: $modelPath (${_lastNativeError()})');
     }
     _initialized = true;
   }
@@ -62,6 +70,9 @@ class WhisperEngine implements SttEngine {
     }
 
     final paramsPtr = _whisperDefaultParams(0);
+    if (paramsPtr == nullptr) {
+      throw Exception('Failed to create whisper params (${_lastNativeError()})');
+    }
 
     final samplesPtr = calloc<Float>(pcmAudio.length);
     for (var i = 0; i < pcmAudio.length; i++) {
@@ -81,8 +92,10 @@ class WhisperEngine implements SttEngine {
     final buffer = StringBuffer();
     for (var i = 0; i < nSegments; i++) {
       final textPtr = _whisperFullGetSegmentText(_ctx!, i);
-      buffer.write(textPtr.toDartString());
-      buffer.write(' ');
+      if (textPtr != nullptr) {
+        buffer.write(textPtr.toDartString());
+        buffer.write(' ');
+      }
     }
 
     return buffer.toString().trim();
@@ -97,4 +110,3 @@ class WhisperEngine implements SttEngine {
     _initialized = false;
   }
 }
-
