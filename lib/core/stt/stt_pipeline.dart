@@ -220,25 +220,27 @@ class SttPipeline {
       return null;
     }
 
-    final withoutLongDots = trimmed
-        .replaceAll(RegExp(r'\.{3,}'), ' ')
+    final hasLongPunctuationRun = RegExp(r'[.!?…]{3,}').hasMatch(trimmed);
+    final withoutLongPunctuation = trimmed
+        .replaceAll(RegExp(r'[.!?…]{3,}'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
-    if (withoutLongDots.isEmpty || RegExp(r'^[\s.,!?;:…-]+$').hasMatch(withoutLongDots)) {
+    if (withoutLongPunctuation.isEmpty ||
+        RegExp(r'^[\s.,!?;:…-]+$').hasMatch(withoutLongPunctuation)) {
       return null;
     }
 
     final punctuationCount = RegExp(r'[.,!?;:…-]').allMatches(trimmed).length;
     final letterCount = RegExp(r'[A-Za-z0-9]').allMatches(trimmed).length;
-    final wordCount = RegExp(r'\b[A-Za-z0-9]+\b').allMatches(withoutLongDots).length;
+    final wordCount = RegExp(r"\b[A-Za-z0-9']+\b").allMatches(withoutLongPunctuation).length;
 
     // Whisper often hallucinates a single vague word followed by many dots
     // when the input is silence, room noise, or a clipped utterance.
-    if (punctuationCount > letterCount && wordCount < 3) {
+    if ((punctuationCount > letterCount || hasLongPunctuationRun) && wordCount < 3) {
       return null;
     }
 
-    return withoutLongDots;
+    return withoutLongPunctuation;
   }
 
   void _setState(SttPipelineState newState) {
