@@ -74,6 +74,7 @@ class StraightCoordinator extends ChangeNotifier {
       _setState(DictationState.idle);
     };
 
+    await SettingsStore.migrateDefaultSttModelToWhisperSmall();
     _selectedSttModel = SettingsStore.getSttModel();
     _selectedLlmModel = SettingsStore.getLlmModel();
     refreshDictionary();

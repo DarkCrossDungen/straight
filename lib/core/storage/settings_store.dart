@@ -1,8 +1,9 @@
 import 'storage_service.dart';
 
 class SettingsStore {
-  static const defaultSttModel = 'whisper-base';
+  static const defaultSttModel = 'whisper-small';
   static const defaultLlmModel = 'none';
+  static const _whisperSmallMigrationKey = 'migratedToWhisperSmallDefault';
 
   static const _defaultHotkey = {
     'alt': true,
@@ -45,6 +46,19 @@ class SettingsStore {
 
   static Future<void> setSttModel(String value) async =>
       StorageService.settings.put('sttModel', value);
+
+  static Future<void> migrateDefaultSttModelToWhisperSmall() async {
+    final migrated =
+        StorageService.settings.get(_whisperSmallMigrationKey, defaultValue: false) as bool;
+    if (migrated) return;
+
+    final current =
+        StorageService.settings.get('sttModel', defaultValue: 'whisper-base') as String;
+    if (current == 'whisper-base') {
+      await StorageService.settings.put('sttModel', defaultSttModel);
+    }
+    await StorageService.settings.put(_whisperSmallMigrationKey, true);
+  }
 
   static String getLlmModel() =>
       StorageService.settings.get('llmModel', defaultValue: defaultLlmModel) as String;
