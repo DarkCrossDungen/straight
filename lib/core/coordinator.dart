@@ -41,6 +41,10 @@ class StraightCoordinator extends ChangeNotifier {
   }
 
   Future<void> init() async {
+    await SettingsStore.migrateDefaultSttModelToWhisperSmall();
+    await SettingsStore.migrateDefaultBehaviorToPushToTalk();
+    unawaited(sttPipeline.prepareMicrophone());
+
     hotkeyService.init(
       onHotkeyTriggered: toggleDictation,
       onKeyDown: _onKeyDown,
@@ -74,7 +78,6 @@ class StraightCoordinator extends ChangeNotifier {
       _setState(DictationState.idle);
     };
 
-    await SettingsStore.migrateDefaultSttModelToWhisperSmall();
     _selectedSttModel = SettingsStore.getSttModel();
     _selectedLlmModel = SettingsStore.getLlmModel();
     refreshDictionary();

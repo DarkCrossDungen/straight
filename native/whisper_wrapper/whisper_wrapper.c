@@ -278,10 +278,18 @@ whisper_wrapper_default_params(int strategy) {
 
     params->vad = false;
     params->vad_model_path = NULL;
+    params->language = "en";
+    params->detect_language = false;
+    params->no_context = true;
     params->print_progress = false;
     params->print_realtime = false;
     params->print_timestamps = false;
     params->no_timestamps = true;
+    params->suppress_blank = true;
+    params->suppress_nst = true;
+    params->temperature = 0.0f;
+    params->no_speech_thold = 0.65f;
+    params->logprob_thold = -1.0f;
 
     return params;
 }

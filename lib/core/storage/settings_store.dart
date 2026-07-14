@@ -4,6 +4,7 @@ class SettingsStore {
   static const defaultSttModel = 'whisper-small';
   static const defaultLlmModel = 'none';
   static const _whisperSmallMigrationKey = 'migratedToWhisperSmallDefault';
+  static const _pushToTalkMigrationKey = 'migratedToPushToTalkDefault';
 
   static const _defaultHotkey = {
     'alt': true,
@@ -60,6 +61,18 @@ class SettingsStore {
     await StorageService.settings.put(_whisperSmallMigrationKey, true);
   }
 
+  static Future<void> migrateDefaultBehaviorToPushToTalk() async {
+    final migrated =
+        StorageService.settings.get(_pushToTalkMigrationKey, defaultValue: false) as bool;
+    if (migrated) return;
+
+    final current = StorageService.settings.get('pushToTalk', defaultValue: false) as bool;
+    if (!current) {
+      await StorageService.settings.put('pushToTalk', true);
+    }
+    await StorageService.settings.put(_pushToTalkMigrationKey, true);
+  }
+
   static String getLlmModel() =>
       StorageService.settings.get('llmModel', defaultValue: defaultLlmModel) as String;
 
@@ -73,7 +86,7 @@ class SettingsStore {
       StorageService.settings.put('startOnBoot', value);
 
   static bool getPushToTalk() =>
-      StorageService.settings.get('pushToTalk', defaultValue: false) as bool;
+      StorageService.settings.get('pushToTalk', defaultValue: true) as bool;
 
   static Future<void> setPushToTalk(bool value) async =>
       StorageService.settings.put('pushToTalk', value);

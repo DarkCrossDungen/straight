@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:record/record.dart';
 import '../audio/vad.dart';
 import 'stt_engine.dart';
@@ -33,6 +33,14 @@ class SttPipeline {
   void Function(SttPipelineState state)? onStateChanged;
   void Function(String text)? onResult;
   void Function(Object error)? onError;
+
+  Future<void> prepareMicrophone() async {
+    try {
+      await _recorder.hasPermission();
+    } catch (_) {
+      // Permission failures are surfaced when dictation actually starts.
+    }
+  }
 
   Future<void> init(String modelPath) async {
     if (_initialized) {
@@ -148,8 +156,8 @@ class SttPipeline {
     _heardSpeechInBuffer = false;
 
     try {
-      final text = await _engine!.transcribe(samples);
-      if (_isUsableTranscription(text)) {
+      final text = cleanTranscriptionForDictation(await _engine!.transcribe(samples));
+      if (text != null) {
         onResult?.call(text);
       }
     } catch (e) {
@@ -197,17 +205,40 @@ class SttPipeline {
     return samples;
   }
 
-  bool _isUsableTranscription(String text) {
+  @visibleForTesting
+  static String? cleanTranscriptionForDictation(String text) {
     final trimmed = text.trim();
     if (trimmed.isEmpty || trimmed.startsWith('Transcription returned code:')) {
-      return false;
+      return null;
     }
 
     if (RegExp(r'^(?:\[[^\]]+\]\s*)+$').hasMatch(trimmed)) {
-      return false;
+      return null;
     }
 
-    return !RegExp(r'^[\s.,!?;:…-]+$').hasMatch(trimmed);
+    if (RegExp(r'^[\s.,!?;:…-]+$').hasMatch(trimmed)) {
+      return null;
+    }
+
+    final withoutLongDots = trimmed
+        .replaceAll(RegExp(r'\.{3,}'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (withoutLongDots.isEmpty || RegExp(r'^[\s.,!?;:…-]+$').hasMatch(withoutLongDots)) {
+      return null;
+    }
+
+    final punctuationCount = RegExp(r'[.,!?;:…-]').allMatches(trimmed).length;
+    final letterCount = RegExp(r'[A-Za-z0-9]').allMatches(trimmed).length;
+    final wordCount = RegExp(r'\b[A-Za-z0-9]+\b').allMatches(withoutLongDots).length;
+
+    // Whisper often hallucinates a single vague word followed by many dots
+    // when the input is silence, room noise, or a clipped utterance.
+    if (punctuationCount > letterCount && wordCount < 3) {
+      return null;
+    }
+
+    return withoutLongDots;
   }
 
   void _setState(SttPipelineState newState) {
