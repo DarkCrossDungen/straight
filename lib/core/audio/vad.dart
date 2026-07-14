@@ -9,38 +9,45 @@ class VoiceActivityDetector {
   static const double _silenceDurationMs = 800;
   static const int _minSpeechDurationMs = 200;
 
-  final int _silenceFrames;
-  final int _minSpeechFrames;
+  final int _silenceSamples;
+  final int _minSpeechSamples;
 
-  int _silentCount = 0;
-  int _speechCount = 0;
+  int _silentSamples = 0;
+  int _speechSamples = 0;
   bool _isSpeaking = false;
 
   VoiceActivityDetector()
-      : _silenceFrames = (_silenceDurationMs * _sampleRate / 1000).ceil() ~/ 320,
-        _minSpeechFrames = (_minSpeechDurationMs * _sampleRate / 1000).ceil() ~/ 320;
+      : _silenceSamples = (_silenceDurationMs * _sampleRate / 1000).ceil(),
+        _minSpeechSamples = (_minSpeechDurationMs * _sampleRate / 1000).ceil();
 
   bool get isSpeaking => _isSpeaking;
 
   void reset() {
-    _silentCount = 0;
-    _speechCount = 0;
+    _silentSamples = 0;
+    _speechSamples = 0;
     _isSpeaking = false;
   }
 
   void processChunk(Uint8List chunk) {
     final rms = _computeRms(chunk);
+    final sampleCount = chunk.lengthInBytes ~/ 2;
+    if (sampleCount == 0) return;
 
     if (rms >= _speechThreshold) {
-      _speechCount++;
-      _silentCount = 0;
-      if (_speechCount >= _minSpeechFrames && !_isSpeaking) {
+      _silentSamples = 0;
+      if (!_isSpeaking) _speechSamples += sampleCount;
+      if (_speechSamples >= _minSpeechSamples && !_isSpeaking) {
         _isSpeaking = true;
       }
     } else {
-      _silentCount++;
-      if (_silentCount >= _silenceFrames && _isSpeaking) {
+      if (_isSpeaking) {
+        _silentSamples += sampleCount;
+      } else {
+        _speechSamples = 0;
+      }
+      if (_silentSamples >= _silenceSamples && _isSpeaking) {
         _isSpeaking = false;
+        _speechSamples = 0;
       }
     }
   }

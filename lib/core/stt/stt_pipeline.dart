@@ -203,7 +203,11 @@ class SttPipeline {
       return false;
     }
 
-    return !RegExp(r'^(?:\[[^\]]+\]\s*)+$').hasMatch(trimmed);
+    if (RegExp(r'^(?:\[[^\]]+\]\s*)+$').hasMatch(trimmed)) {
+      return false;
+    }
+
+    return !RegExp(r'^[\s.,!?;:…-]+$').hasMatch(trimmed);
   }
 
   void _setState(SttPipelineState newState) {
