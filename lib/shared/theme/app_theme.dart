@@ -1,24 +1,13 @@
 import 'package:flutter/material.dart';
+
 import 'colors.dart';
 
 class AppTheme {
   AppTheme._();
 
-  static const _fontSans = 'DM Sans';
-  static const _fontMono = 'Space Mono';
-
-  static ThemeData get dark => _build(
-    brightness: Brightness.dark,
-    bg: AppColors.darkBg,
-    fg: AppColors.darkFg,
-    card: AppColors.darkCard,
-    muted: AppColors.darkMuted,
-    mutedFg: AppColors.darkMutedFg,
-    primary: AppColors.primaryDark,
-    primaryFg: AppColors.lightFg,
-    secondary: AppColors.secondaryDark,
-    accent: AppColors.accentDark,
-  );
+  static const _fontSans = 'Segoe UI';
+  static const _fontDisplay = 'Georgia';
+  static const _fontMono = 'Cascadia Mono';
 
   static ThemeData get light => _build(
     brightness: Brightness.light,
@@ -27,10 +16,25 @@ class AppTheme {
     card: AppColors.lightCard,
     muted: AppColors.lightMuted,
     mutedFg: AppColors.lightMutedFg,
+    border: AppColors.lightBorder,
+    divider: AppColors.lightDivider,
     primary: AppColors.primaryLight,
-    primaryFg: AppColors.darkFg,
     secondary: AppColors.secondaryLight,
     accent: AppColors.accentLight,
+  );
+
+  static ThemeData get dark => _build(
+    brightness: Brightness.dark,
+    bg: AppColors.darkBg,
+    fg: AppColors.darkFg,
+    card: AppColors.darkCard,
+    muted: AppColors.darkMuted,
+    mutedFg: AppColors.darkMutedFg,
+    border: AppColors.darkBorder,
+    divider: AppColors.darkDivider,
+    primary: AppColors.primaryDark,
+    secondary: AppColors.secondaryDark,
+    accent: AppColors.accentDark,
   );
 
   static ThemeData _build({
@@ -40,24 +44,20 @@ class AppTheme {
     required Color card,
     required Color muted,
     required Color mutedFg,
+    required Color border,
+    required Color divider,
     required Color primary,
-    required Color primaryFg,
     required Color secondary,
     required Color accent,
   }) {
-    final border = fg;
-    final baseText = TextStyle(
-      fontFamily: _fontSans,
+    final sans = TextStyle(fontFamily: _fontSans, color: fg, height: 1.35);
+    final display = TextStyle(
+      fontFamily: _fontDisplay,
       color: fg,
-      letterSpacing: 0,
-      height: 1.25,
+      height: 1.05,
     );
-    final monoText = TextStyle(
-      fontFamily: _fontMono,
-      color: fg,
-      letterSpacing: 0,
-      height: 1.2,
-    );
+    final mono = TextStyle(fontFamily: _fontMono, color: fg, height: 1.2);
+    const radius = BorderRadius.all(Radius.circular(10));
 
     return ThemeData(
       brightness: brightness,
@@ -67,52 +67,34 @@ class AppTheme {
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: primary,
-        onPrimary: primaryFg,
+        onPrimary: AppColors.lightCard,
         secondary: secondary,
-        onSecondary: AppColors.lightFg,
-        error: AppColors.error,
-        onError: brightness == Brightness.dark
-            ? AppColors.lightFg
-            : AppColors.darkFg,
+        onSecondary: fg,
+        error: primary,
+        onError: AppColors.lightCard,
         surface: card,
         onSurface: fg,
       ),
       textTheme: TextTheme(
-        headlineLarge: monoText.copyWith(
-          fontSize: 34,
-          fontWeight: FontWeight.w700,
+        headlineLarge: display.copyWith(
+          fontSize: 46,
+          fontWeight: FontWeight.w400,
+          letterSpacing: -1.8,
         ),
-        headlineMedium: monoText.copyWith(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
+        headlineMedium: display.copyWith(
+          fontSize: 31,
+          fontWeight: FontWeight.w400,
+          letterSpacing: -0.8,
         ),
-        titleLarge: baseText.copyWith(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-        ),
-        titleMedium: baseText.copyWith(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
-        titleSmall: monoText.copyWith(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-        ),
-        bodyLarge: baseText.copyWith(fontSize: 15),
-        bodyMedium: baseText.copyWith(fontSize: 14),
-        bodySmall: baseText.copyWith(fontSize: 12, color: mutedFg),
-        labelLarge: monoText.copyWith(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-        ),
-        labelMedium: monoText.copyWith(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-        ),
-        labelSmall: monoText.copyWith(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-        ),
+        titleLarge: sans.copyWith(fontSize: 20, fontWeight: FontWeight.w600),
+        titleMedium: sans.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
+        titleSmall: sans.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
+        bodyLarge: sans.copyWith(fontSize: 16),
+        bodyMedium: sans.copyWith(fontSize: 14),
+        bodySmall: sans.copyWith(fontSize: 12, color: mutedFg),
+        labelLarge: sans.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+        labelMedium: mono.copyWith(fontSize: 11, fontWeight: FontWeight.w600),
+        labelSmall: mono.copyWith(fontSize: 10, fontWeight: FontWeight.w600),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: bg,
@@ -120,10 +102,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: monoText.copyWith(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
+        titleTextStyle: display.copyWith(fontSize: 25, letterSpacing: -0.5),
       ),
       cardTheme: CardThemeData(
         color: card,
@@ -131,162 +110,153 @@ class AppTheme {
         margin: EdgeInsets.zero,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-          side: BorderSide(color: border, width: 1),
+          borderRadius: radius,
+          side: BorderSide(color: border),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: muted,
+        fillColor: card,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 13,
+          horizontal: 14,
+          vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: border, width: 1),
+          borderRadius: radius,
+          borderSide: BorderSide(color: border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: border, width: 1),
+          borderRadius: radius,
+          borderSide: BorderSide(color: border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: accent, width: 2),
+          borderRadius: radius,
+          borderSide: BorderSide(color: primary, width: 1.5),
         ),
-        hintStyle: baseText.copyWith(color: mutedFg, fontSize: 14),
-        labelStyle: monoText.copyWith(color: mutedFg, fontSize: 12),
+        hintStyle: sans.copyWith(color: mutedFg, fontSize: 14),
+        labelStyle: mono.copyWith(color: mutedFg, fontSize: 11),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
-          foregroundColor: primaryFg,
-          disabledBackgroundColor: muted,
-          disabledForegroundColor: mutedFg,
+          foregroundColor: AppColors.lightCard,
           elevation: 0,
           shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          minimumSize: const Size(40, 40),
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-          side: BorderSide(color: border, width: 1),
-          textStyle: monoText.copyWith(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
+          minimumSize: const Size(42, 42),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
+          textStyle: sans.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: fg,
           backgroundColor: card,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-          minimumSize: const Size(40, 40),
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-          side: BorderSide(color: border, width: 1),
-          textStyle: monoText.copyWith(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          minimumSize: const Size(42, 42),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
+          side: BorderSide(color: border),
+          textStyle: sans.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: fg,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-          textStyle: monoText.copyWith(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
+          textStyle: sans.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           foregroundColor: fg,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
         ),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          return states.contains(WidgetState.selected) ? primary : mutedFg;
-        }),
-        trackColor: WidgetStateProperty.resolveWith((states) {
-          return states.contains(WidgetState.selected) ? secondary : muted;
-        }),
-        trackOutlineColor: WidgetStateProperty.resolveWith((_) => border),
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? primary : mutedFg,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.primarySoft
+              : muted,
+        ),
+        trackOutlineColor: WidgetStateProperty.all(border),
       ),
       radioTheme: RadioThemeData(
-        fillColor: WidgetStateProperty.resolveWith((states) {
-          return states.contains(WidgetState.selected) ? primary : fg;
-        }),
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? primary : mutedFg,
+        ),
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: WidgetStateProperty.resolveWith((states) {
-          return states.contains(WidgetState.selected)
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
               ? primary
-              : Colors.transparent;
-        }),
-        checkColor: WidgetStateProperty.resolveWith((_) => primaryFg),
-        side: BorderSide(color: border, width: 1),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+              : Colors.transparent,
+        ),
+        checkColor: WidgetStateProperty.all(AppColors.lightCard),
+        side: BorderSide(color: border),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
       ),
-      dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
+      dividerTheme: DividerThemeData(color: divider, thickness: 1, space: 1),
       dialogTheme: DialogThemeData(
         backgroundColor: card,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-          side: BorderSide(color: border, width: 1),
+          borderRadius: radius,
+          side: BorderSide(color: border),
         ),
-        titleTextStyle: monoText.copyWith(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
+        titleTextStyle: sans.copyWith(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
         ),
       ),
       drawerTheme: DrawerThemeData(
-        backgroundColor: brightness == Brightness.dark
-            ? AppColors.darkBg
-            : AppColors.lightMuted,
+        backgroundColor: bg,
         surfaceTintColor: Colors.transparent,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        shape: const RoundedRectangleBorder(),
       ),
       listTileTheme: ListTileThemeData(
-        iconColor: fg,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
-        titleTextStyle: baseText.copyWith(
+        iconColor: mutedFg,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        titleTextStyle: sans.copyWith(
           fontSize: 15,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
         ),
-        subtitleTextStyle: baseText.copyWith(fontSize: 13, color: mutedFg),
+        subtitleTextStyle: sans.copyWith(fontSize: 13, color: mutedFg),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: secondary,
-        labelStyle: monoText.copyWith(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: AppColors.lightFg,
-        ),
+        backgroundColor: muted,
+        labelStyle: mono.copyWith(fontSize: 10, fontWeight: FontWeight.w600),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-          side: BorderSide(color: border, width: 1),
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
+          side: BorderSide(color: border),
         ),
-        side: BorderSide(color: border, width: 1),
+        side: BorderSide(color: border),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: muted,
-        contentTextStyle: baseText.copyWith(fontSize: 14, color: fg),
+        backgroundColor: fg,
+        contentTextStyle: sans.copyWith(fontSize: 14, color: bg),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-          side: BorderSide(color: border, width: 1),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: primary,
-        foregroundColor: primaryFg,
+        foregroundColor: AppColors.lightCard,
         elevation: 0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primary,

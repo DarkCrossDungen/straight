@@ -3,7 +3,26 @@ import 'package:ffi/ffi.dart';
 import 'package:win32/win32.dart';
 
 class TextInjector {
-  void inject(String text) {
+  bool inject(String text) {
+    // Avoid typing into the desktop or back into Straight's own overlay. This
+    // lets the caller offer a short copy fallback instead of losing the text.
+    final foreground = GetForegroundWindow();
+    if (foreground == 0) return false;
+
+    final titleLength = GetWindowTextLength(foreground);
+    if (titleLength == 0) return false;
+    final title = wsalloc(titleLength + 1);
+    try {
+      GetWindowText(foreground, title, titleLength + 1);
+      final targetTitle = title.toDartString();
+      if (targetTitle.toLowerCase().contains('straight') ||
+          targetTitle == 'Program Manager') {
+        return false;
+      }
+    } finally {
+      free(title);
+    }
+
     int count = 0;
     for (final rune in text.runes) {
       if (rune == 0x0A || rune == 0x0D) {
@@ -14,7 +33,7 @@ class TextInjector {
         count += 4;
       }
     }
-    if (count == 0) return;
+    if (count == 0) return false;
 
     final ptr = calloc<INPUT>(count);
     int i = 0;
@@ -43,8 +62,9 @@ class TextInjector {
       }
     }
 
-    SendInput(count, ptr, sizeOf<INPUT>());
+    final sent = SendInput(count, ptr, sizeOf<INPUT>());
     calloc.free(ptr);
+    return sent == count;
   }
 
   void _setKeyboardInput(INPUT input, int wVk, int wScan, int dwFlags) {

@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:win32/win32.dart';
 import '../storage/settings_store.dart';
 
 class HotkeyService extends ChangeNotifier {
@@ -20,6 +22,9 @@ class HotkeyService extends ChangeNotifier {
   VoidCallback? _onKeyUp;
   HotKey? _registeredHotkey;
   DateTime? _lastToggleAt;
+  String? _registrationError;
+
+  String? get registrationError => _registrationError;
 
   void init({VoidCallback? onHotkeyTriggered, VoidCallback? onKeyDown, VoidCallback? onKeyUp}) {
     _onHotkeyTriggered = onHotkeyTriggered;
@@ -56,16 +61,17 @@ class HotkeyService extends ChangeNotifier {
     }
   }
 
-  Future<void> reloadFromSettings() async {
+  Future<bool> reloadFromSettings() async {
     final stored = SettingsStore.getHotkey();
     await stop();
     _currentHotkey = _hotkeyFromStoredMap(Map.from(stored));
-    await start();
+    final registered = await start();
     notifyListeners();
+    return registered;
   }
 
-  Future<void> start() async {
-    if (_registeredHotkey != null) return;
+  Future<bool> start() async {
+    if (_registeredHotkey != null) return true;
 
     try {
       final isPushToTalk = SettingsStore.getPushToTalk();
@@ -82,9 +88,14 @@ class HotkeyService extends ChangeNotifier {
         );
       }
       _registeredHotkey = _currentHotkey;
+      _registrationError = null;
+      return true;
     } catch (e) {
       _registeredHotkey = null;
-      debugPrint('Hotkey registration failed: $e');
+      _registrationError = e.toString();
+      debugPrint('Hotkey registration failed: $_registrationError');
+      notifyListeners();
+      return false;
     }
   }
 
@@ -112,11 +123,44 @@ class HotkeyService extends ChangeNotifier {
     }
   }
 
-  Future<void> registerHotkey(HotKey hotkey) async {
+  Future<bool> registerHotkey(HotKey hotkey) async {
     await stop();
     _currentHotkey = hotkey;
-    await start();
+    final registered = await start();
     notifyListeners();
+    return registered;
+  }
+
+  /// Windows RegisterHotKey emits WM_HOTKEY on press but has no matching
+  /// release message. Poll the physical state only while dictating so
+  /// push-to-talk can still stop as soon as a key is released.
+  bool isCurrentHotkeyHeld() {
+    if (!Platform.isWindows) return false;
+    final stored = SettingsStore.getHotkey();
+    final keys = <int>[
+      if (stored['alt'] == true) VK_MENU,
+      if (stored['ctrl'] == true) VK_CONTROL,
+      if (stored['shift'] == true) VK_SHIFT,
+      if (stored['meta'] == true) VK_LWIN,
+      _virtualKeyFromLabel((stored['key'] ?? 'Space').toString()),
+    ];
+    return keys.every((key) => (GetAsyncKeyState(key) & 0x8000) != 0);
+  }
+
+  int _virtualKeyFromLabel(String label) {
+    switch (label.toLowerCase()) {
+      case 'space':
+        return VK_SPACE;
+      case 'enter':
+        return VK_RETURN;
+      case 'tab':
+        return VK_TAB;
+      case 'escape':
+        return VK_ESCAPE;
+      default:
+        if (label.length == 1) return label.toUpperCase().codeUnitAt(0);
+        return VK_SPACE;
+    }
   }
 
   @override

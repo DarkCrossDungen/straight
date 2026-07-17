@@ -5,7 +5,6 @@ import 'package:straight/features/onboarding/permission_step.dart';
 import 'package:straight/features/onboarding/tutorial_step.dart';
 import 'package:straight/shared/theme/colors.dart';
 import 'package:straight/shared/widgets/app_surface.dart';
-import 'package:straight/shared/widgets/background_shapes.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -139,66 +138,55 @@ class _WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final stageColor = isDark ? AppColors.accentDark : AppColors.accentLight;
 
     return Padding(
       padding: const EdgeInsets.all(24),
       child: AppSurface(
         padding: EdgeInsets.zero,
-        shadowColor: scheme.primary,
+        shadow: true,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            DecoratedBox(decoration: BoxDecoration(color: stageColor)),
-            BackgroundShapes(
-              color: AppColors.darkFg,
-              blockColor: AppColors.darkFg.withValues(alpha: 0.16),
-              opacity: 0.86,
-            ),
             Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
-                child: AppSurface(
-                  color: scheme.surface,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 84,
-                        height: 84,
-                        decoration: BoxDecoration(
-                          color: scheme.secondary,
-                          border: Border.all(color: scheme.onSurface, width: 1),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 134,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: AppColors.primarySoft,
+                        border: Border.all(
+                          color: scheme.primary.withValues(alpha: 0.35),
                         ),
-                        child: const Icon(
-                          Icons.record_voice_over,
-                          size: 42,
-                          color: Colors.black,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(40),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'STRAIGHT',
-                        style: Theme.of(context).textTheme.headlineLarge,
-                      ),
-                      const SizedBox(height: 10),
-                      AppBadge(
-                        label: 'Offline Windows Dictation',
+                      child: Icon(
+                        Icons.mic_none_rounded,
+                        size: 28,
                         color: scheme.primary,
-                        foregroundColor: scheme.onPrimary,
                       ),
-                      const SizedBox(height: 18),
-                      Text(
-                        'Press the hotkey, speak, and send cleaned text into the app you are already using.',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          height: 1.45,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 28),
+                    Text(
+                      'Straight',
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                    const SizedBox(height: 12),
+                    const AppBadge(label: 'Offline Windows Dictation'),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Speak naturally. Straight cleans up your words and types them into the app already in front of you.',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge?.copyWith(height: 1.45),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -21,13 +21,15 @@ class SettingsStore {
   };
 
   static String getThemeMode() =>
-      StorageService.settings.get('theme', defaultValue: 'dark') as String;
+      StorageService.settings.get('theme', defaultValue: 'light') as String;
 
   static Future<void> setThemeMode(String value) async =>
       StorageService.settings.put('theme', value);
 
   static Map getHotkey() {
-    final value = StorageService.settings.get('hotkey', defaultValue: _defaultHotkey) as Map;
+    final value =
+        StorageService.settings.get('hotkey', defaultValue: _defaultHotkey)
+            as Map;
     if (_isOldReservedDefault(value)) return _defaultHotkey;
     return value;
   }
@@ -43,18 +45,24 @@ class SettingsStore {
   }
 
   static String getSttModel() =>
-      StorageService.settings.get('sttModel', defaultValue: defaultSttModel) as String;
+      StorageService.settings.get('sttModel', defaultValue: defaultSttModel)
+          as String;
 
   static Future<void> setSttModel(String value) async =>
       StorageService.settings.put('sttModel', value);
 
   static Future<void> migrateDefaultSttModelToWhisperSmall() async {
     final migrated =
-        StorageService.settings.get(_whisperSmallMigrationKey, defaultValue: false) as bool;
+        StorageService.settings.get(
+              _whisperSmallMigrationKey,
+              defaultValue: false,
+            )
+            as bool;
     if (migrated) return;
 
     final current =
-        StorageService.settings.get('sttModel', defaultValue: 'whisper-base') as String;
+        StorageService.settings.get('sttModel', defaultValue: 'whisper-base')
+            as String;
     if (current == 'whisper-base') {
       await StorageService.settings.put('sttModel', defaultSttModel);
     }
@@ -63,10 +71,15 @@ class SettingsStore {
 
   static Future<void> migrateDefaultBehaviorToPushToTalk() async {
     final migrated =
-        StorageService.settings.get(_pushToTalkMigrationKey, defaultValue: false) as bool;
+        StorageService.settings.get(
+              _pushToTalkMigrationKey,
+              defaultValue: false,
+            )
+            as bool;
     if (migrated) return;
 
-    final current = StorageService.settings.get('pushToTalk', defaultValue: false) as bool;
+    final current =
+        StorageService.settings.get('pushToTalk', defaultValue: false) as bool;
     if (!current) {
       await StorageService.settings.put('pushToTalk', true);
     }
@@ -74,7 +87,8 @@ class SettingsStore {
   }
 
   static String getLlmModel() =>
-      StorageService.settings.get('llmModel', defaultValue: defaultLlmModel) as String;
+      StorageService.settings.get('llmModel', defaultValue: defaultLlmModel)
+          as String;
 
   static Future<void> setLlmModel(String value) async =>
       StorageService.settings.put('llmModel', value);
@@ -84,6 +98,21 @@ class SettingsStore {
 
   static Future<void> setStartOnBoot(bool value) async =>
       StorageService.settings.put('startOnBoot', value);
+
+  static bool getDesktopBubbleEnabled() =>
+      StorageService.settings.get('desktopBubbleEnabled', defaultValue: true)
+          as bool;
+
+  static Future<void> setDesktopBubbleEnabled(bool value) async =>
+      StorageService.settings.put('desktopBubbleEnabled', value);
+
+  static Map? getDesktopBubblePosition() {
+    final value = StorageService.settings.get('desktopBubblePosition');
+    return value is Map ? value : null;
+  }
+
+  static Future<void> setDesktopBubblePosition(double x, double y) async =>
+      StorageService.settings.put('desktopBubblePosition', {'x': x, 'y': y});
 
   static bool getPushToTalk() =>
       StorageService.settings.get('pushToTalk', defaultValue: true) as bool;

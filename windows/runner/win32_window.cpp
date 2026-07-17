@@ -1,5 +1,7 @@
 #include "win32_window.h"
 
+#include <string>
+
 #include <dwmapi.h>
 #include <flutter_windows.h>
 
@@ -134,8 +136,14 @@ bool Win32Window::Create(const std::wstring& title,
   UINT dpi = FlutterDesktopGetDpiForMonitor(monitor);
   double scale_factor = dpi / 96.0;
 
+  const bool is_bubble_window =
+      std::wstring(GetCommandLineW()).find(L"--bubble-window") !=
+      std::wstring::npos;
+  const DWORD window_style =
+      is_bubble_window ? WS_POPUP : WS_OVERLAPPEDWINDOW;
+
   HWND window = CreateWindow(
-      window_class, title.c_str(), WS_OVERLAPPEDWINDOW,
+      window_class, title.c_str(), window_style,
       Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
       Scale(size.width, scale_factor), Scale(size.height, scale_factor),
       nullptr, nullptr, GetModuleHandle(nullptr), this);

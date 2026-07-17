@@ -150,6 +150,7 @@ struct whisper_full_params {
 };
 
 static char _last_error[512] = "";
+static char _initial_prompt[4096] = "";
 
 static void _set_error(const char *message) {
     snprintf(_last_error, sizeof(_last_error), "%s", message ? message : "unknown error");
@@ -242,6 +243,15 @@ whisper_wrapper_last_error(void) {
     return _last_error;
 }
 
+WHISPER_WRAPPER_API void
+whisper_wrapper_set_initial_prompt(const char* prompt) {
+    if (!prompt) {
+        _initial_prompt[0] = '\0';
+        return;
+    }
+    snprintf(_initial_prompt, sizeof(_initial_prompt), "%s", prompt);
+}
+
 WHISPER_WRAPPER_API struct whisper_context*
 whisper_wrapper_init(const char* path_model) {
     if (!_w.loaded) { _w.loaded = _load_whisper(); }
@@ -289,7 +299,10 @@ whisper_wrapper_default_params(int strategy) {
     params->suppress_nst = true;
     params->temperature = 0.0f;
     params->no_speech_thold = 0.65f;
-    params->logprob_thold = -1.0f;
+    params->logprob_thold = -0.80f;
+    params->entropy_thold = 2.0f;
+    params->max_tokens = 64;
+    params->initial_prompt = _initial_prompt[0] ? _initial_prompt : NULL;
 
     return params;
 }

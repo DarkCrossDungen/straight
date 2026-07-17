@@ -14,11 +14,20 @@ class DictionaryStore {
     }).toList();
   }
 
-  static Future<void> addWord(String word, String replacement) async {
+  static Future<void> addWord(
+    String word,
+    String replacement, {
+    Iterable<String> aliases = const [],
+  }) async {
     final id = _uuid.v4();
     await StorageService.dictionary.put(id, {
       'word': word,
       'replacement': replacement,
+      'aliases': aliases
+          .map((alias) => alias.trim())
+          .where((alias) => alias.isNotEmpty && alias.toLowerCase() != word.toLowerCase())
+          .toSet()
+          .toList(),
       'enabled': true,
     });
   }

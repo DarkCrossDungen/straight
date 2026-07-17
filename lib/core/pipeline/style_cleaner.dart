@@ -13,12 +13,12 @@ class StyleCleaner {
     if (text.isEmpty) return text;
 
     var result = text.trim();
+    result = result.replaceAllMapped(_repeatedPunctuation, (m) => m[1]!);
     result = result.replaceAll(_spaceAroundNewlines, '\n');
     result = result.replaceAllMapped(_spaceBeforePunctuation, (m) => m[1]!);
     result = result.replaceAllMapped(_spaceAfterPunctuation, (m) => '${m[1]} ${m[2]}');
     result = result.replaceAllMapped(_danglingOpeningSpace, (m) => m[1]!);
     result = result.replaceAllMapped(_danglingClosingSpace, (m) => m[1]!);
-    result = result.replaceAllMapped(_repeatedPunctuation, (m) => m[1]!);
     result = result.replaceAll(_collapsedSpaces, ' ');
     result = result.replaceAll(_multiNewlines, '\n\n');
     result = result.replaceAll(_standaloneI, 'I');

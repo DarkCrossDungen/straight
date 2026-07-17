@@ -466,6 +466,19 @@ void main() {
       expect(result, contains('testing'));
     });
 
+    test('replaces pronunciation aliases with the exact spelling', () {
+      final dictionary = [
+        {
+          'word': 'Khrisshy',
+          'replacement': 'Khrisshy',
+          'aliases': ['krishi', 'crushy'],
+          'enabled': true,
+        },
+      ];
+      expect(replacer.process('hello krishi', dictionary), 'hello Khrisshy');
+      expect(replacer.process('hello crushy', dictionary), 'hello Khrisshy');
+    });
+
     test('empty dictionary returns original', () {
       final result = replacer.process('hello world', []);
       expect(result, 'hello world');

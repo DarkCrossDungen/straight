@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:straight/core/storage/history_store.dart';
 import 'package:straight/shared/theme/colors.dart';
 import 'package:straight/shared/widgets/app_surface.dart';
@@ -78,6 +79,20 @@ class _HistoryPageState extends State<HistoryPage> {
   Future<void> _deleteEntry(Map entry) async {
     await HistoryStore.deleteEntry(entry['key']);
     _load();
+  }
+
+  Future<void> _copyEntry(Map entry) async {
+    final appliedText = (entry['appliedText'] as String? ?? '').trim();
+    final text = appliedText.isNotEmpty
+        ? appliedText
+        : (entry['text'] as String? ?? '').trim();
+    if (text.isEmpty) return;
+
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Copied to clipboard')),
+    );
   }
 
   @override
@@ -214,6 +229,11 @@ class _HistoryPageState extends State<HistoryPage> {
                 ),
               ],
             ),
+          ),
+          IconButton(
+            tooltip: 'Copy text',
+            icon: const Icon(Icons.copy_outlined, size: 18),
+            onPressed: () => _copyEntry(entry),
           ),
           IconButton(
             tooltip: 'Delete entry',

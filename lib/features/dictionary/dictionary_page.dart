@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:straight/core/storage/dictionary_store.dart';
+import 'package:straight/core/app_context.dart';
 import 'package:straight/features/dictionary/add_word_dialog.dart';
 import 'package:straight/shared/widgets/app_surface.dart';
 import 'package:straight/shared/widgets/empty_state.dart';
@@ -41,7 +42,12 @@ class _DictionaryPageState extends State<DictionaryPage> {
   Future<void> _addWord() async {
     final result = await AddWordDialog.show(context);
     if (result == null) return;
-    await DictionaryStore.addWord(result['word']!, result['replacement']!);
+    await DictionaryStore.addWord(
+      result['word'] as String,
+      result['replacement'] as String,
+      aliases: (result['aliases'] as List).cast<String>(),
+    );
+    await coordinator.refreshDictionary();
     _load();
   }
 

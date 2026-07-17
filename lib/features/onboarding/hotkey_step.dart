@@ -14,7 +14,7 @@ class HotkeyStep extends StatefulWidget {
 
 class _HotkeyStepState extends State<HotkeyStep> {
   bool _capturing = false;
-  String _hotkey = 'Ctrl + Alt + Space';
+  String _hotkey = 'Alt + Space';
 
   @override
   void initState() {

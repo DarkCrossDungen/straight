@@ -33,4 +33,19 @@ void main() {
       'I want the shimless',
     );
   });
+
+  test('drops spaced and mixed punctuation hallucinations', () {
+    expect(
+      SttPipeline.cleanTranscriptionForDictation('What is this ? . ? . ?'),
+      'What is this',
+    );
+    expect(
+      SttPipeline.cleanTranscriptionForDictation('One, . . . . .'),
+      isNull,
+    );
+    expect(
+      SttPipeline.cleanTranscriptionForDictation('Hello world . . . .'),
+      'Hello world',
+    );
+  });
 }

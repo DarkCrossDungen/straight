@@ -23,6 +23,11 @@ class _ModelSelectorState extends State<ModelSelector> {
       subtitle: 'Better accuracy, more RAM',
     ),
     _ModelOption(
+      id: 'moonshine-small-streaming-en',
+      title: 'Moonshine Small Streaming',
+      subtitle: 'English only, tuned for faster live dictation',
+    ),
+    _ModelOption(
       id: 'whisper-medium',
       title: 'Whisper Medium',
       subtitle: 'Best accuracy, heaviest',

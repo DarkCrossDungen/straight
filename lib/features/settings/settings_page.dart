@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:straight/core/storage/settings_store.dart';
+import 'package:straight/core/startup/startup_service.dart';
+import 'package:straight/features/bubble/desktop_bubble_service.dart';
 import 'package:straight/features/settings/hotkey_capture_tile.dart';
 import 'package:straight/features/settings/model_selector.dart';
 import 'package:straight/shared/theme/colors.dart';
@@ -16,6 +18,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _isDark = true;
   bool _startOnBoot = false;
   bool _pushToTalk = false;
+  bool _desktopBubble = true;
 
   @override
   void initState() {
@@ -23,6 +26,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _isDark = SettingsStore.getThemeMode() == 'dark';
     _startOnBoot = SettingsStore.getStartOnBoot();
     _pushToTalk = SettingsStore.getPushToTalk();
+    _desktopBubble = SettingsStore.getDesktopBubbleEnabled();
   }
 
   @override
@@ -141,6 +145,18 @@ class _SettingsPageState extends State<SettingsPage> {
             onChanged: (value) async {
               setState(() => _startOnBoot = value);
               await SettingsStore.setStartOnBoot(value);
+              await StartupService.setEnabled(value);
+            },
+          ),
+          const Divider(),
+          _switchRow(
+            icon: Icons.graphic_eq_rounded,
+            title: 'Desktop bubble',
+            subtitle: 'Keep a small dictation control over other apps',
+            value: _desktopBubble,
+            onChanged: (value) async {
+              setState(() => _desktopBubble = value);
+              await DesktopBubbleService.instance.setEnabled(value);
             },
           ),
           const Divider(),

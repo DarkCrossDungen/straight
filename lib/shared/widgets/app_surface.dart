@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:straight/shared/theme/colors.dart';
 
 class AppSurface extends StatelessWidget {
   final Widget child;
@@ -11,10 +10,10 @@ class AppSurface extends StatelessWidget {
   const AppSurface({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(16),
+    this.padding = const EdgeInsets.all(20),
     this.color,
     this.shadowColor,
-    this.shadow = true,
+    this.shadow = false,
   });
 
   @override
@@ -23,13 +22,14 @@ class AppSurface extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: color ?? scheme.surface,
-        border: Border.all(color: scheme.onSurface, width: 1),
+        border: Border.all(color: Theme.of(context).dividerColor),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
         boxShadow: shadow
             ? [
                 BoxShadow(
-                  color: shadowColor ?? scheme.onSurface,
-                  offset: const Offset(4, 4),
-                  blurRadius: 0,
+                  color: (shadowColor ?? Colors.black).withValues(alpha: 0.04),
+                  offset: const Offset(0, 3),
+                  blurRadius: 10,
                 ),
               ]
             : null,
@@ -58,17 +58,17 @@ class AppBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
         color: color ?? scheme.secondary,
-        border: Border.all(color: scheme.onSurface, width: 1),
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
       ),
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
-          fontFamily: 'Space Mono',
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
+          fontFamily: 'Cascadia Mono',
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
           height: 1,
-          letterSpacing: 0,
-          color: foregroundColor ?? AppColors.lightFg,
+          color: foregroundColor ?? scheme.onSecondary,
         ),
       ),
     );
@@ -77,22 +77,19 @@ class AppBadge extends StatelessWidget {
 
 class AppSectionLabel extends StatelessWidget {
   final String label;
-
   const AppSectionLabel(this.label, {super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Text(
-      label.toUpperCase(),
-      style: TextStyle(
-        fontFamily: 'Space Mono',
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0,
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.68),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Text(
+    label.toUpperCase(),
+    style: TextStyle(
+      fontFamily: 'Cascadia Mono',
+      fontSize: 10,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.7,
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
+    ),
+  );
 }
 
 class AppIconButton extends StatelessWidget {
@@ -123,9 +120,7 @@ class AppIconButton extends StatelessWidget {
           style: IconButton.styleFrom(
             backgroundColor: color ?? scheme.surface,
             foregroundColor: foregroundColor ?? scheme.onSurface,
-            disabledBackgroundColor: scheme.surface.withValues(alpha: 0.5),
-            shape: const RoundedRectangleBorder(),
-            side: BorderSide(color: scheme.onSurface, width: 1),
+            side: BorderSide(color: Theme.of(context).dividerColor),
             padding: EdgeInsets.zero,
           ),
           onPressed: onPressed,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'core/app_navigation.dart';
 import 'shared/theme/app_theme.dart';
 import 'core/storage/settings_store.dart';
 import 'features/bubble/bubble_overlay.dart';
@@ -14,6 +15,7 @@ class StraightApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = SettingsStore.getThemeMode() == 'dark';
     return MaterialApp(
+      navigatorKey: appNavigatorKey,
       title: 'Straight',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,

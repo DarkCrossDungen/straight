@@ -41,6 +41,10 @@ final _whisperFullGetSegmentText = _lib.lookupFunction<
     Pointer<Utf8> Function(Pointer<Void>, Int32),
     Pointer<Utf8> Function(Pointer<Void>, int)>('whisper_wrapper_segment_text');
 
+final _whisperSetInitialPrompt = _lib.lookupFunction<
+    Void Function(Pointer<Utf8>),
+    void Function(Pointer<Utf8>)>('whisper_wrapper_set_initial_prompt');
+
 String _lastNativeError() {
   final errorPtr = _whisperLastError();
   if (errorPtr == nullptr) return 'unknown native error';
@@ -99,6 +103,22 @@ class WhisperEngine implements SttEngine {
     }
 
     return buffer.toString().trim();
+  }
+
+  @override
+  Future<void> setVocabulary(List<String> terms) async {
+    // A short hint helps Whisper with names and jargon, but an oversized prompt
+    // makes recognition less reliable. Keep the most useful distinct entries.
+    final distinct = <String>{};
+    for (final term in terms) {
+      final cleaned = term.trim();
+      if (cleaned.isNotEmpty) distinct.add(cleaned);
+      if (distinct.length >= 80) break;
+    }
+    final prompt = distinct.join(', ');
+    final promptPtr = prompt.toNativeUtf8();
+    _whisperSetInitialPrompt(promptPtr);
+    calloc.free(promptPtr);
   }
 
   @override
