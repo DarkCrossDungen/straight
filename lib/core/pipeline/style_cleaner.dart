@@ -7,12 +7,14 @@ class StyleCleaner {
   static final _spaceAroundNewlines = RegExp(r'[ \t]*\n[ \t]*');
   static final _danglingOpeningSpace = RegExp(r'([\(\[\{])\s+');
   static final _danglingClosingSpace = RegExp(r'\s+([\)\]\}])');
-  static final _repeatedPunctuation = RegExp(r'([.!?])(?:\s*\1)+');
+  static final _repeatedPunctuation = RegExp(r'([.!?…])(?:\s*[.!?…])+');
 
   String process(String text) {
     if (text.isEmpty) return text;
 
     var result = text.trim();
+    // Treat every long punctuation run as a single mark, even when Whisper
+    // mixes dots, question marks, and spaces while hallucinating on silence.
     result = result.replaceAllMapped(_repeatedPunctuation, (m) => m[1]!);
     result = result.replaceAll(_spaceAroundNewlines, '\n');
     result = result.replaceAllMapped(_spaceBeforePunctuation, (m) => m[1]!);

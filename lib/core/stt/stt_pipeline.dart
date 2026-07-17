@@ -240,7 +240,11 @@ class SttPipeline {
       return null;
     }
 
-    if (RegExp(r'^(?:\[[^\]]+\]\s*)+$').hasMatch(trimmed)) {
+    // Whisper can emit caption-like labels for silence. The old check handled
+    // one label but missed the repeated form, for example
+    // "[BLANK_AUDIO].[BLANK_AUDIO]", which then leaked into the app.
+    if (RegExp(r'^(?:\s*\[[^\]]+\]\s*[.,!?;:…-]?\s*)+$')
+        .hasMatch(trimmed)) {
       return null;
     }
 
@@ -251,7 +255,8 @@ class SttPipeline {
     // Small Whisper models can repeat punctuation while guessing at silence,
     // room noise, or music. The marks can be separated by spaces, which is why
     // a simple "..." matcher was not enough.
-    final hasRepeatedPunctuation = RegExp(r'[.!?…](?:\s*[.!?…]){1,}').hasMatch(trimmed);
+    final hasRepeatedPunctuation =
+        RegExp(r'[.!?…](?:\s*[.!?…]){1,}').hasMatch(trimmed);
     final withoutLongPunctuation = trimmed
         .replaceAll(RegExp(r'[.!?…](?:\s*[.!?…]){1,}'), ' ')
         .replaceAll(RegExp(r'(?<=\s)[.!?…](?=\s|$)'), ' ')
@@ -262,9 +267,13 @@ class SttPipeline {
       return null;
     }
 
-    final punctuationCount = RegExp(r'[.,!?;:…-]').allMatches(withoutLongPunctuation).length;
-    final letterCount = RegExp(r'[A-Za-z0-9]').allMatches(withoutLongPunctuation).length;
-    final wordCount = RegExp(r"\b[A-Za-z0-9']+\b").allMatches(withoutLongPunctuation).length;
+    final punctuationCount =
+        RegExp(r'[.,!?;:…-]').allMatches(withoutLongPunctuation).length;
+    final letterCount =
+        RegExp(r'[A-Za-z0-9]').allMatches(withoutLongPunctuation).length;
+    final wordCount = RegExp(r"\b[A-Za-z0-9']+\b")
+        .allMatches(withoutLongPunctuation)
+        .length;
 
     // Whisper often hallucinates a single vague word followed by many dots
     // when the input is silence, room noise, or a clipped utterance.

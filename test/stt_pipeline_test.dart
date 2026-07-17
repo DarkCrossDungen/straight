@@ -15,6 +15,12 @@ void main() {
       SttPipeline.cleanTranscriptionForDictation("What's ??????????????????????"),
       isNull,
     );
+    expect(
+      SttPipeline.cleanTranscriptionForDictation(
+        '[BLANK_AUDIO].[BLANK_AUDIO].[BLANK_AUDIO].',
+      ),
+      isNull,
+    );
   });
 
   test('keeps useful text while removing long dot runs', () {
