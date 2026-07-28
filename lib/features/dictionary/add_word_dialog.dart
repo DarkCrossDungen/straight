@@ -3,14 +3,26 @@ import 'package:straight/core/app_context.dart';
 import 'package:straight/shared/widgets/app_surface.dart';
 
 class AddWordDialog extends StatefulWidget {
-  const AddWordDialog({super.key});
-
-  static Future<Map<String, dynamic>?> show(BuildContext context) {
+  static Future<Map<String, dynamic>?> show(
+    BuildContext context, {
+    List<Map> profiles = const [],
+    String? initialProfileId,
+  }) {
     return showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (_) => const AddWordDialog(),
+      builder: (_) =>
+          AddWordDialog(profiles: profiles, initialProfileId: initialProfileId),
     );
   }
+
+  final List<Map> profiles;
+  final String? initialProfileId;
+
+  const AddWordDialog({
+    super.key,
+    this.profiles = const [],
+    this.initialProfileId,
+  });
 
   @override
   State<AddWordDialog> createState() => _AddWordDialogState();
@@ -22,6 +34,13 @@ class _AddWordDialogState extends State<AddWordDialog> {
   final _aliasesController = TextEditingController();
   bool _isCapturing = false;
   String? _captureMessage;
+  String? _profileId;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileId = widget.initialProfileId;
+  }
 
   @override
   void dispose() {
@@ -92,16 +111,33 @@ class _AddWordDialogState extends State<AddWordDialog> {
               controller: _replacementController,
               decoration: const InputDecoration(
                 labelText: 'WORD TO TYPE',
-                hintText: 'e.g. Khrisshy',
+                hintText: 'e.g. MoonshineEngine',
               ),
               autofocus: true,
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String?>(
+              value: _profileId,
+              decoration: const InputDecoration(labelText: 'VOCABULARY'),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Global vocabulary'),
+                ),
+                for (final profile in widget.profiles)
+                  DropdownMenuItem<String?>(
+                    value: profile['id'].toString(),
+                    child: Text(profile['name'].toString()),
+                  ),
+              ],
+              onChanged: (value) => setState(() => _profileId = value),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _wordController,
               decoration: const InputDecoration(
                 labelText: 'SPOKEN PHRASE (OPTIONAL)',
-                hintText: 'e.g. krishi',
+                hintText: 'e.g. moon shine engine',
               ),
             ),
             const SizedBox(height: 12),
@@ -109,7 +145,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
               controller: _aliasesController,
               decoration: const InputDecoration(
                 labelText: 'WHAT WHISPER HEARS (OPTIONAL)',
-                hintText: 'e.g. krishi, crushy',
+                hintText: 'e.g. moon shine engine, moonshine engine',
               ),
               maxLines: 2,
             ),
@@ -121,8 +157,12 @@ class _AddWordDialogState extends State<AddWordDialog> {
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: _capturePronunciation,
-              icon: Icon(_isCapturing ? Icons.stop_circle_outlined : Icons.mic_none),
-              label: Text(_isCapturing ? 'CANCEL CAPTURE' : 'RECORD PRONUNCIATION'),
+              icon: Icon(
+                _isCapturing ? Icons.stop_circle_outlined : Icons.mic_none,
+              ),
+              label: Text(
+                _isCapturing ? 'CANCEL CAPTURE' : 'RECORD PRONUNCIATION',
+              ),
             ),
             if (_captureMessage != null) ...[
               const SizedBox(height: 8),
@@ -155,6 +195,8 @@ class _AddWordDialogState extends State<AddWordDialog> {
                           .map((alias) => alias.trim())
                           .where((alias) => alias.isNotEmpty)
                           .toList(),
+                      'profileId': _profileId,
+                      'source': 'manual',
                     });
                   },
                   child: const Text('SAVE'),

@@ -12,7 +12,7 @@ import 'package:window_manager/window_manager.dart';
 Future<void> runDesktopBubble(int port) async {
   await windowManager.ensureInitialized();
   const options = WindowOptions(
-    size: Size(58, 24),
+    size: _BubbleChrome.idleSize,
     backgroundColor: Colors.transparent,
     skipTaskbar: true,
     titleBarStyle: TitleBarStyle.hidden,
@@ -23,8 +23,8 @@ Future<void> runDesktopBubble(int port) async {
       await windowManager.setAlwaysOnTop(true);
       await windowManager.setResizable(false);
       await windowManager.setPreventClose(true);
-      await _placeAtBottomCenter(const Size(58, 24));
-      await windowManager.setOpacity(0.58);
+      await _placeAtBottomCenter(_BubbleChrome.idleSize);
+      await windowManager.setOpacity(_BubbleChrome.idleOpacity);
       await windowManager.show();
     }),
   );
@@ -32,18 +32,45 @@ Future<void> runDesktopBubble(int port) async {
 }
 
 Future<void> _placeAtBottomCenter(Size size) async {
-  final display = await screenRetriever.getPrimaryDisplay();
-  final origin = display.visiblePosition ?? Offset.zero;
-  final visibleSize = display.visibleSize ?? display.size;
+  final bounds = await _visibleBounds();
   await windowManager.setPosition(
     Offset(
-      origin.dx + (visibleSize.width - size.width) / 2,
-      origin.dy + visibleSize.height - size.height - 16,
+      bounds.left + (bounds.width - size.width) / 2,
+      bounds.bottom - size.height - _BubbleChrome.edgeGap,
     ),
   );
 }
 
-enum _BubblePhase { idle, listening, processing, copy }
+Future<Rect> _visibleBounds() async {
+  final display = await screenRetriever.getPrimaryDisplay();
+  final origin = display.visiblePosition ?? Offset.zero;
+  final size = display.visibleSize ?? display.size;
+  return origin & size;
+}
+
+enum _BubblePhase { idle, ready, listening, processing, copyFallback }
+
+enum _DockSide { bottom, left, right }
+
+class _BubbleChrome {
+  // The idle state is intentionally just a quiet companion, not a mini UI.
+  static const idleSize = Size(50, 24);
+  static const readySize = Size(78, 30);
+  static const listeningSize = Size(110, 36);
+  static const processingSize = Size(90, 30);
+  static const copySize = Size(356, 116);
+  static const edgeGap = 16.0;
+  static const dockSnap = 44.0;
+
+  static const idleOpacity = 0.46;
+  static const readyOpacity = 1.0;
+  static const listeningOpacity = 1.0;
+  static const processingOpacity = 0.98;
+  static const copyOpacity = 0.98;
+
+  static const black = Color(0xFF050505);
+  static const coral = Color(0xFFFF6C4C);
+}
 
 class _DesktopBubbleApp extends StatelessWidget {
   const _DesktopBubbleApp({required this.port});
@@ -54,6 +81,10 @@ class _DesktopBubbleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: _BubbleChrome.coral),
+        useMaterial3: true,
+      ),
       home: _DesktopBubble(port: port),
     );
   }
@@ -69,31 +100,34 @@ class _DesktopBubble extends StatefulWidget {
 }
 
 class _DesktopBubbleState extends State<_DesktopBubble>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _motion;
   late final AnimationController _copyCountdown;
   _BubblePhase _phase = _BubblePhase.idle;
+  _DockSide _dockSide = _DockSide.bottom;
   String? _copyText;
   Socket? _socket;
-  bool _hovering = false;
+  Timer? _frameDebounce;
+  int _frameToken = 0;
 
   @override
   void initState() {
     super.initState();
     _motion = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1450),
+      duration: const Duration(milliseconds: 1180),
     )..repeat();
     _copyCountdown =
         AnimationController(vsync: this, duration: const Duration(seconds: 6))
           ..addStatusListener((status) {
-            if (status == AnimationStatus.completed) unawaited(_showIdle());
+            if (status == AnimationStatus.completed) _showIdle();
           });
     unawaited(_registerCommands());
   }
 
   @override
   void dispose() {
+    _frameDebounce?.cancel();
     _motion.dispose();
     _copyCountdown.dispose();
     _socket?.destroy();
@@ -115,28 +149,22 @@ class _DesktopBubbleState extends State<_DesktopBubble>
           switch (data['method'] as String?) {
             case 'state':
               final value = data['value'] as String? ?? 'idle';
-              unawaited(
-                _setPhase(switch (value) {
-                  'listening' => _BubblePhase.listening,
-                  'processing' => _BubblePhase.processing,
-                  _ => _BubblePhase.idle,
-                }),
-              );
+              _setPhase(switch (value) {
+                'listening' => _BubblePhase.listening,
+                'processing' => _BubblePhase.processing,
+                _ => _BubblePhase.idle,
+              });
             case 'copy':
               final text = data['text'] as String?;
-              if (text != null && text.trim().isNotEmpty) {
-                unawaited(_showCopy(text));
-              }
+              if (text != null && text.trim().isNotEmpty) _showCopy(text);
             case 'hide':
               unawaited(windowManager.hide());
             case 'show':
-              unawaited(_showIdle());
+              _showIdle();
             case 'position':
               final x = (data['x'] as num?)?.toDouble();
               final y = (data['y'] as num?)?.toDouble();
-              if (x != null && y != null) {
-                unawaited(windowManager.setPosition(Offset(x, y)));
-              }
+              if (x != null && y != null) unawaited(_restorePosition(x, y));
           }
         });
     _sendToMain('bubble_ready');
@@ -146,106 +174,263 @@ class _DesktopBubbleState extends State<_DesktopBubble>
     _socket?.write('${jsonEncode({'method': method, ...?arguments})}\n');
   }
 
-  Future<void> _setPhase(_BubblePhase phase) async {
+  void _setPhase(_BubblePhase phase) {
     if (!mounted) return;
     _copyCountdown.stop();
     setState(() {
       _phase = phase;
       _copyText = null;
     });
-    await _applyFrame();
+    _scheduleFrame();
   }
 
-  Future<void> _showCopy(String text) async {
+  void _showCopy(String text) {
     if (!mounted) return;
     setState(() {
-      _phase = _BubblePhase.copy;
+      _phase = _BubblePhase.copyFallback;
+      _dockSide = _DockSide.bottom;
       _copyText = text;
     });
-    await _applyFrame();
+    _scheduleFrame();
+    unawaited(_placeAtBottomCenter(_BubbleChrome.copySize));
     _copyCountdown.forward(from: 0);
   }
 
-  Future<void> _showIdle() => _setPhase(_BubblePhase.idle);
+  void _showIdle() => _setPhase(_BubblePhase.idle);
+
+  void _setHovering(bool hovering) {
+    if (_phase != _BubblePhase.idle && _phase != _BubblePhase.ready) return;
+    setState(() {
+      _phase = hovering ? _BubblePhase.ready : _BubblePhase.idle;
+    });
+    _scheduleFrame();
+  }
+
+  void _scheduleFrame() {
+    _frameDebounce?.cancel();
+    _frameDebounce = Timer(
+      const Duration(milliseconds: 12),
+      () => unawaited(_applyFrame()),
+    );
+  }
 
   Future<void> _applyFrame() async {
-    final size = switch (_phase) {
-      _BubblePhase.idle => const Size(58, 24),
-      _BubblePhase.listening => const Size(58, 24),
-      _BubblePhase.processing => const Size(58, 24),
-      _BubblePhase.copy => const Size(304, 118),
-    };
+    final token = ++_frameToken;
+    final targetSize = _orientedSize(_targetBaseSize);
     final oldSize = await windowManager.getSize();
     final oldPosition = await windowManager.getPosition();
-    await windowManager.setSize(size);
-    await windowManager.setPosition(
-      Offset(
-        oldPosition.dx + (oldSize.width - size.width) / 2,
-        oldPosition.dy + oldSize.height - size.height,
-      ),
+    final targetPosition = await _anchoredPosition(
+      oldPosition,
+      oldSize,
+      targetSize,
     );
-    await _applyOpacity();
+
+    await windowManager.setOpacity(_targetOpacity);
+    if (!_shouldAnimate(oldSize, targetSize)) {
+      await windowManager.setSize(targetSize);
+      await windowManager.setPosition(targetPosition);
+      await windowManager.show();
+      return;
+    }
+
+    const frames = 7;
+    for (var frame = 1; frame <= frames; frame++) {
+      if (token != _frameToken) return;
+      final t = Curves.easeOutCubic.transform(frame / frames);
+      final size = Size(
+        _lerp(oldSize.width, targetSize.width, t),
+        _lerp(oldSize.height, targetSize.height, t),
+      );
+      await windowManager.setSize(size);
+      await windowManager.setPosition(
+        Offset(
+          _lerp(oldPosition.dx, targetPosition.dx, t),
+          _lerp(oldPosition.dy, targetPosition.dy, t),
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 14));
+    }
     await windowManager.show();
   }
 
+  bool _shouldAnimate(Size oldSize, Size targetSize) {
+    final delta =
+        (oldSize.width - targetSize.width).abs() +
+        (oldSize.height - targetSize.height).abs();
+    return delta > 3;
+  }
+
+  Future<Offset> _anchoredPosition(
+    Offset oldPosition,
+    Size oldSize,
+    Size targetSize,
+  ) async {
+    final raw = switch (_dockSide) {
+      _DockSide.bottom => Offset(
+        oldPosition.dx + (oldSize.width - targetSize.width) / 2,
+        oldPosition.dy + oldSize.height - targetSize.height,
+      ),
+      _DockSide.left => Offset(
+        oldPosition.dx,
+        oldPosition.dy + (oldSize.height - targetSize.height) / 2,
+      ),
+      _DockSide.right => Offset(
+        oldPosition.dx + oldSize.width - targetSize.width,
+        oldPosition.dy + (oldSize.height - targetSize.height) / 2,
+      ),
+    };
+    return _clampPosition(raw, targetSize);
+  }
+
+  Future<Offset> _clampPosition(Offset position, Size size) async {
+    final bounds = await _visibleBounds();
+    final x = position.dx.clamp(bounds.left, bounds.right - size.width);
+    final y = position.dy.clamp(bounds.top, bounds.bottom - size.height);
+    return Offset(x.toDouble(), y.toDouble());
+  }
+
+  Future<void> _restorePosition(double x, double y) async {
+    final size = await windowManager.getSize();
+    final position = await _clampPosition(Offset(x, y), size);
+    _dockSide = await _nearestDock(position, size);
+    await windowManager.setPosition(position);
+    _scheduleFrame();
+  }
+
+  Future<void> _snapAndRememberPosition() async {
+    final size = await windowManager.getSize();
+    final position = await windowManager.getPosition();
+    final bounds = await _visibleBounds();
+    final dock = await _nearestDock(position, size);
+    final snapped = switch (dock) {
+      _DockSide.left => Offset(
+        bounds.left + _BubbleChrome.edgeGap,
+        position.dy
+            .clamp(
+              bounds.top + _BubbleChrome.edgeGap,
+              bounds.bottom - size.height - _BubbleChrome.edgeGap,
+            )
+            .toDouble(),
+      ),
+      _DockSide.right => Offset(
+        bounds.right - size.width - _BubbleChrome.edgeGap,
+        position.dy
+            .clamp(
+              bounds.top + _BubbleChrome.edgeGap,
+              bounds.bottom - size.height - _BubbleChrome.edgeGap,
+            )
+            .toDouble(),
+      ),
+      _DockSide.bottom => Offset(
+        position.dx
+            .clamp(
+              bounds.left + _BubbleChrome.edgeGap,
+              bounds.right - size.width - _BubbleChrome.edgeGap,
+            )
+            .toDouble(),
+        bounds.bottom - size.height - _BubbleChrome.edgeGap,
+      ),
+    };
+    setState(() => _dockSide = dock);
+    await windowManager.setPosition(snapped);
+    _sendToMain('bubble_moved', {'x': snapped.dx, 'y': snapped.dy});
+    _scheduleFrame();
+  }
+
+  Future<_DockSide> _nearestDock(Offset position, Size size) async {
+    final bounds = await _visibleBounds();
+    final leftDistance = (position.dx - bounds.left).abs();
+    final rightDistance = (bounds.right - position.dx - size.width).abs();
+    final bottomDistance = (bounds.bottom - position.dy - size.height).abs();
+
+    if (leftDistance <= _BubbleChrome.dockSnap &&
+        leftDistance <= rightDistance) {
+      return _DockSide.left;
+    }
+    if (rightDistance <= _BubbleChrome.dockSnap) return _DockSide.right;
+    if (bottomDistance <= _BubbleChrome.dockSnap * 1.4) {
+      return _DockSide.bottom;
+    }
+    return _DockSide.bottom;
+  }
+
   Future<void> _toggleDictation() async {
-    if (_phase != _BubblePhase.processing && _phase != _BubblePhase.copy) {
+    if (_phase != _BubblePhase.processing &&
+        _phase != _BubblePhase.copyFallback) {
       _sendToMain('toggle_dictation');
     }
   }
 
   Future<void> _openSettings() async => _sendToMain('show_settings');
 
-  Future<void> _rememberPosition() async {
-    final position = await windowManager.getPosition();
-    _sendToMain('bubble_moved', {'x': position.dx, 'y': position.dy});
-  }
-
-  Future<void> _applyOpacity() => windowManager.setOpacity(switch (_phase) {
-    _BubblePhase.idle => _hovering ? 0.86 : 0.58,
-    _BubblePhase.listening => 0.98,
-    _BubblePhase.processing => 0.88,
-    _BubblePhase.copy => 0.98,
-  });
-
   Future<void> _copyAndDismiss() async {
     final text = _copyText;
     if (text == null) return;
     await Clipboard.setData(ClipboardData(text: text));
-    await _showIdle();
+    _showIdle();
   }
+
+  Size get _targetBaseSize => switch (_phase) {
+    _BubblePhase.idle => _BubbleChrome.idleSize,
+    _BubblePhase.ready => _BubbleChrome.readySize,
+    _BubblePhase.listening => _BubbleChrome.listeningSize,
+    _BubblePhase.processing => _BubbleChrome.processingSize,
+    _BubblePhase.copyFallback => _BubbleChrome.copySize,
+  };
+
+  double get _targetOpacity => switch (_phase) {
+    _BubblePhase.idle => _BubbleChrome.idleOpacity,
+    _BubblePhase.ready => _BubbleChrome.readyOpacity,
+    _BubblePhase.listening => _BubbleChrome.listeningOpacity,
+    _BubblePhase.processing => _BubbleChrome.processingOpacity,
+    _BubblePhase.copyFallback => _BubbleChrome.copyOpacity,
+  };
+
+  Size _orientedSize(Size size) {
+    if (_phase == _BubblePhase.copyFallback || _dockSide == _DockSide.bottom) {
+      return size;
+    }
+    return Size(size.height, size.width);
+  }
+
+  double _lerp(double a, double b, double t) => a + (b - a) * t;
+
+  bool get _isSideDocked =>
+      _dockSide == _DockSide.left || _dockSide == _DockSide.right;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: MouseRegion(
-        onEnter: (_) {
-          _hovering = true;
-          unawaited(_applyOpacity());
-        },
-        onExit: (_) {
-          _hovering = false;
-          unawaited(_applyOpacity());
-        },
+        onEnter: (_) => _setHovering(true),
+        onExit: (_) => _setHovering(false),
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: _toggleDictation,
           onSecondaryTap: _openSettings,
           onPanStart: (_) => unawaited(windowManager.startDragging()),
-          onPanEnd: (_) => unawaited(_rememberPosition()),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: const Color(0xFF050505),
-              borderRadius: BorderRadius.circular(
-                _phase == _BubblePhase.copy ? 14 : 999,
-              ),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-            ),
-            child: switch (_phase) {
-              _BubblePhase.idle => _idle(),
-              _BubblePhase.listening => _listening(),
-              _BubblePhase.processing => _processing(),
-              _BubblePhase.copy => _copyCard(),
+          onPanEnd: (_) => unawaited(_snapAndRememberPosition()),
+          child: AnimatedBuilder(
+            animation: _motion,
+            builder: (context, _) {
+              final child = DecoratedBox(
+                decoration: _decoration,
+                child: switch (_phase) {
+                  _BubblePhase.idle => _idle(),
+                  _BubblePhase.ready => _ready(),
+                  _BubblePhase.listening => _listening(),
+                  _BubblePhase.processing => _processing(),
+                  _BubblePhase.copyFallback => _copyCard(),
+                },
+              );
+              if (!_isSideDocked || _phase == _BubblePhase.copyFallback) {
+                return child;
+              }
+              return RotatedBox(
+                quarterTurns: _dockSide == _DockSide.left ? 3 : 1,
+                child: child,
+              );
             },
           ),
         ),
@@ -253,55 +438,109 @@ class _DesktopBubbleState extends State<_DesktopBubble>
     );
   }
 
+  BoxDecoration get _decoration {
+    final copy = _phase == _BubblePhase.copyFallback;
+    return BoxDecoration(
+      color: _BubbleChrome.black,
+      borderRadius: BorderRadius.circular(copy ? 16 : 999),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: copy ? 0.34 : 0.14),
+          blurRadius: copy ? 28 : 10,
+          offset: Offset(0, copy ? 12 : 4),
+        ),
+      ],
+    );
+  }
+
   Widget _idle() {
     return Center(
-      child: SizedBox(
-        width: 26,
-        height: 9,
-        child: AnimatedBuilder(
-          animation: _motion,
-          builder: (context, _) => CustomPaint(
-            painter: WaveformPainter(
-              amplitudes: _amplitudes(11, 0.16),
-              color: Colors.white,
-            ),
-          ),
-        ),
+      child: _wave(
+        width: 25,
+        height: 8,
+        count: 7,
+        range: 0.05,
+        opacity: 0.72 + _pulse(0.08),
+        mode: _WaveMode.idle,
       ),
+    );
+  }
+
+  Widget _ready() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.mic_none_rounded, color: Colors.white, size: 14),
+        const SizedBox(width: 7),
+        _wave(
+          width: 26,
+          height: 10,
+          count: 7,
+          range: 0.16,
+          opacity: 0.92,
+          mode: _WaveMode.idle,
+        ),
+      ],
     );
   }
 
   Widget _listening() {
-    return Center(
-      child: AnimatedBuilder(
-        animation: _motion,
-        builder: (context, _) => SizedBox(
-          width: 40,
-          height: 13,
-          child: CustomPaint(
-            painter: WaveformPainter(
-              amplitudes: _amplitudes(17, 0.72),
-              color: Colors.white,
-            ),
-          ),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        _wave(
+          width: 70,
+          height: 18,
+          count: 17,
+          range: 0.84,
+          mode: _WaveMode.speech,
         ),
-      ),
+      ],
     );
   }
 
   Widget _processing() {
-    return Center(
-      child: AnimatedBuilder(
-        animation: _motion,
-        builder: (context, _) => SizedBox(
-          width: 42,
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        _wave(
+          width: 50,
           height: 8,
+          count: 13,
+          range: 0.04,
+          opacity: 0.72,
+          mode: _WaveMode.processing,
+        ),
+        Positioned(
+          right: 12,
           child: CustomPaint(
-            painter: WaveformPainter(
-              amplitudes: _amplitudes(13, 0.10),
-              color: Colors.white70,
+            size: const Size.square(7),
+            painter: _ProcessingDotPainter(
+              progress: _motion.value,
+              color: Colors.white,
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _wave({
+    required double width,
+    required double height,
+    required int count,
+    required double range,
+    required _WaveMode mode,
+    double opacity = 1,
+  }) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: CustomPaint(
+        painter: WaveformPainter(
+          amplitudes: _amplitudes(count, range, mode),
+          color: Colors.white.withValues(alpha: opacity),
         ),
       ),
     );
@@ -309,22 +548,26 @@ class _DesktopBubbleState extends State<_DesktopBubble>
 
   Widget _copyCard() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+      padding: const EdgeInsets.fromLTRB(16, 12, 12, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               const Icon(
-                Icons.graphic_eq_rounded,
+                Icons.mic_none_rounded,
                 color: Colors.white70,
-                size: 15,
+                size: 14,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 7),
               const Expanded(
                 child: Text(
-                  'Copy transcription',
-                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                  'Transcription ready',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               AnimatedBuilder(
@@ -337,7 +580,7 @@ class _DesktopBubbleState extends State<_DesktopBubble>
                     children: [
                       CircularProgressIndicator(
                         value: 1 - _copyCountdown.value,
-                        color: Colors.white54,
+                        color: Colors.white60,
                         backgroundColor: Colors.white12,
                         strokeWidth: 2,
                       ),
@@ -356,7 +599,7 @@ class _DesktopBubbleState extends State<_DesktopBubble>
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 7),
           Expanded(
             child: Text(
               _copyText ?? '',
@@ -364,8 +607,9 @@ class _DesktopBubbleState extends State<_DesktopBubble>
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 13,
-                height: 1.25,
+                fontSize: 13.5,
+                height: 1.3,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -377,10 +621,16 @@ class _DesktopBubbleState extends State<_DesktopBubble>
                 foregroundColor: const Color(0xFF11110F),
                 backgroundColor: Colors.white,
                 minimumSize: const Size(0, 28),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               icon: const Icon(Icons.copy_rounded, size: 13),
-              label: const Text('Copy', style: TextStyle(fontSize: 11)),
+              label: const Text(
+                'Copy',
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+              ),
             ),
           ),
         ],
@@ -388,10 +638,56 @@ class _DesktopBubbleState extends State<_DesktopBubble>
     );
   }
 
-  List<double> _amplitudes(int count, double range) => List<double>.generate(
-    count,
-    (index) =>
-        0.18 +
-        math.sin(_motion.value * math.pi * 2 + index * 0.62).abs() * range,
-  );
+  double _pulse(double amount) =>
+      math.sin(_motion.value * math.pi * 2).abs() * amount;
+
+  List<double> _amplitudes(int count, double range, _WaveMode mode) {
+    final t = _motion.value * math.pi * 2;
+    return List<double>.generate(count, (index) {
+      final centerBias = 1 - ((index - (count - 1) / 2).abs() / count);
+      final organic =
+          (math.sin(t * 0.9 + index * 0.52) + 1) * 0.28 +
+          (math.sin(t * 1.6 + index * 0.23) + 1) * 0.16;
+      return switch (mode) {
+        _WaveMode.idle => 0.18 + math.sin(t + index * 0.42).abs() * range,
+        _WaveMode.speech => 0.14 + organic * range * (0.7 + centerBias * 0.56),
+        _WaveMode.processing =>
+          0.18 +
+              math.sin(t * 0.8 + index * 0.35).abs() * range +
+              centerBias * 0.06,
+      };
+    });
+  }
+}
+
+enum _WaveMode { idle, speech, processing }
+
+class _ProcessingDotPainter extends CustomPainter {
+  const _ProcessingDotPainter({required this.progress, required this.color});
+
+  final double progress;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final pulse = math.sin(progress * math.pi * 2).abs();
+    final center = Offset(size.width / 2, size.height / 2);
+    canvas.drawCircle(
+      center,
+      2 + pulse * 1.2,
+      Paint()..color = color.withValues(alpha: 0.42 + pulse * 0.36),
+    );
+    canvas.drawCircle(
+      center,
+      size.width / 2 - 0.5,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = color.withValues(alpha: 0.16 + pulse * 0.2),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ProcessingDotPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
 }

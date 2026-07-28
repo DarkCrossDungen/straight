@@ -469,14 +469,61 @@ void main() {
     test('replaces pronunciation aliases with the exact spelling', () {
       final dictionary = [
         {
-          'word': 'Khrisshy',
-          'replacement': 'Khrisshy',
-          'aliases': ['krishi', 'crushy'],
+          'word': 'MoonshineEngine',
+          'replacement': 'MoonshineEngine',
+          'aliases': ['moon shine engine', 'moonshine engine'],
           'enabled': true,
         },
       ];
-      expect(replacer.process('hello krishi', dictionary), 'hello Khrisshy');
-      expect(replacer.process('hello crushy', dictionary), 'hello Khrisshy');
+      expect(
+        replacer.process('hello moon shine engine', dictionary),
+        'hello MoonshineEngine',
+      );
+      expect(
+        replacer.process('hello moonshine engine', dictionary),
+        'hello MoonshineEngine',
+      );
+    });
+
+    test('normalizes technical separators from imported folders', () {
+      final dictionary = [
+        {
+          'word': 'moonshine_wrapper.dll',
+          'replacement': 'moonshine_wrapper.dll',
+          'aliases': ['moonshine wrapper dll'],
+          'source': 'folder',
+          'enabled': true,
+        },
+      ];
+      expect(
+        replacer.process('update moonshine wrapper dll', dictionary),
+        'update moonshine_wrapper.dll',
+      );
+    });
+
+    test('only applies fuzzy matching to long imported technical terms', () {
+      final dictionary = [
+        {
+          'word': 'moonshine_wrapper.dll',
+          'replacement': 'moonshine_wrapper.dll',
+          'source': 'folder',
+          'enabled': true,
+        },
+        {
+          'word': 'readme',
+          'replacement': 'README',
+          'source': 'folder',
+          'enabled': true,
+        },
+      ];
+      expect(
+        replacer.process('update moonshine wrapper dli', dictionary),
+        'update moonshine_wrapper.dll',
+      );
+      expect(
+        replacer.process('please read me later', dictionary),
+        'please read me later',
+      );
     });
 
     test('empty dictionary returns original', () {

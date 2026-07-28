@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:straight/core/storage/dictionary_store.dart';
 import 'package:straight/core/app_context.dart';
 import 'package:straight/features/dictionary/add_word_dialog.dart';
+import 'package:straight/core/storage/work_profile_store.dart';
 import 'package:straight/shared/widgets/app_surface.dart';
 import 'package:straight/shared/widgets/empty_state.dart';
 import 'package:straight/shared/widgets/search_field.dart';
@@ -17,6 +18,8 @@ class _DictionaryPageState extends State<DictionaryPage> {
   List<Map> _entries = [];
   List<Map> _filtered = [];
   final _searchController = TextEditingController();
+  List<Map> _profiles = [];
+  String _profileFilter = 'all';
 
   @override
   void initState() {
@@ -33,19 +36,43 @@ class _DictionaryPageState extends State<DictionaryPage> {
   void _load() {
     setState(() {
       _entries = DictionaryStore.getAll();
-      _filtered = _searchController.text.isEmpty
+      _profiles = WorkProfileStore.getAll();
+      if (_profileFilter == 'global') {
+        _entries = _entries
+            .where((entry) => entry['profileId'] == null)
+            .toList();
+      } else if (_profileFilter != 'all') {
+        _entries = _entries
+            .where((entry) => entry['profileId'] == _profileFilter)
+            .toList();
+      }
+      final query = _searchController.text.trim().toLowerCase();
+      _filtered = query.isEmpty
           ? _entries
-          : DictionaryStore.search(_searchController.text);
+          : _entries.where((entry) {
+              final word = entry['word']?.toString().toLowerCase() ?? '';
+              final replacement =
+                  entry['replacement']?.toString().toLowerCase() ?? '';
+              return word.contains(query) || replacement.contains(query);
+            }).toList();
     });
   }
 
   Future<void> _addWord() async {
-    final result = await AddWordDialog.show(context);
+    final result = await AddWordDialog.show(
+      context,
+      profiles: _profiles,
+      initialProfileId: _profileFilter == 'all' || _profileFilter == 'global'
+          ? null
+          : _profileFilter,
+    );
     if (result == null) return;
     await DictionaryStore.addWord(
       result['word'] as String,
       result['replacement'] as String,
       aliases: (result['aliases'] as List).cast<String>(),
+      profileId: result['profileId'] as String?,
+      source: result['source'] as String? ?? 'manual',
     );
     await coordinator.refreshDictionary();
     _load();
@@ -70,6 +97,14 @@ class _DictionaryPageState extends State<DictionaryPage> {
       appBar: AppBar(
         title: const Text('DICTIONARY'),
         actions: [
+          IconButton(
+            tooltip: 'Work profiles',
+            onPressed: () async {
+              await Navigator.pushNamed(context, '/work-profiles');
+              _load();
+            },
+            icon: const Icon(Icons.workspaces_outline),
+          ),
           ElevatedButton.icon(
             onPressed: _addWord,
             icon: const Icon(Icons.add, size: 18),
@@ -85,6 +120,27 @@ class _DictionaryPageState extends State<DictionaryPage> {
             Row(
               children: [
                 AppBadge(label: '${_entries.length} words'),
+                const SizedBox(width: 10),
+                DropdownButton<String>(
+                  value: _profileFilter,
+                  items: [
+                    const DropdownMenuItem(value: 'all', child: Text('All')),
+                    const DropdownMenuItem(
+                      value: 'global',
+                      child: Text('Global'),
+                    ),
+                    for (final profile in _profiles)
+                      DropdownMenuItem(
+                        value: profile['id'].toString(),
+                        child: Text(profile['name'].toString()),
+                      ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() => _profileFilter = value);
+                    _load();
+                  },
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: SearchField(
@@ -131,6 +187,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
         children: const [
           Expanded(flex: 2, child: AppSectionLabel('Word')),
           Expanded(flex: 3, child: AppSectionLabel('Replacement')),
+          SizedBox(width: 90, child: AppSectionLabel('Source')),
           SizedBox(width: 104, child: AppSectionLabel('Active')),
         ],
       ),
@@ -175,6 +232,17 @@ class _DictionaryPageState extends State<DictionaryPage> {
                   alpha: enabled ? 0.78 : 0.42,
                 ),
               ),
+            ),
+          ),
+          SizedBox(
+            width: 90,
+            child: Text(
+              entry['profileId'] == null
+                  ? 'Global'
+                  : entry['source']?.toString() ?? 'Manual',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
           SizedBox(

@@ -10,6 +10,8 @@ import 'llm/qwen_engine.dart';
 import 'storage/history_store.dart';
 import 'storage/settings_store.dart';
 import 'storage/dictionary_store.dart';
+import 'storage/work_profile_store.dart';
+import 'windows/active_app_service.dart';
 
 enum DictationState { idle, listening, processing }
 
@@ -19,6 +21,7 @@ class StraightCoordinator extends ChangeNotifier {
   final TextInjector textInjector = TextInjector();
   final DictationPipeline dictationPipeline = DictationPipeline();
   final QwenEngine _qwenEngine = QwenEngine();
+  final ActiveAppService _activeAppService = ActiveAppService();
 
   DictationState _state = DictationState.idle;
   DictationState get state => _state;
@@ -41,6 +44,8 @@ class StraightCoordinator extends ChangeNotifier {
   Timer? _pendingTapRelease;
   Timer? _hotkeyReleaseWatcher;
   bool _latchedDictation = false;
+  String? _lastActiveApp;
+  String? get lastActiveApp => _lastActiveApp;
 
   void _setState(DictationState s) {
     _state = s;
@@ -59,7 +64,6 @@ class StraightCoordinator extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    await SettingsStore.migrateDefaultSttModelToWhisperSmall();
     await SettingsStore.migrateDefaultBehaviorToPushToTalk();
     unawaited(sttPipeline.prepareMicrophone());
 
@@ -139,7 +143,9 @@ class StraightCoordinator extends ChangeNotifier {
 
   void _watchForHotkeyRelease() {
     _hotkeyReleaseWatcher?.cancel();
-    _hotkeyReleaseWatcher = Timer.periodic(const Duration(milliseconds: 8), (_) {
+    _hotkeyReleaseWatcher = Timer.periodic(const Duration(milliseconds: 8), (
+      _,
+    ) {
       if (!hotkeyService.isCurrentHotkeyHeld()) {
         _handleHotkeyRelease();
       }
@@ -227,7 +233,8 @@ class StraightCoordinator extends ChangeNotifier {
 
   void cancelPronunciationCapture() {
     if (_pronunciationCapture != null &&
-        (_state == DictationState.listening || _state == DictationState.processing)) {
+        (_state == DictationState.listening ||
+            _state == DictationState.processing)) {
       _discardNextTranscription = true;
     }
     _finishPronunciationCapture(null);
@@ -276,6 +283,19 @@ class StraightCoordinator extends ChangeNotifier {
 
     _setState(DictationState.processing);
 
+    // The app executable is only used to select a locally stored vocabulary
+    // profile. Straight never reads window contents or monitors typing.
+    final activeApp = _activeAppService.foregroundExecutable();
+    if (activeApp != null && activeApp.toLowerCase() != 'straight.exe') {
+      _lastActiveApp = activeApp;
+    }
+    final profile = SettingsStore.getAutomaticProfileSwitching()
+        ? WorkProfileStore.findForExecutable(_lastActiveApp)
+        : null;
+    dictationPipeline.setDictionary(
+      DictionaryStore.getForProfile(profile?['id']?.toString()),
+    );
+
     final pauseDuration = sttPipeline.lastPauseDurationMs;
     final result = _cleanupModelReady
         ? await dictationPipeline.processWithLlm(
@@ -293,7 +313,8 @@ class StraightCoordinator extends ChangeNotifier {
       'text': rawText,
       'appliedText': result.text,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
-      'app': '',
+      'app': _lastActiveApp ?? '',
+      'profileId': profile?['id'] ?? '',
     });
 
     _setStatus(inserted ? 'Text inserted' : 'Copy transcription');
@@ -398,7 +419,8 @@ class StraightCoordinator extends ChangeNotifier {
     _setStatus('Loading speech model...');
 
     final modelPath = await _resolveSpeechModelPath(_selectedSttModel);
-    final modelExists = _selectedSttModel == 'qwen3-asr-0.6b' ||
+    final modelExists =
+        _selectedSttModel == 'qwen3-asr-0.6b' ||
             _selectedSttModel == 'moonshine-small-streaming-en'
         ? await Directory(modelPath).exists()
         : await File(modelPath).exists();

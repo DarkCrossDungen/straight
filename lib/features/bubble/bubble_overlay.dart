@@ -744,7 +744,11 @@ class _BubbleOverlayState extends State<BubbleOverlay>
       children: [
         _voiceNote(Icons.lock_outline_rounded, 'On this device', scheme),
         _voiceNote(Icons.auto_fix_high_rounded, 'Clean as you speak', scheme),
-        _voiceNote(Icons.graphic_eq_rounded, 'Whisper ready', scheme),
+        _voiceNote(
+          Icons.graphic_eq_rounded,
+          '${_friendlyModel(coordinator.selectedSttModel)} ready',
+          scheme,
+        ),
       ],
     );
   }
@@ -922,6 +926,7 @@ class _BubbleOverlayState extends State<BubbleOverlay>
   String _friendlyModel(String id) => switch (id) {
     'whisper-small' => 'Whisper Small',
     'whisper-medium' => 'Whisper Medium',
+    'moonshine-small-streaming-en' => 'Moonshine Small Streaming',
     'qwen3-asr-0.6b' => 'Qwen3-ASR 0.6B',
     _ => 'Whisper Base',
   };
