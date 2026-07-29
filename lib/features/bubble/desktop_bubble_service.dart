@@ -18,6 +18,8 @@ class DesktopBubbleService {
   Socket? _bubbleSocket;
   Timer? _startupDelay;
   bool _bubbleReady = false;
+  DictationState? _lastSentState;
+  double _lastSentSpeechLevel = -1;
 
   Future<void> initialize({
     required StraightCoordinator coordinator,
@@ -73,6 +75,8 @@ class DesktopBubbleService {
     _bubbleSocket?.destroy();
     _bubbleSocket = socket;
     _bubbleReady = false;
+    _lastSentState = null;
+    _lastSentSpeechLevel = -1;
     socket
         .cast<List<int>>()
         .transform(utf8.decoder)
@@ -83,7 +87,6 @@ class DesktopBubbleService {
             switch (data['method'] as String?) {
               case 'bubble_ready':
                 _bubbleReady = true;
-                _sendSavedPosition();
                 unawaited(_syncDictationState());
               case 'show_main':
                 unawaited(_showMainWindow());
@@ -91,12 +94,6 @@ class DesktopBubbleService {
                 _coordinator?.toggleDictation();
               case 'show_settings':
                 unawaited(_showSettings());
-              case 'bubble_moved':
-                final x = (data['x'] as num?)?.toDouble();
-                final y = (data['y'] as num?)?.toDouble();
-                if (x != null && y != null) {
-                  unawaited(SettingsStore.setDesktopBubblePosition(x, y));
-                }
             }
           },
           onDone: () {
@@ -116,7 +113,15 @@ class DesktopBubbleService {
     if (!_bubbleReady || !SettingsStore.getDesktopBubbleEnabled()) return;
     final coordinator = _coordinator;
     if (coordinator == null) return;
-    _send('state', {'value': coordinator.state.name});
+    if (_lastSentState != coordinator.state) {
+      _lastSentState = coordinator.state;
+      _send('state', {'value': coordinator.state.name});
+    }
+    final level = coordinator.speechLevel;
+    if ((level - _lastSentSpeechLevel).abs() >= 0.025 || level == 0) {
+      _lastSentSpeechLevel = level;
+      _send('level', {'value': level});
+    }
     final fallback = coordinator.takeCopyFallbackText();
     if (fallback != null) _send('copy', {'text': fallback});
   }
@@ -129,15 +134,6 @@ class DesktopBubbleService {
   Future<void> _showSettings() async {
     await _showMainWindow();
     appNavigatorKey.currentState?.pushNamed('/settings');
-  }
-
-  void _sendSavedPosition() {
-    final position = SettingsStore.getDesktopBubblePosition();
-    final x = position?['x'];
-    final y = position?['y'];
-    if (x is num && y is num) {
-      _send('position', {'x': x.toDouble(), 'y': y.toDouble()});
-    }
   }
 
   void _send(String method, [Map<String, dynamic>? arguments]) {

@@ -7,6 +7,7 @@ import 'backtrack_handler.dart';
 import 'command_parser.dart';
 import 'style_cleaner.dart';
 import 'word_replacer.dart';
+import 'structure_formatter.dart';
 import '../llm/llm_engine.dart';
 
 class DictationResult {
@@ -26,6 +27,7 @@ class DictationPipeline {
   final CommandParser _commandParser = CommandParser();
   final StyleCleaner _styleCleaner = StyleCleaner();
   final WordReplacer _wordReplacer = WordReplacer();
+  final StructureFormatter _structureFormatter = StructureFormatter();
   LlmEngine? _llm;
   List<Map> _dictionary = [];
 
@@ -53,6 +55,7 @@ class DictationPipeline {
     text = _punctuator.process(text, pauseDurationMs: pauseDurationMs);
     text = _capitalizer.process(text);
     text = _styleCleaner.process(text);
+    text = _structureFormatter.process(text);
 
     return DictationResult(
       text: text.trim(),
@@ -60,7 +63,10 @@ class DictationPipeline {
     );
   }
 
-  Future<DictationResult> processWithLlm(String rawText, {int pauseDurationMs = 0}) async {
+  Future<DictationResult> processWithLlm(
+    String rawText, {
+    int pauseDurationMs = 0,
+  }) async {
     var result = process(rawText, pauseDurationMs: pauseDurationMs);
     if (_llm == null || result.text.isEmpty) return result;
 
@@ -69,6 +75,8 @@ class DictationPipeline {
       'Return only the final cleaned text. Do not explain anything.\n'
       'Preserve the speaker\'s meaning, names, technical terms, line breaks, and punctuation intent.\n'
       'Fix obvious speech-recognition mistakes, grammar, repeated words, spacing, and awkward phrasing.\n'
+      'Use short paragraphs when the speaker clearly changes topic. Preserve a blank line between paragraphs.\n'
+      'Turn clearly enumerated items, steps, or recommendations into concise bullet points. Do not turn ordinary prose into a list.\n'
       'Do not add new facts. Do not make the text longer unless needed for grammar.\n\n'
       'Dictated text:\n${result.text}\n\n'
       'Final cleaned text:',

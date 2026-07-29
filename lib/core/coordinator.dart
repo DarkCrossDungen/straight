@@ -12,6 +12,7 @@ import 'storage/settings_store.dart';
 import 'storage/dictionary_store.dart';
 import 'storage/work_profile_store.dart';
 import 'windows/active_app_service.dart';
+import 'windows/media_control_service.dart';
 
 enum DictationState { idle, listening, processing }
 
@@ -22,6 +23,7 @@ class StraightCoordinator extends ChangeNotifier {
   final DictationPipeline dictationPipeline = DictationPipeline();
   final QwenEngine _qwenEngine = QwenEngine();
   final ActiveAppService _activeAppService = ActiveAppService();
+  final MediaControlService _mediaControlService = MediaControlService();
 
   DictationState _state = DictationState.idle;
   DictationState get state => _state;
@@ -38,17 +40,17 @@ class StraightCoordinator extends ChangeNotifier {
   bool get isCapturingPronunciation => _pronunciationCapture != null;
   bool _discardNextTranscription = false;
   bool _hotkeyRegistered = true;
-  static const _shortTapThreshold = Duration(milliseconds: 180);
-  static const _doubleTapWindow = Duration(milliseconds: 260);
   DateTime? _hotkeyPressedAt;
-  Timer? _pendingTapRelease;
   Timer? _hotkeyReleaseWatcher;
-  bool _latchedDictation = false;
+  bool _mediaWasPaused = false;
   String? _lastActiveApp;
   String? get lastActiveApp => _lastActiveApp;
+  double _speechLevel = 0;
+  double get speechLevel => _speechLevel;
 
   void _setState(DictationState s) {
     _state = s;
+    if (s != DictationState.listening) _speechLevel = 0;
     notifyListeners();
   }
 
@@ -92,6 +94,13 @@ class StraightCoordinator extends ChangeNotifier {
     };
 
     sttPipeline.onResult = _onTranscription;
+    sttPipeline.onAudioLevel = (level) {
+      if (_state != DictationState.listening) return;
+      // Typical close-mic speech sits well below a raw RMS value of 0.05.
+      // Map that useful range into 0..1 for the companion visual only.
+      _speechLevel = ((level - 0.003) / 0.047).clamp(0.0, 1.0).toDouble();
+      notifyListeners();
+    };
     sttPipeline.onError = (e) {
       debugPrint('STT error: $e');
       final message = e.toString();
@@ -101,6 +110,7 @@ class StraightCoordinator extends ChangeNotifier {
             : 'Speech engine error',
       );
       _setState(DictationState.idle);
+      unawaited(_resumeMediaIfNeeded());
       _finishPronunciationCapture(null);
     };
 
@@ -111,25 +121,9 @@ class StraightCoordinator extends ChangeNotifier {
 
   void _onKeyDown() {
     if (!SettingsStore.getPushToTalk()) return;
-
-    if (_latchedDictation) {
-      // A latched session is stopped by one more press, not a key release.
-      if (_state == DictationState.listening) {
-        _latchedDictation = false;
-        unawaited(_stopDictation());
-      }
-      return;
-    }
-
-    if (_pendingTapRelease?.isActive == true &&
-        _state == DictationState.listening) {
-      _pendingTapRelease?.cancel();
-      _pendingTapRelease = null;
-      _latchedDictation = true;
-      _setStatus('Toggle dictation on. Press the hotkey once to stop.');
-      return;
-    }
-
+    // Ignore repeat key-down events. A push-to-talk session starts once and
+    // ends only when one of its keys is released.
+    if (_state != DictationState.idle || _hotkeyPressedAt != null) return;
     _hotkeyPressedAt = DateTime.now();
     _watchForHotkeyRelease();
     if (_state == DictationState.idle) {
@@ -155,29 +149,10 @@ class StraightCoordinator extends ChangeNotifier {
   void _handleHotkeyRelease() {
     _hotkeyReleaseWatcher?.cancel();
     _hotkeyReleaseWatcher = null;
-    if (!SettingsStore.getPushToTalk() || _latchedDictation) return;
-    if (_state != DictationState.listening) return;
-
-    final pressedAt = _hotkeyPressedAt;
+    if (!SettingsStore.getPushToTalk()) return;
     _hotkeyPressedAt = null;
-    final heldFor = pressedAt == null
-        ? Duration.zero
-        : DateTime.now().difference(pressedAt);
-
-    if (heldFor > _shortTapThreshold) {
-      unawaited(_stopDictation());
-      return;
-    }
-
-    // A very quick tap waits only long enough to tell whether a second tap is
-    // coming. Normal spoken push-to-talk releases without this delay.
-    _pendingTapRelease?.cancel();
-    _pendingTapRelease = Timer(_doubleTapWindow, () {
-      _pendingTapRelease = null;
-      if (!_latchedDictation && _state == DictationState.listening) {
-        unawaited(_stopDictation());
-      }
-    });
+    if (_state != DictationState.listening) return;
+    unawaited(_stopDictation());
   }
 
   Future<void> refreshDictionary() async {
@@ -253,6 +228,7 @@ class StraightCoordinator extends ChangeNotifier {
       _setState(DictationState.idle);
       return;
     }
+    _mediaWasPaused = await _mediaControlService.pauseIfPlaying();
     _setStatus('Listening for speech...');
     _setState(DictationState.listening);
     await sttPipeline.start();
@@ -261,9 +237,19 @@ class StraightCoordinator extends ChangeNotifier {
   Future<void> _stopDictation() async {
     _hotkeyReleaseWatcher?.cancel();
     _hotkeyReleaseWatcher = null;
-    await sttPipeline.stop();
-    _setStatus('Ready to dictate');
-    _setState(DictationState.idle);
+    try {
+      await sttPipeline.stop();
+      _setStatus('Ready to dictate');
+      _setState(DictationState.idle);
+    } finally {
+      await _resumeMediaIfNeeded();
+    }
+  }
+
+  Future<void> _resumeMediaIfNeeded() async {
+    if (!_mediaWasPaused) return;
+    _mediaWasPaused = false;
+    await _mediaControlService.resumeIfPausedByStraight();
   }
 
   void _onTranscription(String rawText) async {
@@ -513,8 +499,8 @@ class StraightCoordinator extends ChangeNotifier {
 
   @override
   void dispose() {
-    _pendingTapRelease?.cancel();
     _hotkeyReleaseWatcher?.cancel();
+    unawaited(_resumeMediaIfNeeded());
     _finishPronunciationCapture(null);
     hotkeyService.dispose();
     unawaited(sttPipeline.dispose());

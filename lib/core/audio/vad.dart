@@ -15,21 +15,25 @@ class VoiceActivityDetector {
   int _silentSamples = 0;
   int _speechSamples = 0;
   bool _isSpeaking = false;
+  double _level = 0;
 
   VoiceActivityDetector()
-      : _silenceSamples = (_silenceDurationMs * _sampleRate / 1000).ceil(),
-        _minSpeechSamples = (_minSpeechDurationMs * _sampleRate / 1000).ceil();
+    : _silenceSamples = (_silenceDurationMs * _sampleRate / 1000).ceil(),
+      _minSpeechSamples = (_minSpeechDurationMs * _sampleRate / 1000).ceil();
 
   bool get isSpeaking => _isSpeaking;
+  double get level => _level;
 
   void reset() {
     _silentSamples = 0;
     _speechSamples = 0;
     _isSpeaking = false;
+    _level = 0;
   }
 
   void processChunk(Uint8List chunk) {
     final rms = _computeRms(chunk);
+    _level = rms;
     final sampleCount = chunk.lengthInBytes ~/ 2;
     if (sampleCount == 0) return;
 

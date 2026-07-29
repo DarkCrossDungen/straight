@@ -7,7 +7,7 @@ class SettingsStore {
   static const _pushToTalkMigrationKey = 'migratedToPushToTalkDefault';
 
   static const _defaultHotkey = {
-    'alt': true,
+    'alt': false,
     'ctrl': true,
     'shift': false,
     'key': 'Space',
@@ -15,7 +15,7 @@ class SettingsStore {
 
   static const _oldReservedDefaultHotkey = {
     'alt': true,
-    'ctrl': false,
+    'ctrl': true,
     'shift': false,
     'key': 'Space',
   };

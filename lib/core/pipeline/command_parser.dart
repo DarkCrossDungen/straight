@@ -1,6 +1,7 @@
 enum DictationCommand {
   newLine,
   newParagraph,
+  bulletPoint,
   scratchLast,
   scratchAll,
   selectAll,
@@ -22,24 +23,104 @@ enum DictationCommand {
 
 class CommandParser {
   static final _commands = [
-    _CommandDef(RegExp(r'\bnew\s+line\b', caseSensitive: false), DictationCommand.newLine, '\n'),
-    _CommandDef(RegExp(r'\bnew\s+para(graph)?\b', caseSensitive: false), DictationCommand.newParagraph, '\n\n'),
-    _CommandDef(RegExp(r'\bscratch\s+that\b', caseSensitive: false), DictationCommand.scratchLast, ''),
-    _CommandDef(RegExp(r'\bscratch\s+all\b|\bdelete\s+all\b|\bclear\b', caseSensitive: false), DictationCommand.scratchAll, ''),
-    _CommandDef(RegExp(r'\bselect\s+all\b', caseSensitive: false), DictationCommand.selectAll, ''),
-    _CommandDef(RegExp(r'\bcopy\s+that\b|\bcopy\b', caseSensitive: false), DictationCommand.copy, ''),
-    _CommandDef(RegExp(r'\bpaste\s+that\b|\bpaste\b', caseSensitive: false), DictationCommand.paste, ''),
-    _CommandDef(RegExp(r'\bcap\b|\bcapitalize\b', caseSensitive: false), DictationCommand.capNext, ''),
-    _CommandDef(RegExp(r'\ball\s+caps\b', caseSensitive: false), DictationCommand.allCaps, ''),
-    _CommandDef(RegExp(r'\buncap\b|\bno\s+caps\b', caseSensitive: false), DictationCommand.uncap, ''),
-    _CommandDef(RegExp(r'\bperiod\b', caseSensitive: false), DictationCommand.period, '.'),
-    _CommandDef(RegExp(r'\bcomma\b', caseSensitive: false), DictationCommand.comma, ','),
-    _CommandDef(RegExp(r'\bquestion\s+mark\b', caseSensitive: false), DictationCommand.questionMark, '?'),
-    _CommandDef(RegExp(r'\bexclamation\s+(point|mark)\b', caseSensitive: false), DictationCommand.exclamation, '!'),
-    _CommandDef(RegExp(r'\bsemi\s+colon\b', caseSensitive: false), DictationCommand.semiColon, ';'),
-    _CommandDef(RegExp(r'\bcolon\b', caseSensitive: false), DictationCommand.colon, ':'),
-    _CommandDef(RegExp(r'\bopen\s+quote\b', caseSensitive: false), DictationCommand.openQuote, '"'),
-    _CommandDef(RegExp(r'\bclose\s+quote\b', caseSensitive: false), DictationCommand.closeQuote, '"'),
+    _CommandDef(
+      RegExp(r'\bnew\s+line\b', caseSensitive: false),
+      DictationCommand.newLine,
+      '\n',
+    ),
+    _CommandDef(
+      RegExp(r'\bnew\s+para(graph)?\b', caseSensitive: false),
+      DictationCommand.newParagraph,
+      '\n\n',
+    ),
+    _CommandDef(
+      RegExp(r'\b(?:new|next)?\s*bullet(?:\s+point)?\b', caseSensitive: false),
+      DictationCommand.bulletPoint,
+      '\n• ',
+    ),
+    _CommandDef(
+      RegExp(r'\bscratch\s+that\b', caseSensitive: false),
+      DictationCommand.scratchLast,
+      '',
+    ),
+    _CommandDef(
+      RegExp(
+        r'\bscratch\s+all\b|\bdelete\s+all\b|\bclear\b',
+        caseSensitive: false,
+      ),
+      DictationCommand.scratchAll,
+      '',
+    ),
+    _CommandDef(
+      RegExp(r'\bselect\s+all\b', caseSensitive: false),
+      DictationCommand.selectAll,
+      '',
+    ),
+    _CommandDef(
+      RegExp(r'\bcopy\s+that\b|\bcopy\b', caseSensitive: false),
+      DictationCommand.copy,
+      '',
+    ),
+    _CommandDef(
+      RegExp(r'\bpaste\s+that\b|\bpaste\b', caseSensitive: false),
+      DictationCommand.paste,
+      '',
+    ),
+    _CommandDef(
+      RegExp(r'\bcap\b|\bcapitalize\b', caseSensitive: false),
+      DictationCommand.capNext,
+      '',
+    ),
+    _CommandDef(
+      RegExp(r'\ball\s+caps\b', caseSensitive: false),
+      DictationCommand.allCaps,
+      '',
+    ),
+    _CommandDef(
+      RegExp(r'\buncap\b|\bno\s+caps\b', caseSensitive: false),
+      DictationCommand.uncap,
+      '',
+    ),
+    _CommandDef(
+      RegExp(r'\bperiod\b', caseSensitive: false),
+      DictationCommand.period,
+      '.',
+    ),
+    _CommandDef(
+      RegExp(r'\bcomma\b', caseSensitive: false),
+      DictationCommand.comma,
+      ',',
+    ),
+    _CommandDef(
+      RegExp(r'\bquestion\s+mark\b', caseSensitive: false),
+      DictationCommand.questionMark,
+      '?',
+    ),
+    _CommandDef(
+      RegExp(r'\bexclamation\s+(point|mark)\b', caseSensitive: false),
+      DictationCommand.exclamation,
+      '!',
+    ),
+    _CommandDef(
+      RegExp(r'\bsemi\s+colon\b', caseSensitive: false),
+      DictationCommand.semiColon,
+      ';',
+    ),
+    _CommandDef(
+      RegExp(r'\bcolon\b', caseSensitive: false),
+      DictationCommand.colon,
+      ':',
+    ),
+    _CommandDef(
+      RegExp(r'\bopen\s+quote\b', caseSensitive: false),
+      DictationCommand.openQuote,
+      '"',
+    ),
+    _CommandDef(
+      RegExp(r'\bclose\s+quote\b', caseSensitive: false),
+      DictationCommand.closeQuote,
+      '"',
+    ),
   ];
 
   final List<DictationCommand> detectedCommands = [];
@@ -83,7 +164,6 @@ class CommandParser {
 
     return result;
   }
-
 }
 
 class _CommandDef {

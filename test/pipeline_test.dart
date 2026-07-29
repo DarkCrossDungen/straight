@@ -9,6 +9,7 @@ import 'package:straight/core/pipeline/punctuator.dart';
 import 'package:straight/core/pipeline/style_cleaner.dart';
 import 'package:straight/core/pipeline/word_replacer.dart';
 import 'package:straight/core/pipeline/dictation_pipeline.dart';
+import 'package:straight/core/pipeline/structure_formatter.dart';
 
 void main() {
   group('CommandParser', () {
@@ -28,6 +29,15 @@ void main() {
       final result = parser.process('hello new paragraph world');
       expect(result, contains('\n\n'));
       expect(parser.detectedCommands, contains(DictationCommand.newParagraph));
+    });
+
+    test('bullet point command', () {
+      final result = parser.process(
+        'shopping list bullet point apples next bullet milk',
+      );
+      expect(result, contains('\n• apples'));
+      expect(result, contains('\n• milk'));
+      expect(parser.detectedCommands, contains(DictationCommand.bulletPoint));
     });
 
     test('period command', () {
@@ -134,6 +144,26 @@ void main() {
     test('empty text returns empty', () {
       final result = parser.process('');
       expect(result, '');
+    });
+  });
+
+  group('StructureFormatter', () {
+    final formatter = StructureFormatter();
+
+    test('turns a clearly enumerated sequence into bullets', () {
+      final result = formatter.process(
+        'Shopping list: first apples second milk finally bread',
+      );
+      expect(result, contains('• apples'));
+      expect(result, contains('• milk'));
+      expect(result, contains('• bread'));
+    });
+
+    test('separates explicit topic transitions into paragraphs', () {
+      final result = formatter.process(
+        'The build is ready. Moving on, we should review the design.',
+      );
+      expect(result, contains('.\n\nMoving on'));
     });
   });
 
