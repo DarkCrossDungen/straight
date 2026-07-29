@@ -12,7 +12,7 @@ class HotkeyService extends ChangeNotifier {
 
   HotKey _currentHotkey = HotKey(
     key: LogicalKeyboardKey.space,
-    modifiers: [HotKeyModifier.control, HotKeyModifier.alt],
+    modifiers: [HotKeyModifier.control],
   );
 
   HotKey get currentHotkey => _currentHotkey;
@@ -26,7 +26,11 @@ class HotkeyService extends ChangeNotifier {
 
   String? get registrationError => _registrationError;
 
-  void init({VoidCallback? onHotkeyTriggered, VoidCallback? onKeyDown, VoidCallback? onKeyUp}) {
+  void init({
+    VoidCallback? onHotkeyTriggered,
+    VoidCallback? onKeyDown,
+    VoidCallback? onKeyUp,
+  }) {
     _onHotkeyTriggered = onHotkeyTriggered;
     _onKeyDown = onKeyDown;
     _onKeyUp = onKeyUp;
@@ -103,7 +107,8 @@ class HotkeyService extends ChangeNotifier {
     // Windows can repeat WM_HOTKEY while the keys are still held. Without a
     // short guard, one press can stop dictation and immediately start it again.
     final now = DateTime.now();
-    if (_lastToggleAt != null && now.difference(_lastToggleAt!).inMilliseconds < 800) {
+    if (_lastToggleAt != null &&
+        now.difference(_lastToggleAt!).inMilliseconds < 800) {
       return;
     }
     _lastToggleAt = now;

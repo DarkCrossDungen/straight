@@ -5,6 +5,7 @@ import 'core/storage/settings_store.dart';
 import 'features/bubble/bubble_overlay.dart';
 import 'features/settings/settings_page.dart';
 import 'features/dictionary/dictionary_page.dart';
+import 'features/dictionary/work_profiles_page.dart';
 import 'features/history/history_page.dart';
 import 'features/onboarding/onboarding_page.dart';
 
@@ -25,6 +26,7 @@ class StraightApp extends StatelessWidget {
       routes: {
         '/settings': (_) => const SettingsPage(),
         '/dictionary': (_) => const DictionaryPage(),
+        '/work-profiles': (_) => const WorkProfilesPage(),
         '/history': (_) => const HistoryPage(),
         '/onboarding': (_) => const OnboardingPage(),
       },

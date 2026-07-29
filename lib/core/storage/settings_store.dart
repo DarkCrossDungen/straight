@@ -1,13 +1,13 @@
 import 'storage_service.dart';
 
 class SettingsStore {
-  static const defaultSttModel = 'whisper-small';
+  static const defaultSttModel = 'moonshine-small-streaming-en';
   static const defaultLlmModel = 'none';
   static const _whisperSmallMigrationKey = 'migratedToWhisperSmallDefault';
   static const _pushToTalkMigrationKey = 'migratedToPushToTalkDefault';
 
   static const _defaultHotkey = {
-    'alt': true,
+    'alt': false,
     'ctrl': true,
     'shift': false,
     'key': 'Space',
@@ -15,7 +15,7 @@ class SettingsStore {
 
   static const _oldReservedDefaultHotkey = {
     'alt': true,
-    'ctrl': false,
+    'ctrl': true,
     'shift': false,
     'key': 'Space',
   };
@@ -119,4 +119,14 @@ class SettingsStore {
 
   static Future<void> setPushToTalk(bool value) async =>
       StorageService.settings.put('pushToTalk', value);
+
+  static bool getAutomaticProfileSwitching() =>
+      StorageService.settings.get(
+            'automaticProfileSwitching',
+            defaultValue: true,
+          )
+          as bool;
+
+  static Future<void> setAutomaticProfileSwitching(bool value) async =>
+      StorageService.settings.put('automaticProfileSwitching', value);
 }

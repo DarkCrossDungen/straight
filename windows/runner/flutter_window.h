@@ -3,7 +3,9 @@
 
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
+#include <flutter/method_channel.h>
 
+#include <atomic>
 #include <memory>
 
 #include "win32_window.h"
@@ -28,6 +30,9 @@ class FlutterWindow : public Win32Window {
 
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
+      media_control_channel_;
+  std::atomic_bool media_paused_by_straight_ = false;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

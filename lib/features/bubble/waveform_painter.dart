@@ -10,8 +10,9 @@ class WaveformPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.butt;
+      // Keep narrow companion bars clean: a fixed 2px stroke makes bars merge.
+      ..strokeWidth = (size.width / (amplitudes.length * 2.8)).clamp(1.0, 1.8)
+      ..strokeCap = StrokeCap.round;
 
     final barWidth = size.width / (amplitudes.length * 2);
     for (var i = 0; i < amplitudes.length; i++) {

@@ -1,8 +1,39 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <flutter/standard_method_codec.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Media.Control.h>
+#include <thread>
 
 #include "flutter/generated_plugin_registrant.h"
+
+namespace {
+
+bool PauseActiveMediaSession() {
+  using namespace winrt::Windows::Media::Control;
+  const auto manager =
+      GlobalSystemMediaTransportControlsSessionManager::RequestAsync().get();
+  const auto session = manager.GetCurrentSession();
+  if (!session) return false;
+  const auto playback = session.GetPlaybackInfo();
+  if (playback.PlaybackStatus() !=
+      GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing) {
+    return false;
+  }
+  return session.TryPauseAsync().get();
+}
+
+bool ResumeActiveMediaSession() {
+  using namespace winrt::Windows::Media::Control;
+  const auto manager =
+      GlobalSystemMediaTransportControlsSessionManager::RequestAsync().get();
+  const auto session = manager.GetCurrentSession();
+  if (!session) return false;
+  return session.TryPlayAsync().get();
+}
+
+}  // namespace
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -25,6 +56,41 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  media_control_channel_ =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(), "straight/media_control",
+          &flutter::StandardMethodCodec::GetInstance());
+  media_control_channel_->SetMethodCallHandler(
+      [this](const auto& call, auto result) {
+        if (call.method_name() == "pauseIfPlaying") {
+          std::thread([this, result = std::move(result)]() mutable {
+            try {
+              winrt::init_apartment(winrt::apartment_type::multi_threaded);
+              const bool paused = PauseActiveMediaSession();
+              media_paused_by_straight_.store(paused);
+              result->Success(flutter::EncodableValue(paused));
+            } catch (const std::exception& error) {
+              result->Error("media_control_error", error.what());
+            }
+          }).detach();
+          return;
+        }
+        if (call.method_name() == "resumeIfPausedByStraight") {
+          std::thread([this, result = std::move(result)]() mutable {
+            try {
+              winrt::init_apartment(winrt::apartment_type::multi_threaded);
+              if (media_paused_by_straight_.exchange(false)) {
+                ResumeActiveMediaSession();
+              }
+              result->Success();
+            } catch (const std::exception& error) {
+              result->Error("media_control_error", error.what());
+            }
+          }).detach();
+          return;
+        }
+        result->NotImplemented();
+      });
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
   Show();
 
@@ -42,6 +108,7 @@ bool FlutterWindow::OnCreate() {
 
 void FlutterWindow::OnDestroy() {
   if (flutter_controller_) {
+    media_control_channel_.reset();
     flutter_controller_ = nullptr;
   }
 

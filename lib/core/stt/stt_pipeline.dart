@@ -34,6 +34,7 @@ class SttPipeline {
   }
 
   void Function(SttPipelineState state)? onStateChanged;
+  void Function(double level)? onAudioLevel;
   void Function(String text)? onResult;
   void Function(Object error)? onError;
 
@@ -56,11 +57,13 @@ class SttPipeline {
     final hasPermission = await _recorder.hasPermission();
     if (!hasPermission) throw StateError('Microphone permission denied');
 
-    final stream = await _recorder.startStream(const RecordConfig(
-      encoder: AudioEncoder.pcm16bits,
-      numChannels: 1,
-      sampleRate: 16000,
-    ));
+    final stream = await _recorder.startStream(
+      const RecordConfig(
+        encoder: AudioEncoder.pcm16bits,
+        numChannels: 1,
+        sampleRate: 16000,
+      ),
+    );
     final subscription = stream.listen((_) {});
     await Future<void>.delayed(const Duration(milliseconds: 80));
     await subscription.cancel();
@@ -77,7 +80,8 @@ class SttPipeline {
     final normalizedPath = modelPath.toLowerCase();
     if (normalizedPath.contains('moonshine')) {
       _engine = MoonshineEngine();
-    } else if (normalizedPath.contains('qwen3-asr') || normalizedPath.contains('qwen_asr')) {
+    } else if (normalizedPath.contains('qwen3-asr') ||
+        normalizedPath.contains('qwen_asr')) {
       _engine = QwenAsrEngine();
     } else {
       _engine = WhisperEngine();
@@ -112,11 +116,13 @@ class SttPipeline {
     try {
       final hasPermission = await _recorder.hasPermission();
       if (!hasPermission) throw StateError('Microphone permission denied');
-      final stream = await _recorder.startStream(const RecordConfig(
-        encoder: AudioEncoder.pcm16bits,
-        numChannels: 1,
-        sampleRate: 16000,
-      ));
+      final stream = await _recorder.startStream(
+        const RecordConfig(
+          encoder: AudioEncoder.pcm16bits,
+          numChannels: 1,
+          sampleRate: 16000,
+        ),
+      );
       _subscription = stream.listen(
         _onAudioChunk,
         onError: (Object error) {
@@ -133,6 +139,7 @@ class SttPipeline {
 
   void _onAudioChunk(Uint8List chunk) {
     _vad.processChunk(chunk);
+    onAudioLevel?.call(_vad.level);
 
     final samples = _convertToInt16(chunk);
     _buffer.addAll(samples);
@@ -172,7 +179,10 @@ class SttPipeline {
   }
 
   Future<void> _flushBuffer() async {
-    if (_buffer.isEmpty || !_heardSpeechInBuffer || _isProcessing || _engine == null) {
+    if (_buffer.isEmpty ||
+        !_heardSpeechInBuffer ||
+        _isProcessing ||
+        _engine == null) {
       return;
     }
     _isProcessing = true;
@@ -184,7 +194,9 @@ class SttPipeline {
     _heardSpeechInBuffer = false;
 
     try {
-      final text = cleanTranscriptionForDictation(await _engine!.transcribe(samples));
+      final text = cleanTranscriptionForDictation(
+        await _engine!.transcribe(samples),
+      );
       if (text != null) {
         onResult?.call(text);
       }
@@ -192,7 +204,6 @@ class SttPipeline {
       onError?.call(e);
     } finally {
       _isProcessing = false;
-      _setState(SttPipelineState.listening);
     }
   }
 
@@ -243,8 +254,7 @@ class SttPipeline {
     // Whisper can emit caption-like labels for silence. The old check handled
     // one label but missed the repeated form, for example
     // "[BLANK_AUDIO].[BLANK_AUDIO]", which then leaked into the app.
-    if (RegExp(r'^(?:\s*\[[^\]]+\]\s*[.,!?;:…-]?\s*)+$')
-        .hasMatch(trimmed)) {
+    if (RegExp(r'^(?:\s*\[[^\]]+\]\s*[.,!?;:…-]?\s*)+$').hasMatch(trimmed)) {
       return null;
     }
 
@@ -255,8 +265,9 @@ class SttPipeline {
     // Small Whisper models can repeat punctuation while guessing at silence,
     // room noise, or music. The marks can be separated by spaces, which is why
     // a simple "..." matcher was not enough.
-    final hasRepeatedPunctuation =
-        RegExp(r'[.!?…](?:\s*[.!?…]){1,}').hasMatch(trimmed);
+    final hasRepeatedPunctuation = RegExp(
+      r'[.!?…](?:\s*[.!?…]){1,}',
+    ).hasMatch(trimmed);
     final withoutLongPunctuation = trimmed
         .replaceAll(RegExp(r'[.!?…](?:\s*[.!?…]){1,}'), ' ')
         .replaceAll(RegExp(r'(?<=\s)[.!?…](?=\s|$)'), ' ')
@@ -267,24 +278,28 @@ class SttPipeline {
       return null;
     }
 
-    final punctuationCount =
-        RegExp(r'[.,!?;:…-]').allMatches(withoutLongPunctuation).length;
-    final letterCount =
-        RegExp(r'[A-Za-z0-9]').allMatches(withoutLongPunctuation).length;
-    final wordCount = RegExp(r"\b[A-Za-z0-9']+\b")
-        .allMatches(withoutLongPunctuation)
-        .length;
+    final punctuationCount = RegExp(
+      r'[.,!?;:…-]',
+    ).allMatches(withoutLongPunctuation).length;
+    final letterCount = RegExp(
+      r'[A-Za-z0-9]',
+    ).allMatches(withoutLongPunctuation).length;
+    final wordCount = RegExp(
+      r"\b[A-Za-z0-9']+\b",
+    ).allMatches(withoutLongPunctuation).length;
 
     // Whisper often hallucinates a single vague word followed by many dots
     // when the input is silence, room noise, or a clipped utterance.
-    if ((punctuationCount * 3 > letterCount || hasRepeatedPunctuation) && wordCount < 2) {
+    if ((punctuationCount * 3 > letterCount || hasRepeatedPunctuation) &&
+        wordCount < 2) {
       return null;
     }
 
     // Non-speech labels and music captions are not useful dictation.
-    if (RegExp(r'^\(?\s*(?:music|applause|laughter|silence|noise)\s*\)?$',
-            caseSensitive: false)
-        .hasMatch(withoutLongPunctuation)) {
+    if (RegExp(
+      r'^\(?\s*(?:music|applause|laughter|silence|noise)\s*\)?$',
+      caseSensitive: false,
+    ).hasMatch(withoutLongPunctuation)) {
       return null;
     }
 

@@ -34,6 +34,7 @@ void main(List<String> args) async {
   await Hive.openBox('dictionary');
   await Hive.openBox('history');
   await Hive.openBox('snippets');
+  await Hive.openBox('workProfiles');
 
   coordinator = StraightCoordinator();
 
@@ -53,11 +54,17 @@ void main(List<String> args) async {
   }
 
   runApp(const StraightApp());
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    unawaited(_startBackgroundServices(args));
+  });
+}
+
+Future<void> _startBackgroundServices(List<String> args) async {
   await DesktopBubbleService.instance.initialize(
     coordinator: coordinator,
     launchedAtLogin: args.contains('--launch-at-login'),
   );
-  unawaited(coordinator.bootstrap());
+  await coordinator.bootstrap();
 }
 
 class _MainWindowListener extends WindowListener {

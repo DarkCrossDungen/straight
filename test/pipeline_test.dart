@@ -9,6 +9,7 @@ import 'package:straight/core/pipeline/punctuator.dart';
 import 'package:straight/core/pipeline/style_cleaner.dart';
 import 'package:straight/core/pipeline/word_replacer.dart';
 import 'package:straight/core/pipeline/dictation_pipeline.dart';
+import 'package:straight/core/pipeline/structure_formatter.dart';
 
 void main() {
   group('CommandParser', () {
@@ -28,6 +29,15 @@ void main() {
       final result = parser.process('hello new paragraph world');
       expect(result, contains('\n\n'));
       expect(parser.detectedCommands, contains(DictationCommand.newParagraph));
+    });
+
+    test('bullet point command', () {
+      final result = parser.process(
+        'shopping list bullet point apples next bullet milk',
+      );
+      expect(result, contains('\n• apples'));
+      expect(result, contains('\n• milk'));
+      expect(parser.detectedCommands, contains(DictationCommand.bulletPoint));
     });
 
     test('period command', () {
@@ -134,6 +144,26 @@ void main() {
     test('empty text returns empty', () {
       final result = parser.process('');
       expect(result, '');
+    });
+  });
+
+  group('StructureFormatter', () {
+    final formatter = StructureFormatter();
+
+    test('turns a clearly enumerated sequence into bullets', () {
+      final result = formatter.process(
+        'Shopping list: first apples second milk finally bread',
+      );
+      expect(result, contains('• apples'));
+      expect(result, contains('• milk'));
+      expect(result, contains('• bread'));
+    });
+
+    test('separates explicit topic transitions into paragraphs', () {
+      final result = formatter.process(
+        'The build is ready. Moving on, we should review the design.',
+      );
+      expect(result, contains('.\n\nMoving on'));
     });
   });
 
@@ -469,14 +499,61 @@ void main() {
     test('replaces pronunciation aliases with the exact spelling', () {
       final dictionary = [
         {
-          'word': 'Khrisshy',
-          'replacement': 'Khrisshy',
-          'aliases': ['krishi', 'crushy'],
+          'word': 'MoonshineEngine',
+          'replacement': 'MoonshineEngine',
+          'aliases': ['moon shine engine', 'moonshine engine'],
           'enabled': true,
         },
       ];
-      expect(replacer.process('hello krishi', dictionary), 'hello Khrisshy');
-      expect(replacer.process('hello crushy', dictionary), 'hello Khrisshy');
+      expect(
+        replacer.process('hello moon shine engine', dictionary),
+        'hello MoonshineEngine',
+      );
+      expect(
+        replacer.process('hello moonshine engine', dictionary),
+        'hello MoonshineEngine',
+      );
+    });
+
+    test('normalizes technical separators from imported folders', () {
+      final dictionary = [
+        {
+          'word': 'moonshine_wrapper.dll',
+          'replacement': 'moonshine_wrapper.dll',
+          'aliases': ['moonshine wrapper dll'],
+          'source': 'folder',
+          'enabled': true,
+        },
+      ];
+      expect(
+        replacer.process('update moonshine wrapper dll', dictionary),
+        'update moonshine_wrapper.dll',
+      );
+    });
+
+    test('only applies fuzzy matching to long imported technical terms', () {
+      final dictionary = [
+        {
+          'word': 'moonshine_wrapper.dll',
+          'replacement': 'moonshine_wrapper.dll',
+          'source': 'folder',
+          'enabled': true,
+        },
+        {
+          'word': 'readme',
+          'replacement': 'README',
+          'source': 'folder',
+          'enabled': true,
+        },
+      ];
+      expect(
+        replacer.process('update moonshine wrapper dli', dictionary),
+        'update moonshine_wrapper.dll',
+      );
+      expect(
+        replacer.process('please read me later', dictionary),
+        'please read me later',
+      );
     });
 
     test('empty dictionary returns original', () {

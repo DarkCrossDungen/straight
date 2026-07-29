@@ -31,8 +31,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
       std::wstring(command_line).find(L"--bubble-window") !=
       std::wstring::npos;
   Win32Window::Size size(
-      is_bubble_window ? 58 : 1280,
-      is_bubble_window ? 24 : 720);
+      is_bubble_window ? 420 : 1280,
+      is_bubble_window ? 148 : 720);
   if (!window.Create(L"straight", origin, size)) {
     return EXIT_FAILURE;
   }

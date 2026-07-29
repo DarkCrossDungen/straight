@@ -111,6 +111,15 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
           const Divider(),
+          _linkRow(
+            Icons.workspaces_outline,
+            'Work profiles',
+            'Private vocabulary by app',
+            () {
+              Navigator.pushNamed(context, '/work-profiles');
+            },
+          ),
+          const Divider(),
           _linkRow(Icons.schedule, 'History', 'Recent dictation log', () {
             Navigator.pushNamed(context, '/history');
           }),
