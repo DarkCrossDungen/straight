@@ -9,6 +9,8 @@ import 'package:straight/core/pipeline/punctuator.dart';
 import 'package:straight/core/pipeline/style_cleaner.dart';
 import 'package:straight/core/pipeline/word_replacer.dart';
 import 'package:straight/core/pipeline/snippet_expander.dart';
+import 'package:straight/core/pipeline/code_formatter.dart';
+import 'package:straight/core/platform/window_context.dart';
 import 'package:straight/core/pipeline/dictation_pipeline.dart';
 
 void main() {
@@ -571,6 +573,49 @@ void main() {
       expect(result.text, contains('https://cal.com/dark'));
     });
 
+    test('context-aware code formatting in IDE context', () {
+      final codeWindow = ActiveWindowInfo(
+        hwnd: 1234,
+        title: 'main.dart - VS Code',
+        processName: 'code.exe',
+        category: AppCategory.code,
+      );
+      final result = pipeline.process(
+        'declare camel case user authentication token',
+        windowContext: codeWindow,
+      );
+      expect(result.text, equals('Declare userAuthenticationToken'));
+    });
+
+    test('preserves lowercase initial on camelCase at beginning of sentence', () {
+      final codeWindow = ActiveWindowInfo(
+        hwnd: 1234,
+        title: 'main.dart - VS Code',
+        processName: 'code.exe',
+        category: AppCategory.code,
+      );
+      final result = pipeline.process(
+        'camel case user authentication token',
+        windowContext: codeWindow,
+      );
+      expect(result.text, equals('userAuthenticationToken'));
+    });
+
+    test('omits formal trailing period in chat app context', () {
+      final chatWindow = ActiveWindowInfo(
+        hwnd: 5678,
+        title: 'Slack',
+        processName: 'slack.exe',
+        category: AppCategory.chat,
+      );
+      final result = pipeline.process(
+        'sounds great see you tomorrow',
+        pauseDurationMs: 500,
+        windowContext: chatWindow,
+      );
+      expect(result.text, equals('Sounds great see you tomorrow'));
+    });
+
     test('processes complex mixed input', () {
       final result = pipeline.process(
         'I um went to the uh store period new line hello world',
@@ -579,6 +624,39 @@ void main() {
       expect(result.text, isNot(contains('um')));
       expect(result.text, isNot(contains('uh')));
       expect(result.text, contains('.'));
+    });
+  });
+
+  group('CodeFormatter', () {
+    late CodeFormatter formatter;
+
+    setUp(() {
+      formatter = CodeFormatter();
+    });
+
+    test('converts camel case', () {
+      final result = formatter.process('declare camel case user login handler');
+      expect(result, equals('declare userLoginHandler'));
+    });
+
+    test('converts snake case', () {
+      final result = formatter.process('define snake case database pool connection');
+      expect(result, equals('define database_pool_connection'));
+    });
+
+    test('converts kebab case', () {
+      final result = formatter.process('class kebab case custom button primary');
+      expect(result, equals('class custom-button-primary'));
+    });
+
+    test('converts screaming case', () {
+      final result = formatter.process('constant screaming case max retry attempts');
+      expect(result, equals('constant MAX_RETRY_ATTEMPTS'));
+    });
+
+    test('converts pascal case', () {
+      final result = formatter.process('interface pascal case auth response model');
+      expect(result, equals('interface AuthResponseModel'));
     });
   });
 }

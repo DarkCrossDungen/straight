@@ -10,6 +10,8 @@ import 'llm/qwen_engine.dart';
 import 'storage/history_store.dart';
 import 'storage/settings_store.dart';
 import 'storage/dictionary_store.dart';
+import 'storage/snippets_store.dart';
+import 'platform/window_context.dart';
 
 enum DictationState { idle, listening, processing }
 
@@ -128,12 +130,16 @@ class StraightCoordinator extends ChangeNotifier {
     }
   }
 
+  ActiveWindowInfo? _activeWindow;
+  ActiveWindowInfo? get activeWindow => _activeWindow;
+
   Future<void> _startDictation() async {
     if (!sttPipeline.isInitialized) {
       _setStatus('Speech model missing');
       _setState(DictationState.idle);
       return;
     }
+    _activeWindow = WindowContext.getActiveWindow();
     _setStatus('Listening for speech...');
     _setState(DictationState.listening);
     await sttPipeline.start();
@@ -149,17 +155,19 @@ class StraightCoordinator extends ChangeNotifier {
     _setState(DictationState.processing);
 
     final pauseDuration = sttPipeline.lastPauseDurationMs;
-    final result = _cleanupModelReady
-        ? await dictationPipeline.processWithLlm(rawText, pauseDurationMs: pauseDuration)
-        : dictationPipeline.process(rawText, pauseDurationMs: pauseDuration);
+    final windowCtx = _activeWindow ?? WindowContext.getActiveWindow();
 
-    textInjector.inject(result.text);
+    final result = _cleanupModelReady
+        ? await dictationPipeline.processWithLlm(rawText, pauseDurationMs: pauseDuration, windowContext: windowCtx)
+        : dictationPipeline.process(rawText, pauseDurationMs: pauseDuration, windowContext: windowCtx);
+
+    await textInjector.inject(result.text);
 
     await HistoryStore.addEntry({
       'text': rawText,
       'appliedText': result.text,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
-      'app': '',
+      'app': windowCtx?.processName ?? '',
     });
 
     _setStatus('Text inserted');
