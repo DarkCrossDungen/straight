@@ -30,6 +30,8 @@ class StraightCoordinator extends ChangeNotifier {
   String get selectedLlmModel => _selectedLlmModel;
   bool _cleanupModelReady = false;
 
+  void Function(double amplitude)? onAmplitudeChanged;
+
   void _setState(DictationState s) {
     _state = s;
     notifyListeners();
@@ -62,6 +64,12 @@ class StraightCoordinator extends ChangeNotifier {
       }
     };
 
+    sttPipeline.onAmplitudeChanged = (amp) {
+      onAmplitudeChanged?.call(amp);
+    };
+
+    sttPipeline.isWhisperMode = SettingsStore.getWhisperMode();
+
     sttPipeline.onResult = _onTranscription;
     sttPipeline.onError = (e) {
       debugPrint('STT error: $e');
@@ -72,6 +80,11 @@ class StraightCoordinator extends ChangeNotifier {
     _selectedSttModel = SettingsStore.getSttModel();
     _selectedLlmModel = SettingsStore.getLlmModel();
     refreshDictionary();
+    refreshSnippets();
+  }
+
+  void refreshWhisperMode() {
+    sttPipeline.isWhisperMode = SettingsStore.getWhisperMode();
   }
 
   void _onKeyDown() {
@@ -89,6 +102,11 @@ class StraightCoordinator extends ChangeNotifier {
   void refreshDictionary() {
     final dictionary = DictionaryStore.getAll();
     dictationPipeline.setDictionary(dictionary);
+  }
+
+  void refreshSnippets() {
+    final snippets = SnippetsStore.getAll();
+    dictationPipeline.setSnippets(snippets);
   }
 
   Future<void> bootstrap() async {

@@ -8,6 +8,7 @@ import 'package:straight/core/pipeline/backtrack_handler.dart';
 import 'package:straight/core/pipeline/punctuator.dart';
 import 'package:straight/core/pipeline/style_cleaner.dart';
 import 'package:straight/core/pipeline/word_replacer.dart';
+import 'package:straight/core/pipeline/snippet_expander.dart';
 import 'package:straight/core/pipeline/dictation_pipeline.dart';
 
 void main() {
@@ -290,36 +291,38 @@ void main() {
     });
 
     test('converts small numbers', () {
-      final result = formatter.process('I have 5 apples');
-      expect(result, contains('five'));
+      final result = formatter.process('I have five apples');
+      expect(result, contains('5'));
     });
 
     test('converts teen numbers', () {
-      final result = formatter.process('I have 15 apples');
-      expect(result, contains('fifteen'));
+      final result = formatter.process('I have fifteen apples');
+      expect(result, contains('15'));
     });
 
-    test('converts tens', () {
-      final result = formatter.process('I have 20 apples');
-      expect(result, contains('twenty'));
+    test('converts tens and compound tens', () {
+      final result = formatter.process('I have twenty apples and thirty five oranges');
+      expect(result, contains('20'));
+      expect(result, contains('35'));
     });
 
     test('converts hundreds', () {
-      final result = formatter.process('I have 100 apples');
-      expect(result, contains('one hundred'));
+      final result = formatter.process('I have one hundred apples');
+      expect(result, contains('100'));
     });
 
     test('converts ordinals', () {
-      final result = formatter.process('I am 1st');
-      expect(result, contains('first'));
+      final result = formatter.process('I am first and he is twenty first');
+      expect(result, contains('1st'));
+      expect(result, contains('21st'));
     });
 
     test('handles currency', () {
-      final result = formatter.process('It costs \$50');
-      expect(result, contains('fifty dollars'));
+      final result = formatter.process('It costs fifty dollars');
+      expect(result, contains('\$50'));
     });
 
-    test('skips numbers with leading zeros', () {
+    test('preserves existing code digits', () {
       final result = formatter.process('code 007');
       expect(result, contains('007'));
     });
@@ -327,6 +330,35 @@ void main() {
     test('empty text returns empty', () {
       final result = formatter.process('');
       expect(result, '');
+    });
+  });
+
+  group('SnippetExpander', () {
+    late SnippetExpander expander;
+
+    setUp(() {
+      expander = SnippetExpander();
+    });
+
+    test('expands exact snippet trigger phrase', () {
+      final snippets = [
+        {'name': 'my email', 'content': 'test@example.com'},
+      ];
+      final result = expander.process('please send to my email today', snippets);
+      expect(result, equals('please send to test@example.com today'));
+    });
+
+    test('expands case-insensitively', () {
+      final snippets = [
+        {'name': 'CALENDLY LINK', 'content': 'https://cal.com/user'},
+      ];
+      final result = expander.process('book at my calendly link please', snippets);
+      expect(result, equals('book at my https://cal.com/user please'));
+    });
+
+    test('handles empty snippets list without modification', () {
+      final result = expander.process('hello world', []);
+      expect(result, equals('hello world'));
     });
   });
 
@@ -529,6 +561,14 @@ void main() {
     test('empty text returns empty', () {
       final result = pipeline.process('');
       expect(result.text, '');
+    });
+
+    test('handles snippets in pipeline', () {
+      pipeline.setSnippets([
+        {'name': 'my calendly', 'content': 'https://cal.com/dark'},
+      ]);
+      final result = pipeline.process('you can book at my calendly anytime');
+      expect(result.text, contains('https://cal.com/dark'));
     });
 
     test('processes complex mixed input', () {

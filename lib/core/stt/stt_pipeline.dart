@@ -31,6 +31,14 @@ class SttPipeline {
   void Function(SttPipelineState state)? onStateChanged;
   void Function(String text)? onResult;
   void Function(Object error)? onError;
+  void Function(double amplitude)? onAmplitudeChanged;
+
+  bool _isWhisperMode = false;
+  bool get isWhisperMode => _isWhisperMode;
+  set isWhisperMode(bool val) {
+    _isWhisperMode = val;
+    _vad.isWhisperMode = val;
+  }
 
   Future<void> init(String modelPath) async {
     if (_initialized) {
@@ -55,6 +63,7 @@ class SttPipeline {
     await stop();
     _setState(SttPipelineState.listening);
     _buffer = [];
+    _vad.isWhisperMode = _isWhisperMode;
     _vad.reset();
     _isProcessing = false;
 
@@ -81,7 +90,8 @@ class SttPipeline {
   }
 
   void _onAudioChunk(Uint8List chunk) {
-    _vad.processChunk(chunk);
+    final rms = _vad.processChunk(chunk);
+    onAmplitudeChanged?.call(rms);
 
     final samples = _convertToInt16(chunk);
     _buffer.addAll(samples);
@@ -142,7 +152,11 @@ class SttPipeline {
   List<int> _convertToInt16(Uint8List bytes) {
     final samples = <int>[];
     for (var i = 0; i + 1 < bytes.length; i += 2) {
-      samples.add(((bytes[i + 1] << 8) | bytes[i]).toSigned(16));
+      var val = ((bytes[i + 1] << 8) | bytes[i]).toSigned(16);
+      if (_isWhisperMode) {
+        val = (val * 2.5).round().clamp(-32768, 32767);
+      }
+      samples.add(val);
     }
     return samples;
   }

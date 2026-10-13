@@ -18,4 +18,12 @@ class BubbleController extends ChangeNotifier {
     _waveformAmplitudes = amplitudes;
     notifyListeners();
   }
+
+  void pushAmplitude(double amp) {
+    final normalized = (amp * 4.5).clamp(0.08, 1.0);
+    final next = List<double>.from(_waveformAmplitudes.sublist(1))..add(normalized);
+    _waveformAmplitudes = next;
+    notifyListeners();
+  }
 }
+

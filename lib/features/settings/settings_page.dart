@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:straight/core/app_context.dart';
 import 'package:straight/core/storage/settings_store.dart';
+import 'package:straight/core/platform/windows_startup.dart';
 import 'package:straight/features/settings/hotkey_capture_tile.dart';
 import 'package:straight/features/settings/model_selector.dart';
 
@@ -14,6 +16,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _isDark = true;
   bool _startOnBoot = false;
   bool _pushToTalk = false;
+  bool _whisperMode = false;
 
   @override
   void initState() {
@@ -21,6 +24,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _isDark = SettingsStore.getThemeMode() == 'dark';
     _startOnBoot = SettingsStore.getStartOnBoot();
     _pushToTalk = SettingsStore.getPushToTalk();
+    _whisperMode = SettingsStore.getWhisperMode();
   }
 
   @override
@@ -71,6 +75,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onChanged: (value) async {
                 setState(() => _startOnBoot = value);
                 await SettingsStore.setStartOnBoot(value);
+                await WindowsStartup.setEnabled(value);
               },
             ),
           ),
@@ -84,6 +89,20 @@ class _SettingsPageState extends State<SettingsPage> {
               onChanged: (value) async {
                 setState(() => _pushToTalk = value);
                 await SettingsStore.setPushToTalk(value);
+              },
+            ),
+          ),
+          const Divider(height: 1),
+          _settingRow(
+            icon: Icons.volume_down,
+            title: 'Whisper mode',
+            subtitle: 'Higher mic gain & sensitive VAD for quiet speaking',
+            trailing: Switch(
+              value: _whisperMode,
+              onChanged: (value) async {
+                setState(() => _whisperMode = value);
+                await SettingsStore.setWhisperMode(value);
+                coordinator.refreshWhisperMode();
               },
             ),
           ),

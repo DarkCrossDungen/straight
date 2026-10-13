@@ -54,6 +54,10 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/dictionary');
               }),
+              _navItem(Icons.content_cut_outlined, 'Snippets', () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/snippets');
+              }),
               _navItem(Icons.history, 'History', () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/history');

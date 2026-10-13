@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:straight/core/app_context.dart';
 import 'package:straight/core/storage/snippets_store.dart';
 import 'package:straight/features/snippets/add_snippet_dialog.dart';
 import 'package:straight/shared/widgets/empty_state.dart';
@@ -44,6 +45,7 @@ class _SnippetsPageState extends State<SnippetsPage> {
     final result = await AddSnippetDialog.show(context);
     if (result == null) return;
     await SnippetsStore.addSnippet(result['name']!, result['content']!);
+    coordinator.refreshSnippets();
     _load();
   }
 
@@ -58,11 +60,13 @@ class _SnippetsPageState extends State<SnippetsPage> {
       'name': result['name'],
       'content': result['content'],
     });
+    coordinator.refreshSnippets();
     _load();
   }
 
   Future<void> _deleteSnippet(Map snippet) async {
     await SnippetsStore.deleteSnippet(snippet['id']);
+    coordinator.refreshSnippets();
     _load();
   }
 

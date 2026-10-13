@@ -7,6 +7,7 @@ import 'backtrack_handler.dart';
 import 'command_parser.dart';
 import 'style_cleaner.dart';
 import 'word_replacer.dart';
+import 'snippet_expander.dart';
 import '../llm/llm_engine.dart';
 
 class DictationResult {
@@ -26,8 +27,10 @@ class DictationPipeline {
   final CommandParser _commandParser = CommandParser();
   final StyleCleaner _styleCleaner = StyleCleaner();
   final WordReplacer _wordReplacer = WordReplacer();
+  final SnippetExpander _snippetExpander = SnippetExpander();
   LlmEngine? _llm;
   List<Map> _dictionary = [];
+  List<Map> _snippets = [];
 
   DictationPipeline({this._llm});
 
@@ -37,6 +40,10 @@ class DictationPipeline {
 
   void setDictionary(List<Map> dictionary) {
     _dictionary = dictionary;
+  }
+
+  void setSnippets(List<Map> snippets) {
+    _snippets = snippets;
   }
 
   DictationResult process(String rawText, {int pauseDurationMs = 0}) {
@@ -50,6 +57,7 @@ class DictationPipeline {
     text = _numberFormatter.process(text);
     text = _commandParser.process(text);
     text = _wordReplacer.process(text, _dictionary);
+    text = _snippetExpander.process(text, _snippets);
     text = _punctuator.process(text, pauseDurationMs: pauseDurationMs);
     text = _capitalizer.process(text);
     text = _styleCleaner.process(text);

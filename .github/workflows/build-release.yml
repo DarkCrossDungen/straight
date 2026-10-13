@@ -1,0 +1,65 @@
+name: Build Windows Release & Installer
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Windows x64 .exe & Installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run unit tests
+        run: flutter test
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Copy prebuilt native DLLs to release bundle
+        run: |
+          mkdir -p build/windows/x64/runner/Release/native/prebuilt
+          cp native/prebuilt/*.dll build/windows/x64/runner/Release/native/prebuilt/
+          cp native/prebuilt/*.dll build/windows/x64/runner/Release/
+        shell: bash
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress
+
+      - name: Build Inno Setup Installer
+        run: |
+          mkdir dist
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" windows\installer\straight.iss
+        shell: powershell
+
+      - name: Create Portable Zip
+        run: |
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath dist\Straight-Portable-Windows-x64.zip
+        shell: powershell
+
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Straight-Windows-x64
+          path: |
+            dist/Straight-Setup.exe
+            dist/Straight-Portable-Windows-x64.zip

@@ -46,4 +46,10 @@ class SettingsStore {
 
   static Future<void> setPushToTalk(bool value) async =>
       StorageService.settings.put('pushToTalk', value);
+
+  static bool getWhisperMode() =>
+      StorageService.settings.get('whisperMode', defaultValue: false) as bool;
+
+  static Future<void> setWhisperMode(bool value) async =>
+      StorageService.settings.put('whisperMode', value);
 }

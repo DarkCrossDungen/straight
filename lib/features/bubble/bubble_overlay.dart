@@ -31,12 +31,18 @@ class _BubbleOverlayState extends State<BubbleOverlay>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
     coordinator.addListener(_syncState);
+    coordinator.onAmplitudeChanged = (amp) {
+      if (mounted && coordinator.state == DictationState.listening) {
+        _controller.pushAmplitude(amp);
+      }
+    };
     _syncState();
   }
 
   @override
   void dispose() {
     coordinator.removeListener(_syncState);
+    coordinator.onAmplitudeChanged = null;
     _pulseController.dispose();
     _controller.dispose();
     super.dispose();
@@ -46,6 +52,7 @@ class _BubbleOverlayState extends State<BubbleOverlay>
     switch (coordinator.state) {
       case DictationState.idle:
         _controller.setState(BubbleState.idle);
+        _controller.updateWaveform(List.filled(20, 0.1));
         _pulseController.stop();
         _pulseController.reset();
         break;
@@ -198,6 +205,8 @@ class _BubbleOverlayState extends State<BubbleOverlay>
             _navButton(Icons.settings_outlined, 'Settings', () => Navigator.pushNamed(context, '/settings')),
             const SizedBox(height: 8),
             _navButton(Icons.book_outlined, 'Dictionary', () => Navigator.pushNamed(context, '/dictionary')),
+            const SizedBox(height: 8),
+            _navButton(Icons.content_cut_outlined, 'Snippets', () => Navigator.pushNamed(context, '/snippets')),
             const SizedBox(height: 8),
             _navButton(Icons.history, 'History', () => Navigator.pushNamed(context, '/history')),
             const Spacer(),
