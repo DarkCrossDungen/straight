@@ -14,8 +14,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -35,12 +33,19 @@ jobs:
       - name: Build Windows release
         run: flutter build windows --release
 
-      - name: Copy prebuilt native DLLs to release bundle
+      - name: Prepare Release bundle and copy prebuilt DLLs
         run: |
-          mkdir -p build/windows/x64/runner/Release/native/prebuilt
-          cp native/prebuilt/*.dll build/windows/x64/runner/Release/native/prebuilt/
-          cp native/prebuilt/*.dll build/windows/x64/runner/Release/
-        shell: bash
+          if (Test-Path "build\windows\runner\Release") {
+            New-Item -ItemType Directory -Force -Path "build\windows\x64\runner\Release"
+            Copy-Item -Recurse -Force "build\windows\runner\Release\*" "build\windows\x64\runner\Release\"
+          } elseif (Test-Path "build\windows\x64\runner\Release") {
+            New-Item -ItemType Directory -Force -Path "build\windows\runner\Release"
+            Copy-Item -Recurse -Force "build\windows\x64\runner\Release\*" "build\windows\runner\Release\"
+          }
+          New-Item -ItemType Directory -Force -Path "build\windows\x64\runner\Release\native\prebuilt"
+          Copy-Item -Force "native\prebuilt\*.dll" "build\windows\x64\runner\Release\native\prebuilt\"
+          Copy-Item -Force "native\prebuilt\*.dll" "build\windows\x64\runner\Release\"
+        shell: powershell
 
       - name: Install Inno Setup
         run: choco install innosetup --no-progress
