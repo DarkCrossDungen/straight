@@ -27,11 +27,10 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  // Required by window_manager: comment out default Show callback so windowManager controls visibility
-  // flutter_controller_->engine()->SetNextFrameCallback([&]() {
-  //   this->Show();
-  // });
-  // flutter_controller_->ForceRedraw();
+  flutter_controller_->engine()->SetNextFrameCallback([&]() {
+    this->Show();
+  });
+  flutter_controller_->ForceRedraw();
 
   return true;
 }

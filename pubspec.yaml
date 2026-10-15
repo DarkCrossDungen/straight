@@ -28,7 +28,6 @@ dependencies:
 
   # System Utilities
   path_provider: ^2.1.5
-  window_manager: ^0.4.3
 
   # Download Manager
   http: ^1.3.0
