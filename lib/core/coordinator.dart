@@ -12,6 +12,7 @@ import 'storage/settings_store.dart';
 import 'storage/dictionary_store.dart';
 import 'storage/snippets_store.dart';
 import 'platform/window_context.dart';
+import 'learning/correction_detector.dart';
 
 enum DictationState { idle, listening, processing }
 
@@ -133,6 +134,27 @@ class StraightCoordinator extends ChangeNotifier {
   ActiveWindowInfo? _activeWindow;
   ActiveWindowInfo? get activeWindow => _activeWindow;
 
+  final CorrectionDetector _correctionDetector = CorrectionDetector();
+  String? _lastDictatedText;
+  int _lastDictatedTimestamp = 0;
+
+  String buildBiasingPrompt() {
+    final words = <String>[];
+    for (final entry in DictionaryStore.getAll()) {
+      if (entry['enabled'] == true && entry['replacement'] != null) {
+        final rep = entry['replacement'] as String;
+        if (rep.isNotEmpty) words.add(rep);
+      }
+    }
+    for (final snippet in SnippetsStore.getAll()) {
+      if (snippet['name'] != null) {
+        final name = snippet['name'] as String;
+        if (name.isNotEmpty) words.add(name);
+      }
+    }
+    return words.join(', ');
+  }
+
   Future<void> _startDictation() async {
     if (!sttPipeline.isInitialized) {
       _setStatus('Speech model missing');
@@ -140,6 +162,7 @@ class StraightCoordinator extends ChangeNotifier {
       return;
     }
     _activeWindow = WindowContext.getActiveWindow();
+    sttPipeline.initialPrompt = buildBiasingPrompt();
     _setStatus('Listening for speech...');
     _setState(DictationState.listening);
     await sttPipeline.start();
@@ -154,6 +177,27 @@ class StraightCoordinator extends ChangeNotifier {
   void _onTranscription(String rawText) async {
     _setState(DictationState.processing);
 
+    // 1. Check for explicit voice correction command ("correction grok to Grox" / "replace grok with Grox")
+    final voiceCorrection = _correctionDetector.parseVoiceCorrection(rawText);
+    if (voiceCorrection != null) {
+      await _correctionDetector.learn(voiceCorrection.original, voiceCorrection.replacement);
+      refreshDictionary();
+      _setStatus('Learned: ${voiceCorrection.original} ➔ ${voiceCorrection.replacement}');
+      _setState(DictationState.idle);
+      return;
+    }
+
+    // 2. Implicit self-correction learning:
+    // If user recently dictated within 45 seconds, check if the current transcription is a single-word correction
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (_lastDictatedText != null && (now - _lastDictatedTimestamp) < 45000) {
+      final detected = _correctionDetector.detectWordCorrection(_lastDictatedText!, rawText);
+      if (detected != null && detected.confidence >= 0.7) {
+        await _correctionDetector.learn(detected.original, detected.replacement);
+        refreshDictionary();
+      }
+    }
+
     final pauseDuration = sttPipeline.lastPauseDurationMs;
     final windowCtx = _activeWindow ?? WindowContext.getActiveWindow();
 
@@ -163,10 +207,13 @@ class StraightCoordinator extends ChangeNotifier {
 
     await textInjector.inject(result.text);
 
+    _lastDictatedText = result.text;
+    _lastDictatedTimestamp = now;
+
     await HistoryStore.addEntry({
       'text': rawText,
       'appliedText': result.text,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'timestamp': now,
       'app': windowCtx?.processName ?? '',
     });
 

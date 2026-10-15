@@ -33,6 +33,8 @@ class SttPipeline {
   void Function(Object error)? onError;
   void Function(double amplitude)? onAmplitudeChanged;
 
+  String? initialPrompt;
+
   bool _isWhisperMode = false;
   bool get isWhisperMode => _isWhisperMode;
   set isWhisperMode(bool val) {
@@ -115,7 +117,7 @@ class SttPipeline {
     _vad.reset();
 
     try {
-      final text = await _engine!.transcribe(samples);
+      final text = await _engine!.transcribe(samples, initialPrompt: initialPrompt);
       if (text.isNotEmpty && !text.startsWith('Transcription returned code:')) {
         onResult?.call(text);
       }

@@ -17,17 +17,22 @@ void main() async {
 
   coordinator = StraightCoordinator();
 
-  await windowManager.ensureInitialized();
-  await windowManager.setSize(const Size(1240, 760));
-  await windowManager.setMinimumSize(const Size(860, 580));
-  await windowManager.setResizable(true);
-  await windowManager.center();
-  if (!kDebugMode) {
-    await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-    await windowManager.setAlwaysOnTop(true);
-    await windowManager.setSkipTaskbar(true);
-    await windowManager.setPreventClose(true);
-    windowManager.addListener(AppWindowListener());
+  try {
+    await windowManager.ensureInitialized();
+    const windowOptions = WindowOptions(
+      size: Size(1240, 760),
+      minimumSize: Size(860, 580),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.normal,
+    );
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  } catch (e) {
+    debugPrint('window_manager init warning: $e');
   }
 
   await coordinator.bootstrap();

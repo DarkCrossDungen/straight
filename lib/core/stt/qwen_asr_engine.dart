@@ -73,8 +73,12 @@ class QwenAsrEngine extends SttEngine {
   }
 
   @override
-  Future<String> transcribe(List<int> pcmAudio) async {
+  Future<String> transcribe(List<int> pcmAudio, {String? initialPrompt}) async {
     if (!isLoaded) throw Exception('Qwen3-ASR not initialized');
+
+    if (initialPrompt != null && initialPrompt.isNotEmpty) {
+      await setPrompt(initialPrompt);
+    }
 
     // Convert int16 PCM to float32 [-1.0, 1.0]
     final floatSamples = calloc<Float>(pcmAudio.length);

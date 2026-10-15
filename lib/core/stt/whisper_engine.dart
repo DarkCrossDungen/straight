@@ -56,7 +56,7 @@ class WhisperEngine implements SttEngine {
   }
 
   @override
-  Future<String> transcribe(List<int> pcmAudio) async {
+  Future<String> transcribe(List<int> pcmAudio, {String? initialPrompt}) async {
     if (!_initialized || _ctx == nullptr) {
       throw Exception('Whisper engine not initialized');
     }

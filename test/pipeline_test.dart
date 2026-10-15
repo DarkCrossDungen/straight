@@ -12,6 +12,7 @@ import 'package:straight/core/pipeline/snippet_expander.dart';
 import 'package:straight/core/pipeline/code_formatter.dart';
 import 'package:straight/core/platform/window_context.dart';
 import 'package:straight/core/pipeline/dictation_pipeline.dart';
+import 'package:straight/core/learning/correction_detector.dart';
 
 void main() {
   group('CommandParser', () {
@@ -657,6 +658,49 @@ void main() {
     test('converts pascal case', () {
       final result = formatter.process('interface pascal case auth response model');
       expect(result, equals('interface AuthResponseModel'));
+    });
+  });
+
+  group('CorrectionDetector (Self-Correction Learning)', () {
+    late CorrectionDetector detector;
+
+    setUp(() {
+      detector = CorrectionDetector();
+    });
+
+    test('detects single-word replacement in a sentence (Grok -> Grox)', () {
+      final result = detector.detectWordCorrection(
+        'let us test with grok model',
+        'let us test with Grox model',
+      );
+      expect(result, isNotNull);
+      expect(result!.original, equals('grok'));
+      expect(result.replacement, equals('Grox'));
+      expect(result.confidence, greaterThanOrEqualTo(0.7));
+    });
+
+    test('detects single word standalone correction', () {
+      final result = detector.detectWordCorrection('grok', 'Grox');
+      expect(result, isNotNull);
+      expect(result!.original, equals('grok'));
+      expect(result.replacement, equals('Grox'));
+    });
+
+    test('parses explicit voice correction commands', () {
+      final res1 = detector.parseVoiceCorrection('correction grok to Grox');
+      expect(res1, isNotNull);
+      expect(res1!.original, equals('grok'));
+      expect(res1.replacement, equals('Grox'));
+
+      final res2 = detector.parseVoiceCorrection('replace grok with Grox');
+      expect(res2, isNotNull);
+      expect(res2!.original, equals('grok'));
+      expect(res2.replacement, equals('Grox'));
+    });
+
+    test('returns null when texts are identical', () {
+      final result = detector.detectWordCorrection('identical text', 'identical text');
+      expect(result, isNull);
     });
   });
 }
