@@ -15,7 +15,11 @@ void main() async {
   await Hive.openBox('snippets');
 
   coordinator = StraightCoordinator();
-  await coordinator.bootstrap();
+  try {
+    await coordinator.bootstrap();
+  } catch (e) {
+    debugPrint('Coordinator bootstrap warning: $e');
+  }
 
   runApp(const StraightApp());
 }
