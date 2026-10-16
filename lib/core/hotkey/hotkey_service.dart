@@ -54,15 +54,21 @@ class HotkeyService extends ChangeNotifier {
     }
   }
 
+  bool _isRegistered = false;
+  bool get isRegistered => _isRegistered;
+
   Future<void> reloadFromSettings() async {
     final stored = SettingsStore.getHotkey();
-    await stop();
+    if (_isRegistered) {
+      await stop();
+    }
     _currentHotkey = _hotkeyFromStoredMap(Map.from(stored));
     await start();
     notifyListeners();
   }
 
   Future<void> start() async {
+    if (_isRegistered) return;
     try {
       final isPushToTalk = SettingsStore.getPushToTalk();
       if (isPushToTalk) {
@@ -77,21 +83,26 @@ class HotkeyService extends ChangeNotifier {
           keyDownHandler: (_) => _onHotkeyTriggered?.call(),
         );
       }
+      _isRegistered = true;
     } catch (e) {
       debugPrint('Hotkey registration failed: $e');
     }
   }
 
   Future<void> stop() async {
+    if (!_isRegistered) return;
     try {
       await hotKeyManager.unregister(_currentHotkey);
+      _isRegistered = false;
     } catch (e) {
       debugPrint('Hotkey unregister failed: $e');
     }
   }
 
   Future<void> registerHotkey(HotKey hotkey) async {
-    await stop();
+    if (_isRegistered) {
+      await stop();
+    }
     _currentHotkey = hotkey;
     await start();
     notifyListeners();
@@ -99,7 +110,9 @@ class HotkeyService extends ChangeNotifier {
 
   @override
   void dispose() {
-    stop();
+    if (_isRegistered) {
+      stop();
+    }
     super.dispose();
   }
 }

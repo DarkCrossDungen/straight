@@ -46,18 +46,26 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
   // Give Flutter, including plugins, an opportunity to handle window messages.
-  if (flutter_controller_) {
-    std::optional<LRESULT> result =
-        flutter_controller_->HandleTopLevelWindowProc(hwnd, message, wparam,
-                                                      lparam);
-    if (result) {
-      return *result;
+  try {
+    if (flutter_controller_) {
+      std::optional<LRESULT> result =
+          flutter_controller_->HandleTopLevelWindowProc(hwnd, message, wparam,
+                                                        lparam);
+      if (result) {
+        return *result;
+      }
     }
+  } catch (...) {
+    // Catch any plugin or runtime exception to prevent crash
   }
 
   switch (message) {
     case WM_FONTCHANGE:
-      flutter_controller_->engine()->ReloadSystemFonts();
+      try {
+        if (flutter_controller_ && flutter_controller_->engine()) {
+          flutter_controller_->engine()->ReloadSystemFonts();
+        }
+      } catch (...) {}
       break;
   }
 
