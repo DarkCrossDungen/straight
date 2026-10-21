@@ -49,7 +49,7 @@ class WhisperEngine implements SttEngine {
     final pathPtr = modelPath.toNativeUtf8();
     _ctx = _whisperInit(pathPtr);
     calloc.free(pathPtr);
-    if (_ctx == nullptr) {
+    if (_ctx == null || _ctx == nullptr) {
       throw Exception('Failed to load whisper model: $modelPath');
     }
     _initialized = true;
@@ -57,7 +57,7 @@ class WhisperEngine implements SttEngine {
 
   @override
   Future<String> transcribe(List<int> pcmAudio, {String? initialPrompt}) async {
-    if (!_initialized || _ctx == nullptr) {
+    if (!_initialized || _ctx == null || _ctx == nullptr) {
       throw Exception('Whisper engine not initialized');
     }
 
@@ -90,9 +90,13 @@ class WhisperEngine implements SttEngine {
 
   @override
   Future<void> dispose() async {
-    if (_ctx != nullptr) {
-      _whisperFree(_ctx!);
-      _ctx = nullptr;
+    if (_ctx != null && _ctx != nullptr) {
+      try {
+        _whisperFree(_ctx!);
+      } catch (e) {
+        // Silently catch native free warning
+      }
+      _ctx = null;
     }
     _initialized = false;
   }

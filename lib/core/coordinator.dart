@@ -113,9 +113,21 @@ class StraightCoordinator extends ChangeNotifier {
   }
 
   Future<void> bootstrap() async {
-    await init();
-    await refreshSpeechModel();
-    await refreshCleanupModel();
+    try {
+      await init();
+    } catch (e) {
+      debugPrint('Coordinator init warning: $e');
+    }
+    try {
+      await refreshSpeechModel();
+    } catch (e) {
+      debugPrint('Coordinator speech model warning: $e');
+    }
+    try {
+      await refreshCleanupModel();
+    } catch (e) {
+      debugPrint('Coordinator cleanup model warning: $e');
+    }
   }
 
   void toggleDictation() {
@@ -321,7 +333,11 @@ class StraightCoordinator extends ChangeNotifier {
     if (modelPath == null) {
       _cleanupModelReady = false;
       dictationPipeline.setLlmEngine(null);
-      unawaited(_qwenEngine.dispose());
+      try {
+        await _qwenEngine.dispose();
+      } catch (e) {
+        debugPrint('QwenEngine dispose warning: $e');
+      }
       return;
     }
 
@@ -329,7 +345,11 @@ class StraightCoordinator extends ChangeNotifier {
     if (!await file.exists()) {
       _cleanupModelReady = false;
       dictationPipeline.setLlmEngine(null);
-      unawaited(_qwenEngine.dispose());
+      try {
+        await _qwenEngine.dispose();
+      } catch (e) {
+        debugPrint('QwenEngine dispose warning: $e');
+      }
       return;
     }
 
@@ -343,7 +363,11 @@ class StraightCoordinator extends ChangeNotifier {
     } catch (e) {
       _cleanupModelReady = false;
       dictationPipeline.setLlmEngine(null);
-      unawaited(_qwenEngine.dispose());
+      try {
+        await _qwenEngine.dispose();
+      } catch (e2) {
+        debugPrint('QwenEngine dispose warning: $e2');
+      }
       debugPrint('Cleanup model load error: $e');
     }
   }
@@ -351,8 +375,12 @@ class StraightCoordinator extends ChangeNotifier {
   @override
   void dispose() {
     hotkeyService.dispose();
-    unawaited(sttPipeline.dispose());
-    unawaited(_qwenEngine.dispose());
+    try {
+      sttPipeline.dispose();
+    } catch (_) {}
+    try {
+      _qwenEngine.dispose();
+    } catch (_) {}
     super.dispose();
   }
 }

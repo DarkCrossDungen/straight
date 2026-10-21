@@ -32,7 +32,7 @@ class QwenEngine implements LlmEngine {
     final pathPtr = modelPath.toNativeUtf8();
     _ctx = _init(pathPtr);
     calloc.free(pathPtr);
-    if (_ctx == nullptr) {
+    if (_ctx == null || _ctx == nullptr) {
       throw Exception('Failed to load Qwen model: $modelPath');
     }
     _initialized = true;
@@ -40,7 +40,7 @@ class QwenEngine implements LlmEngine {
 
   @override
   Future<String> complete(String prompt, {int maxTokens = 128}) async {
-    if (!_initialized || _ctx == nullptr) {
+    if (!_initialized || _ctx == null || _ctx == nullptr) {
       throw Exception('Qwen engine not initialized');
     }
 
@@ -59,9 +59,13 @@ class QwenEngine implements LlmEngine {
 
   @override
   Future<void> dispose() async {
-    if (_ctx != nullptr) {
-      _free(_ctx!);
-      _ctx = nullptr;
+    if (_ctx != null && _ctx != nullptr) {
+      try {
+        _free(_ctx!);
+      } catch (e) {
+        // Silently catch native free warning
+      }
+      _ctx = null;
     }
     _initialized = false;
   }
