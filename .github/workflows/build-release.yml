@@ -31,7 +31,8 @@ jobs:
         run: flutter config --enable-windows-desktop
 
       - name: Build Windows release
-        run: flutter build windows --release
+        run: flutter build windows --release --no-enable-impeller
+
 
       - name: Prepare Release bundle and copy prebuilt DLLs
         run: |

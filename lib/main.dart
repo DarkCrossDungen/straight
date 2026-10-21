@@ -31,13 +31,13 @@ void main() async {
     }
 
     coordinator = StraightCoordinator();
+    runApp(const StraightApp());
+
     try {
       await coordinator.bootstrap();
     } catch (e) {
       debugPrint('Coordinator bootstrap warning: $e');
     }
-
-    runApp(const StraightApp());
   }, (error, stack) {
     debugPrint('Global zone caught error: $error\n$stack');
   });
