@@ -1,3 +1,4 @@
+import 'package:hive_flutter/hive_flutter.dart';
 import 'storage_service.dart';
 
 class SettingsStore {
@@ -11,45 +12,122 @@ class SettingsStore {
     'key': 'Space',
   };
 
-  static String getThemeMode() =>
-      StorageService.settings.get('theme', defaultValue: 'dark') as String;
+  static String getThemeMode() {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        return StorageService.settings.get('theme', defaultValue: 'dark') as String;
+      }
+    } catch (_) {}
+    return 'dark';
+  }
 
-  static Future<void> setThemeMode(String value) async =>
-      StorageService.settings.put('theme', value);
+  static Future<void> setThemeMode(String value) async {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        await StorageService.settings.put('theme', value);
+      }
+    } catch (_) {}
+  }
 
-  static Map getHotkey() =>
-      StorageService.settings.get('hotkey', defaultValue: _defaultHotkey) as Map;
+  static Map getHotkey() {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        return StorageService.settings.get('hotkey', defaultValue: _defaultHotkey) as Map;
+      }
+    } catch (_) {}
+    return _defaultHotkey;
+  }
 
-  static Future<void> setHotkey(Map value) async =>
-      StorageService.settings.put('hotkey', value);
+  static Future<void> setHotkey(Map value) async {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        await StorageService.settings.put('hotkey', value);
+      }
+    } catch (_) {}
+  }
 
-  static String getSttModel() =>
-      StorageService.settings.get('sttModel', defaultValue: defaultSttModel) as String;
+  static String getSttModel() {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        return StorageService.settings.get('sttModel', defaultValue: defaultSttModel) as String;
+      }
+    } catch (_) {}
+    return defaultSttModel;
+  }
 
-  static Future<void> setSttModel(String value) async =>
-      StorageService.settings.put('sttModel', value);
+  static Future<void> setSttModel(String value) async {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        await StorageService.settings.put('sttModel', value);
+      }
+    } catch (_) {}
+  }
 
-  static String getLlmModel() =>
-      StorageService.settings.get('llmModel', defaultValue: defaultLlmModel) as String;
+  static String getLlmModel() {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        return StorageService.settings.get('llmModel', defaultValue: defaultLlmModel) as String;
+      }
+    } catch (_) {}
+    return defaultLlmModel;
+  }
 
-  static Future<void> setLlmModel(String value) async =>
-      StorageService.settings.put('llmModel', value);
+  static Future<void> setLlmModel(String value) async {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        await StorageService.settings.put('llmModel', value);
+      }
+    } catch (_) {}
+  }
 
-  static bool getStartOnBoot() =>
-      StorageService.settings.get('startOnBoot', defaultValue: false) as bool;
+  static bool getStartOnBoot() {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        return StorageService.settings.get('startOnBoot', defaultValue: false) as bool;
+      }
+    } catch (_) {}
+    return false;
+  }
 
-  static Future<void> setStartOnBoot(bool value) async =>
-      StorageService.settings.put('startOnBoot', value);
+  static Future<void> setStartOnBoot(bool value) async {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        await StorageService.settings.put('startOnBoot', value);
+      }
+    } catch (_) {}
+  }
 
-  static bool getPushToTalk() =>
-      StorageService.settings.get('pushToTalk', defaultValue: false) as bool;
+  static bool getPushToTalk() {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        return StorageService.settings.get('pushToTalk', defaultValue: false) as bool;
+      }
+    } catch (_) {}
+    return false;
+  }
 
-  static Future<void> setPushToTalk(bool value) async =>
-      StorageService.settings.put('pushToTalk', value);
+  static Future<void> setPushToTalk(bool value) async {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        await StorageService.settings.put('pushToTalk', value);
+      }
+    } catch (_) {}
+  }
 
-  static bool getWhisperMode() =>
-      StorageService.settings.get('whisperMode', defaultValue: false) as bool;
+  static bool getWhisperMode() {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        return StorageService.settings.get('whisperMode', defaultValue: false) as bool;
+      }
+    } catch (_) {}
+    return false;
+  }
 
-  static Future<void> setWhisperMode(bool value) async =>
-      StorageService.settings.put('whisperMode', value);
+  static Future<void> setWhisperMode(bool value) async {
+    try {
+      if (Hive.isBoxOpen('settings')) {
+        await StorageService.settings.put('whisperMode', value);
+      }
+    } catch (_) {}
+  }
 }

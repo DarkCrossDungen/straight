@@ -1,10 +1,10 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
 class StorageService {
-  static final settings = Hive.box('settings');
-  static final dictionary = Hive.box('dictionary');
-  static final history = Hive.box('history');
-  static final snippets = Hive.box('snippets');
+  static Box get settings => Hive.box('settings');
+  static Box get dictionary => Hive.box('dictionary');
+  static Box get history => Hive.box('history');
+  static Box get snippets => Hive.box('snippets');
 
   Future<void> clearAll() async {
     await settings.clear();
