@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+# User data in ~/.local/share/straight (dictionary, history, settings) is
+# intentionally left behind so an upgrade keeps it.
+exit 0

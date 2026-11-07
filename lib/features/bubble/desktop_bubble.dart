@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi' hide Size;
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -11,9 +12,18 @@ import 'package:window_manager/window_manager.dart';
 
 Future<void> runDesktopBubble(int port) async {
   await windowManager.ensureInitialized();
-  const options = WindowOptions(
-    size: _BubbleChrome.windowSize,
-    backgroundColor: Colors.transparent,
+  // Flutter's Linux host cannot make a window transparent, so a canvas larger
+  // than the pill would paint as a black slab over the desktop. There the
+  // window is exactly the chip and never takes focus away from the text box
+  // being dictated into.
+  final initialSize = Platform.isLinux
+      ? _BubbleChrome.linuxIdleSize
+      : _BubbleChrome.windowSize;
+  final options = WindowOptions(
+    size: initialSize,
+    backgroundColor: Platform.isLinux
+        ? _BubbleChrome.surface
+        : Colors.transparent,
     skipTaskbar: true,
     titleBarStyle: TitleBarStyle.hidden,
     windowButtonVisibility: false,
@@ -23,12 +33,47 @@ Future<void> runDesktopBubble(int port) async {
       await windowManager.setAlwaysOnTop(true);
       await windowManager.setResizable(false);
       await windowManager.setPreventClose(true);
-      await _placeAtBottomCenter(_BubbleChrome.windowSize);
+      if (Platform.isLinux) _neverTakeFocus();
+      await _placeAtBottomCenter(initialSize);
       await windowManager.setOpacity(_BubbleChrome.compactOpacity);
       await windowManager.show();
     }),
   );
   runApp(_DesktopBubbleApp(port: port));
+}
+
+/// Keeps the bubble from stealing the caret. AT-SPI types into whichever
+/// editable object holds focus, so a focused bubble would break dictation.
+void _neverTakeFocus() {
+  try {
+    final gtk = DynamicLibrary.open('libgtk-3.so.0');
+    final list = gtk
+        .lookupFunction<
+          Pointer<Void> Function(),
+          Pointer<Void> Function()
+        >('gtk_window_list_toplevel_windows')();
+    if (list.address == 0) return;
+    final node = list.cast<_GList>().ref;
+    final acceptFocus = gtk
+        .lookupFunction<
+          Void Function(Pointer<Void>, Int32),
+          void Function(Pointer<Void>, int)
+        >('gtk_window_set_accept_focus');
+    final freeList = gtk
+        .lookupFunction<Void Function(Pointer<Void>), void Function(Pointer<Void>)>(
+          'g_list_free',
+        );
+    acceptFocus(node.data, 0);
+    freeList(list);
+  } catch (_) {
+    // Without GTK the window simply behaves like any other small window.
+  }
+}
+
+base class _GList extends Struct {
+  external Pointer<Void> data;
+  external Pointer<_GList> next;
+  external Pointer<_GList> prev;
 }
 
 Future<void> _placeAtBottomCenter(Size size) async {
@@ -48,7 +93,7 @@ Future<Rect> _visibleBounds() async {
   return origin & size;
 }
 
-enum _BubblePhase { idle, listening, processing, copyFallback }
+enum _BubblePhase { idle, listening, processing, copyFallback, notice }
 
 class _BubbleChrome {
   // The native host stays at the largest visual size from startup. Windows
@@ -59,6 +104,14 @@ class _BubbleChrome {
   static const listeningVisualSize = Size(72, 30);
   static const processingVisualSize = Size(52, 9);
   static const edgeGap = 16.0;
+
+  // On Linux the window *is* the chip, so these are sized to be readable
+  // rather than to sit inside a larger transparent canvas.
+  static const linuxIdleSize = Size(76, 18);
+  static const linuxListeningSize = Size(152, 46);
+  static const linuxProcessingSize = Size(96, 20);
+  static const linuxCopySize = Size(380, 140);
+  static const linuxNoticeSize = Size(380, 62);
 
   static const compactOpacity = 0.94;
 
@@ -101,6 +154,8 @@ class _DesktopBubbleState extends State<_DesktopBubble>
   late final AnimationController _copyCountdown;
   _BubblePhase _phase = _BubblePhase.idle;
   String? _copyText;
+  String? _noticeText;
+  Timer? _noticeTimer;
   Socket? _socket;
   double _speechLevel = 0;
   bool _copyConfirmed = false;
@@ -127,6 +182,7 @@ class _DesktopBubbleState extends State<_DesktopBubble>
   void dispose() {
     _motion.dispose();
     _copyCountdown.dispose();
+    _noticeTimer?.cancel();
     _socket?.destroy();
     super.dispose();
   }
@@ -154,6 +210,9 @@ class _DesktopBubbleState extends State<_DesktopBubble>
             case 'copy':
               final text = data['text'] as String?;
               if (text != null && text.trim().isNotEmpty) _showCopy(text);
+            case 'notice':
+              final text = data['text'] as String?;
+              if (text != null && text.trim().isNotEmpty) _showNotice(text);
             case 'level':
               final value = (data['value'] as num?)?.toDouble();
               if (value != null && mounted) {
@@ -164,8 +223,15 @@ class _DesktopBubbleState extends State<_DesktopBubble>
             case 'show':
               _showIdle();
           }
-        });
+        }, onDone: _quit, onError: (Object _) => _quit());
     _sendToMain('bubble_ready');
+  }
+
+  /// The main process owns this window. If its control socket closes, the
+  /// bubble is an orphan and would keep covering the desktop.
+  void _quit() {
+    unawaited(windowManager.hide());
+    exit(0);
   }
 
   void _sendToMain(String method, [Map<String, dynamic>? arguments]) {
@@ -176,19 +242,45 @@ class _DesktopBubbleState extends State<_DesktopBubble>
     if (!mounted) return;
     final wasCopyFallback = _phase == _BubblePhase.copyFallback;
     _copyCountdown.stop();
+    _noticeTimer?.cancel();
     setState(() {
       _phase = phase;
       _copyText = null;
+      _noticeText = null;
       _copyConfirmed = false;
       _copyCollapsing = false;
       if (phase != _BubblePhase.listening) _speechLevel = 0;
     });
+    unawaited(_resizeForPhase());
     if (wasCopyFallback && phase != _BubblePhase.copyFallback) {
-      unawaited(_placeAtBottomCenter(_BubbleChrome.windowSize));
+      unawaited(_placeAtBottomCenter(_visualSize));
       unawaited(windowManager.setOpacity(_BubbleChrome.compactOpacity));
     } else if (phase != _BubblePhase.copyFallback) {
       unawaited(_keepAboveOtherWindows());
     }
+  }
+
+  Size get _visualSize => Platform.isLinux
+      ? switch (_phase) {
+          _BubblePhase.idle => _BubbleChrome.linuxIdleSize,
+          _BubblePhase.listening => _BubbleChrome.linuxListeningSize,
+          _BubblePhase.processing => _BubbleChrome.linuxProcessingSize,
+          _BubblePhase.copyFallback => _BubbleChrome.linuxCopySize,
+          _BubblePhase.notice => _BubbleChrome.linuxNoticeSize,
+        }
+      : switch (_phase) {
+          _BubblePhase.idle => _BubbleChrome.idleVisualSize,
+          _BubblePhase.listening => _BubbleChrome.listeningVisualSize,
+          _BubblePhase.processing => _BubbleChrome.processingVisualSize,
+          _BubblePhase.copyFallback => _BubbleChrome.windowSize,
+          _BubblePhase.notice => _BubbleChrome.windowSize,
+        };
+
+  Future<void> _resizeForPhase() async {
+    if (!Platform.isLinux) return;
+    final size = _visualSize;
+    await windowManager.setSize(size);
+    await _placeAtBottomCenter(size);
   }
 
   void _showCopy(String text) {
@@ -199,7 +291,8 @@ class _DesktopBubbleState extends State<_DesktopBubble>
       _copyConfirmed = false;
       _copyCollapsing = false;
     });
-    unawaited(_placeAtBottomCenter(_BubbleChrome.windowSize));
+    unawaited(_resizeForPhase());
+    unawaited(_placeAtBottomCenter(_visualSize));
     unawaited(windowManager.setOpacity(1));
     unawaited(_keepAboveOtherWindows());
     _copyCountdown.forward(from: 0);
@@ -207,8 +300,28 @@ class _DesktopBubbleState extends State<_DesktopBubble>
 
   void _showIdle() => _setPhase(_BubblePhase.idle);
 
+  /// Failures used to be written to a status field no widget ever read, so a
+  /// dead microphone looked exactly like a dead shortcut.
+  void _showNotice(String text) {
+    if (!mounted) return;
+    _noticeTimer?.cancel();
+    setState(() {
+      _phase = _BubblePhase.notice;
+      _noticeText = text;
+    });
+    unawaited(_resizeForPhase());
+    unawaited(windowManager.setOpacity(1));
+    unawaited(_keepAboveOtherWindows());
+    _noticeTimer = Timer(const Duration(seconds: 7), () {
+      if (mounted && _phase == _BubblePhase.notice) _showIdle();
+    });
+  }
+
   Future<void> _keepAboveOtherWindows() async {
     await windowManager.setAlwaysOnTop(true);
+    // Re-showing would raise and focus the chip on some desktops, taking the
+    // caret away from the app being dictated into.
+    if (Platform.isLinux) return;
     await windowManager.show();
   }
 
@@ -258,8 +371,35 @@ class _DesktopBubbleState extends State<_DesktopBubble>
               _BubblePhase.listening => _listening(),
               _BubblePhase.processing => _processing(),
               _BubblePhase.copyFallback => _copyCard(),
+              _BubblePhase.notice => _noticeCard(),
             },
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _noticeCard() {
+    final size = Platform.isLinux ? _visualSize : const Size(400, 62);
+    return Container(
+      width: size.width,
+      height: size.height,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: _BubbleChrome.copySurface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        _noticeText ?? '',
+        textAlign: TextAlign.center,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: Color(0xFFE3E3E3),
+          fontSize: 12.5,
+          height: 1.25,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -291,10 +431,10 @@ class _DesktopBubbleState extends State<_DesktopBubble>
 
   Widget _idle() {
     return _pill(
-      size: _BubbleChrome.idleVisualSize,
+      size: _visualSize,
       child: _wave(
-        width: 27,
-        height: 5,
+        width: Platform.isLinux ? 44 : 27,
+        height: Platform.isLinux ? 7 : 5,
         count: 7,
         range: 0.05,
         opacity: 0.72,
@@ -305,12 +445,12 @@ class _DesktopBubbleState extends State<_DesktopBubble>
 
   Widget _listening() {
     return _pill(
-      size: _BubbleChrome.listeningVisualSize,
+      size: _visualSize,
       surface: _BubbleChrome.activeSurface,
       child: _wave(
-        width: 50,
-        height: 13,
-        count: 13,
+        width: Platform.isLinux ? 108 : 50,
+        height: Platform.isLinux ? 26 : 13,
+        count: Platform.isLinux ? 17 : 13,
         range: 0.78,
         speechLevel: _speechLevel,
         mode: _WaveMode.speech,
@@ -320,10 +460,10 @@ class _DesktopBubbleState extends State<_DesktopBubble>
 
   Widget _processing() {
     return _pill(
-      size: _BubbleChrome.processingVisualSize,
+      size: _visualSize,
       child: _wave(
-        width: 31,
-        height: 5,
+        width: Platform.isLinux ? 56 : 31,
+        height: Platform.isLinux ? 8 : 5,
         count: 9,
         range: 0.04,
         opacity: 0.72,
@@ -364,9 +504,14 @@ class _DesktopBubbleState extends State<_DesktopBubble>
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
         child: Container(
+          width: _visualSize.width,
+          height: _visualSize.height,
           decoration: BoxDecoration(
             color: _BubbleChrome.copySurface,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius:
+                Platform.isLinux
+                    ? BorderRadius.zero
+                    : BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.28),
@@ -375,7 +520,7 @@ class _DesktopBubbleState extends State<_DesktopBubble>
               ),
             ],
           ),
-          padding: const EdgeInsets.fromLTRB(18, 13, 18, 18),
+          padding: EdgeInsets.fromLTRB(18, 13, 18, Platform.isLinux ? 13 : 18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

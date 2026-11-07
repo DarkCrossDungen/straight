@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:straight/core/storage/settings_store.dart';
 import 'package:straight/core/startup/startup_service.dart';
@@ -157,28 +159,36 @@ class _SettingsPageState extends State<SettingsPage> {
               await StartupService.setEnabled(value);
             },
           ),
-          const Divider(),
-          _switchRow(
-            icon: Icons.graphic_eq_rounded,
-            title: 'Desktop bubble',
-            subtitle: 'Keep a small dictation control over other apps',
-            value: _desktopBubble,
-            onChanged: (value) async {
-              setState(() => _desktopBubble = value);
-              await DesktopBubbleService.instance.setEnabled(value);
-            },
-          ),
-          const Divider(),
-          _switchRow(
-            icon: Icons.keyboard_voice,
-            title: 'Push to talk',
-            subtitle: 'Hold the hotkey to record',
-            value: _pushToTalk,
-            onChanged: (value) async {
-              setState(() => _pushToTalk = value);
-              await SettingsStore.setPushToTalk(value);
-            },
-          ),
+          // Needs a transparent overlay window, which the Linux build cannot
+          // create yet.
+          if (!Platform.isLinux) ...[
+            const Divider(),
+            _switchRow(
+              icon: Icons.graphic_eq_rounded,
+              title: 'Desktop bubble',
+              subtitle: 'Keep a small dictation control over other apps',
+              value: _desktopBubble,
+              onChanged: (value) async {
+                setState(() => _desktopBubble = value);
+                await DesktopBubbleService.instance.setEnabled(value);
+              },
+            ),
+          ],
+          // A desktop-registered shortcut only reports the press, so holding
+          // the key to record is impossible on Wayland.
+          if (!Platform.isLinux) ...[
+            const Divider(),
+            _switchRow(
+              icon: Icons.keyboard_voice,
+              title: 'Push to talk',
+              subtitle: 'Hold the hotkey to record',
+              value: _pushToTalk,
+              onChanged: (value) async {
+                setState(() => _pushToTalk = value);
+                await SettingsStore.setPushToTalk(value);
+              },
+            ),
+          ],
           const SizedBox(height: 16),
           AppSurface(
             padding: const EdgeInsets.all(12),

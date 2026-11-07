@@ -223,11 +223,7 @@ static int _load_whisper(void) {
 #endif
     LOAD(init_from_file);
     LOAD(free);
-    _w.full_default_params_by_ref = (void*)GetProcAddress(mod, "whisper_full_default_params_by_ref");
-    if (!_w.full_default_params_by_ref) {
-        snprintf(_last_error, sizeof(_last_error), "Missing export: whisper_full_default_params_by_ref");
-        return 0;
-    }
+    LOAD(full_default_params_by_ref);
     LOAD(full);
     LOAD(full_n_segments);
     LOAD(full_get_segment_text);

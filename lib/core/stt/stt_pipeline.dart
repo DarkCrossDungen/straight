@@ -10,6 +10,11 @@ import 'moonshine_engine.dart';
 enum SttPipelineState { idle, listening, processing }
 
 class SttPipeline {
+  static const _noSpeechWindow = Duration(seconds: 8);
+  static const _maxUtterance = Duration(seconds: 120);
+  static const _watchdogInterval = Duration(milliseconds: 500);
+  static const _lockedPauseMs = 5000;
+
   final AudioRecorder _recorder = AudioRecorder();
   final VoiceActivityDetector _vad = VoiceActivityDetector();
   SttEngine? _engine;
@@ -24,6 +29,9 @@ class SttPipeline {
   int _lastSpeechTimestamp = 0;
   bool _heardSpeechInBuffer = false;
   bool _isAutoStopping = false;
+  DateTime? _startedAt;
+  Timer? _watchdog;
+  double _peakClipping = 0;
 
   SttPipelineState _state = SttPipelineState.idle;
   SttPipelineState get state => _state;
@@ -33,10 +41,33 @@ class SttPipeline {
     return DateTime.now().millisecondsSinceEpoch - _lastSpeechTimestamp;
   }
 
+  /// Explains a silent session when the microphone, not the user, is at fault.
+  /// Both conditions destroy speech before any engine can read it, and both
+  /// are fixed by lowering the system input volume.
+  String? get microphoneWarning {
+    if (_vad.hearsOnlyStatic) {
+      return 'Microphone hears only static, not voices. Check it is plugged in and not muted.';
+    }
+    if (_peakClipping > 0.02) {
+      return 'Microphone is clipping. Lower the input volume in Sound settings.';
+    }
+    if (_vad.noiseFloor > 0.05) {
+      return 'Microphone hears constant loud noise. Lower the input volume in Sound settings.';
+    }
+    return null;
+  }
+
   void Function(SttPipelineState state)? onStateChanged;
   void Function(double level)? onAudioLevel;
   void Function(String text)? onResult;
   void Function(Object error)? onError;
+
+  /// Fires when a listening session was closed because nothing was said.
+  void Function()? onNoSpeech;
+
+  /// When true a pause in speech does not end the session, so the user can
+  /// dictate across several sentences and stop with one press.
+  bool keepsListeningPastSilence = false;
 
   Future<void> prepareMicrophone() async {
     if (_microphonePrimed) return;
@@ -112,6 +143,9 @@ class SttPipeline {
     _vad.reset();
     _isProcessing = false;
     _heardSpeechInBuffer = false;
+    keepsListeningPastSilence = false;
+    _startedAt = DateTime.now();
+    _peakClipping = 0;
 
     try {
       final hasPermission = await _recorder.hasPermission();
@@ -131,15 +165,72 @@ class SttPipeline {
           onError?.call(error);
         },
       );
+      _startWatchdog();
     } catch (e) {
       _setState(SttPipelineState.idle);
       onError?.call(e);
     }
   }
 
+  /// Wayland hands the shortcut over as a press with no matching release, so
+  /// nobody is guaranteed to be there to switch the microphone off. The
+  /// watchdog is what keeps a missed press from leaving it open.
+  void _startWatchdog() {
+    _watchdog?.cancel();
+    _watchdog = Timer.periodic(_watchdogInterval, (_) {
+      final started = _startedAt;
+      if (_state != SttPipelineState.listening || started == null) return;
+      if (_isAutoStopping || _isProcessing) return;
+      final elapsed = DateTime.now().difference(started);
+
+      if (!_heardSpeechInBuffer) {
+        if (elapsed >= _noSpeechWindow) {
+          _stopWatchdog();
+          unawaited(_abortAsSilence());
+        }
+        return;
+      }
+
+      final silenceFor =
+          DateTime.now().millisecondsSinceEpoch - _lastSpeechTimestamp;
+      final heldTooLong =
+          keepsListeningPastSilence &&
+          !_vad.isSpeaking &&
+          silenceFor >= _lockedPauseMs &&
+          _buffer.length > 16000;
+      if (heldTooLong || elapsed >= _maxUtterance) {
+        _stopWatchdog();
+        _pendingTranscription = _stopAfterSpeechPause();
+      }
+    });
+  }
+
+  void _stopWatchdog() {
+    _watchdog?.cancel();
+    _watchdog = null;
+  }
+
+  Future<void> _abortAsSilence() async {
+    if (_isAutoStopping) return;
+    _isAutoStopping = true;
+    try {
+      await _subscription?.cancel();
+      _subscription = null;
+      await _recorder.stop();
+    } finally {
+      _buffer = [];
+      _heardSpeechInBuffer = false;
+      _startedAt = null;
+      _setState(SttPipelineState.idle);
+      _isAutoStopping = false;
+      onNoSpeech?.call();
+    }
+  }
+
   void _onAudioChunk(Uint8List chunk) {
     _vad.processChunk(chunk);
-    onAudioLevel?.call(_vad.level);
+    if (_vad.clippedRatio > _peakClipping) _peakClipping = _vad.clippedRatio;
+    onAudioLevel?.call(_vad.speechLevel);
 
     final samples = _convertToInt16(chunk);
     _buffer.addAll(samples);
@@ -156,7 +247,11 @@ class SttPipeline {
       return;
     }
 
-    if (!_vad.isSpeaking && !_isProcessing && _buffer.length > 16000) {
+    if (!_vad.isSpeaking &&
+        !keepsListeningPastSilence &&
+        !_isProcessing &&
+        _buffer.length > 16000) {
+      _stopWatchdog();
       _pendingTranscription = _stopAfterSpeechPause();
     }
   }
@@ -172,6 +267,8 @@ class SttPipeline {
     } finally {
       _buffer = [];
       _heardSpeechInBuffer = false;
+      _startedAt = null;
+      keepsListeningPastSilence = false;
       _pendingTranscription = null;
       _setState(SttPipelineState.idle);
       _isAutoStopping = false;
@@ -208,6 +305,7 @@ class SttPipeline {
   }
 
   Future<void> stop() async {
+    _stopWatchdog();
     if (_isAutoStopping) {
       await _pendingTranscription;
       return;
@@ -226,6 +324,8 @@ class SttPipeline {
     }
     _buffer = [];
     _heardSpeechInBuffer = false;
+    _startedAt = null;
+    keepsListeningPastSilence = false;
     _isProcessing = false;
     _pendingTranscription = null;
     _setState(SttPipelineState.idle);

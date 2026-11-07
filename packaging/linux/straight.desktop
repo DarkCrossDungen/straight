@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Straight
+GenericName=Voice Dictation
+Comment=Speak naturally — Straight cleans up your words and types them into the app in front of you.
+Exec=/opt/straight/straight
+Icon=straight
+Terminal=false
+Categories=Utility;Accessibility;AudioVideo;
+Keywords=dictation;speech;voice;typing;transcription;
+StartupWMClass=com.straight.straight

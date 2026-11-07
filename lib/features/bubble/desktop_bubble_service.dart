@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:straight/core/app_navigation.dart';
+import 'package:straight/core/app_paths.dart';
 import 'package:straight/core/coordinator.dart';
 import 'package:straight/core/storage/settings_store.dart';
 import 'package:window_manager/window_manager.dart';
@@ -28,6 +29,8 @@ class DesktopBubbleService {
     _coordinator = coordinator;
     coordinator.addListener(_syncDictationState);
 
+    // The shortcut port exists even with the bubble switched off.
+    await _ensureServer();
     if (!SettingsStore.getDesktopBubbleEnabled()) return;
     if (launchedAtLogin) {
       _startupDelay = Timer(const Duration(minutes: 2), () {
@@ -68,15 +71,22 @@ class DesktopBubbleService {
   Future<void> _ensureServer() async {
     if (_server != null) return;
     _server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
-    _server!.listen(_acceptBubble);
+    _server!.listen(_acceptClient);
   }
 
-  void _acceptBubble(Socket socket) {
-    _bubbleSocket?.destroy();
-    _bubbleSocket = socket;
-    _bubbleReady = false;
-    _lastSentState = null;
-    _lastSentSpeechLevel = -1;
+  /// Publishes the port so the desktop shortcut can reach this instance.
+  ///
+  /// Wayland refuses global key grabs to applications, so the shortcut is a
+  /// desktop entry that runs `straight --toggle`. Announcing before the speech
+  /// model loads would make that first press land on a deaf instance and look
+  /// like a broken shortcut.
+  Future<void> markReady() async {
+    final server = _server;
+    if (server == null) return;
+    await bubbleControlFile.writeAsString('${server.port}\n');
+  }
+
+  void _acceptClient(Socket socket) {
     socket
         .cast<List<int>>()
         .transform(utf8.decoder)
@@ -86,12 +96,19 @@ class DesktopBubbleService {
             final data = jsonDecode(line) as Map<String, dynamic>;
             switch (data['method'] as String?) {
               case 'bubble_ready':
+                _bubbleSocket?.destroy();
+                _bubbleSocket = socket;
                 _bubbleReady = true;
+                _lastSentState = null;
+                _lastSentSpeechLevel = -1;
                 unawaited(_syncDictationState());
               case 'show_main':
                 unawaited(_showMainWindow());
               case 'toggle_dictation':
                 _coordinator?.toggleDictation();
+                // One-shot clients (the desktop shortcut) leave as soon as
+                // they are served; the bubble keeps its connection open.
+                if (!identical(_bubbleSocket, socket)) socket.destroy();
               case 'show_settings':
                 unawaited(_showSettings());
             }
@@ -124,6 +141,8 @@ class DesktopBubbleService {
     }
     final fallback = coordinator.takeCopyFallbackText();
     if (fallback != null) _send('copy', {'text': fallback});
+    final notice = coordinator.takeNotice();
+    if (notice != null) _send('notice', {'text': notice});
   }
 
   Future<void> _showMainWindow() async {

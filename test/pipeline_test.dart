@@ -354,9 +354,35 @@ void main() {
       handler = BacktrackHandler();
     });
 
-    test('removes scratch that', () {
+    test('leaves a trailing scratch that for the command parser', () {
       final result = handler.process('hello world scratch that');
-      expect(result, isNot(contains('scratch that')));
+      expect(result, 'hello world scratch that');
+    });
+
+    test('scratch that retracts the interrupted sentence', () {
+      final result = handler.process(
+        'the meeting is at three pm scratch that make it four pm',
+      );
+      expect(result, 'make it four pm');
+    });
+
+    test('scratch that keeps earlier sentences', () {
+      final result = handler.process(
+        'send the report today. the meeting is at three scratch that it is at four',
+      );
+      expect(result, 'send the report today. it is at four');
+    });
+
+    test('never mind retracts only when a correction follows', () {
+      expect(handler.process('hello world never mind'), 'hello world never mind');
+      expect(handler.process('hello world never mind goodbye'), 'goodbye');
+    });
+
+    test('scratch that after a full stop retracts that sentence', () {
+      final result = handler.process(
+        'keep this. drop that sentence. scratch that here is the replacement',
+      );
+      expect(result, 'keep this. here is the replacement');
     });
 
     test('removes no wait', () {

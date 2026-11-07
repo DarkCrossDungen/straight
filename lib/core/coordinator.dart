@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'hotkey/hotkey_service.dart';
+import 'hotkey/input_access.dart';
+import 'hotkey/keyboard_watcher.dart';
 import 'stt/stt_pipeline.dart';
 import 'injection/text_injector.dart';
 import 'pipeline/dictation_pipeline.dart';
@@ -17,6 +19,11 @@ import 'windows/media_control_service.dart';
 enum DictationState { idle, listening, processing }
 
 class StraightCoordinator extends ChangeNotifier {
+  static const _doubleTapWindow = Duration(milliseconds: 400);
+
+  /// How long a release waits before stopping, so a second tap can turn a hold
+  /// into locked dictation instead.
+  static const _tapGrace = Duration(milliseconds: 260);
   final HotkeyService hotkeyService = HotkeyService();
   final SttPipeline sttPipeline = SttPipeline();
   final TextInjector textInjector = TextInjector();
@@ -36,11 +43,16 @@ class StraightCoordinator extends ChangeNotifier {
   bool _cleanupModelReady = false;
   String? _copyFallbackText;
   String? get copyFallbackText => _copyFallbackText;
+  String? _notice;
   Completer<String?>? _pronunciationCapture;
   bool get isCapturingPronunciation => _pronunciationCapture != null;
   bool _discardNextTranscription = false;
   bool _hotkeyRegistered = true;
   DateTime? _hotkeyPressedAt;
+  DateTime? _lastPressAt;
+  KeyboardWatcher? _watcher;
+  Timer? _tapGraceTimer;
+  DateTime? _rawKeyEventAt;
   Timer? _hotkeyReleaseWatcher;
   bool _mediaWasPaused = false;
   String? _lastActiveApp;
@@ -54,9 +66,18 @@ class StraightCoordinator extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _setStatus(String message) {
+  void _setStatus(String message, {bool alert = false}) {
     _statusMessage = message;
+    if (alert) _notice = message;
     notifyListeners();
+  }
+
+  /// One-shot problem report for the bubble. Routine status stays out of it so
+  /// the chip does not nag after every successful dictation.
+  String? takeNotice() {
+    final message = _notice;
+    _notice = null;
+    return message;
   }
 
   String? takeCopyFallbackText() {
@@ -74,10 +95,17 @@ class StraightCoordinator extends ChangeNotifier {
       onKeyDown: _onKeyDown,
       onKeyUp: _onKeyUp,
     );
-    _hotkeyRegistered = await hotkeyService.reloadFromSettings();
+    // On Linux the desktop owns the key and notifies us over the control port,
+    // so grabbing a shortcut inside the app would only ever fail.
+    _hotkeyRegistered =
+        Platform.isLinux || await hotkeyService.reloadFromSettings();
     if (!_hotkeyRegistered) {
-      _setStatus('Hotkey unavailable. Choose another shortcut in Settings.');
+      _setStatus(
+        'Hotkey unavailable. Choose another shortcut in Settings.',
+        alert: true,
+      );
     }
+    unawaited(_startWatcher());
 
     sttPipeline.onStateChanged = (s) {
       switch (s) {
@@ -94,11 +122,16 @@ class StraightCoordinator extends ChangeNotifier {
     };
 
     sttPipeline.onResult = _onTranscription;
+    sttPipeline.onNoSpeech = () {
+      _setStatus(
+        sttPipeline.microphoneWarning ??
+            'Heard no speech. Press the shortcut and start talking.',
+        alert: true,
+      );
+    };
     sttPipeline.onAudioLevel = (level) {
       if (_state != DictationState.listening) return;
-      // Typical close-mic speech sits well below a raw RMS value of 0.05.
-      // Map that useful range into 0..1 for the companion visual only.
-      _speechLevel = ((level - 0.003) / 0.047).clamp(0.0, 1.0).toDouble();
+      _speechLevel = level;
       notifyListeners();
     };
     sttPipeline.onError = (e) {
@@ -108,6 +141,7 @@ class StraightCoordinator extends ChangeNotifier {
         message.contains('Microphone permission denied')
             ? 'Microphone permission denied'
             : 'Speech engine error',
+        alert: true,
       );
       _setState(DictationState.idle);
       unawaited(_resumeMediaIfNeeded());
@@ -178,16 +212,111 @@ class StraightCoordinator extends ChangeNotifier {
   }
 
   void toggleDictation() {
+    // When raw keys are readable, the same physical press also arrives here
+    // through the desktop shortcut, which cannot report a release. The watcher
+    // owns that press instead.
+    final rawEvent = _rawKeyEventAt;
+    if (_watcher != null &&
+        rawEvent != null &&
+        DateTime.now().difference(rawEvent) < _doubleTapWindow) {
+      return;
+    }
+
+    final now = DateTime.now();
+    final sinceLastPress = _lastPressAt == null
+        ? null
+        : now.difference(_lastPressAt!);
+    _lastPressAt = now;
+
     switch (_state) {
       case DictationState.idle:
         _startDictation();
         break;
       case DictationState.listening:
+        // A desktop shortcut only reports presses, never a release, so a quick
+        // second press is the only way to say "keep recording until I stop
+        // you". One press ends the session instead.
+        if (sinceLastPress != null &&
+            sinceLastPress < _doubleTapWindow &&
+            !sttPipeline.keepsListeningPastSilence) {
+          sttPipeline.keepsListeningPastSilence = true;
+          _setStatus('Locked. Press the shortcut again to stop.');
+          return;
+        }
         _stopDictation();
         break;
       case DictationState.processing:
         break;
     }
+  }
+
+  /// Starts the raw-key reader when the machine allows it. Without read access
+  /// to /dev/input this returns quietly and presses-only behavior stays.
+  Future<void> _startWatcher() async {
+    if (!InputAccess.isSupported || _watcher != null) return;
+    final watcher = await KeyboardWatcher.start(
+      HotkeySpec.fromSettings(SettingsStore.getHotkey()),
+    );
+    if (watcher == null) return;
+    _watcher = watcher;
+    watcher.events.listen(_onRawKeyEvent);
+    notifyListeners();
+  }
+
+  /// Whether raw key events are readable, so a hold can be told from a tap.
+  bool get holdToRecordReady => _watcher != null;
+
+  /// Retries the raw-key reader after the user grants keyboard access.
+  Future<bool> enableHoldToRecord() async {
+    await _startWatcher();
+    return _watcher != null;
+  }
+
+  /// Hold to record, release to stop, double tap to lock dictation until the
+  /// next tap. Only possible with raw key events, because Wayland hands a
+  /// shortcut over as a press with no matching release.
+  void _onRawKeyEvent(KeyboardEvent event) {
+    _rawKeyEventAt = DateTime.now();
+
+    if (event.isDown) {
+      final waitingForSecondTap = _tapGraceTimer != null;
+      _tapGraceTimer?.cancel();
+      _tapGraceTimer = null;
+
+      if (waitingForSecondTap && _state == DictationState.listening) {
+        sttPipeline.keepsListeningPastSilence = true;
+        _setStatus('Locked. Press again to stop.');
+        return;
+      }
+      switch (_state) {
+        case DictationState.idle:
+          _lastPressAt = DateTime.now();
+          unawaited(_startDictation());
+        case DictationState.listening:
+          unawaited(_stopDictation());
+        case DictationState.processing:
+          break;
+      }
+      return;
+    }
+
+    if (_state != DictationState.listening ||
+        sttPipeline.keepsListeningPastSilence) {
+      return;
+    }
+    // Releasing stops recording, but only after a tap has had a chance to be
+    // the second half of a double tap.
+    _tapGraceTimer = Timer(_tapGrace, () {
+      _tapGraceTimer = null;
+      if (_state == DictationState.listening) unawaited(_stopDictation());
+    });
+  }
+
+  /// Points every shortcut layer at the stored hotkey.
+  Future<bool> reloadHotkey() async {
+    final registered = await hotkeyService.reloadFromSettings();
+    _watcher?.updateSpec(HotkeySpec.fromSettings(SettingsStore.getHotkey()));
+    return registered;
   }
 
   /// Captures one short hotkey dictation for a dictionary entry. The result is
@@ -196,7 +325,7 @@ class StraightCoordinator extends ChangeNotifier {
     final existing = _pronunciationCapture;
     if (existing != null) return existing.future;
     if (!sttPipeline.isInitialized) {
-      _setStatus('Speech model missing');
+      _setStatus('Speech model missing', alert: true);
       return Future<String?>.value(null);
     }
 
@@ -224,10 +353,12 @@ class StraightCoordinator extends ChangeNotifier {
 
   Future<void> _startDictation() async {
     if (!sttPipeline.isInitialized) {
-      _setStatus('Speech model missing');
+      _setStatus('Speech model missing', alert: true);
       _setState(DictationState.idle);
       return;
     }
+    // AT-SPI must learn the typing target before the bubble takes focus.
+    textInjector.captureFocus();
     _mediaWasPaused = await _mediaControlService.pauseIfPlaying();
     _setStatus('Listening for speech...');
     _setState(DictationState.listening);
@@ -237,6 +368,8 @@ class StraightCoordinator extends ChangeNotifier {
   Future<void> _stopDictation() async {
     _hotkeyReleaseWatcher?.cancel();
     _hotkeyReleaseWatcher = null;
+    _tapGraceTimer?.cancel();
+    _tapGraceTimer = null;
     try {
       await sttPipeline.stop();
       _setStatus('Ready to dictate');
@@ -411,7 +544,7 @@ class StraightCoordinator extends ChangeNotifier {
         ? await Directory(modelPath).exists()
         : await File(modelPath).exists();
     if (!modelExists) {
-      _setStatus('Speech model missing: $_selectedSttModel');
+      _setStatus('Speech model missing: $_selectedSttModel', alert: true);
       return;
     }
 
@@ -426,9 +559,10 @@ class StraightCoordinator extends ChangeNotifier {
         _hotkeyRegistered
             ? 'Ready to dictate'
             : 'Hotkey unavailable. Choose another shortcut in Settings.',
+        alert: !_hotkeyRegistered,
       );
     } catch (e) {
-      _setStatus('Could not load speech model');
+      _setStatus('Could not load speech model', alert: true);
       debugPrint('Model load error: $e');
     }
   }
@@ -500,6 +634,8 @@ class StraightCoordinator extends ChangeNotifier {
   @override
   void dispose() {
     _hotkeyReleaseWatcher?.cancel();
+    _tapGraceTimer?.cancel();
+    _watcher?.dispose();
     unawaited(_resumeMediaIfNeeded());
     _finishPronunciationCapture(null);
     hotkeyService.dispose();

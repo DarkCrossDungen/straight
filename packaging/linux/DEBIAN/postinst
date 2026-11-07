@@ -1,0 +1,17 @@
+#!/bin/bash
+# Registers Straight with the desktop after install.
+set -e
+
+update-desktop-database /usr/share/applications || true
+gtk-update-icon-cache -f -t /usr/share/icons/hicolor || true
+
+# Remove the developer-tree autostart entry; the app rewrites it against
+# /opt/straight on its first launch.
+for entry in /home/*/.config/autostart/Straight.desktop; do
+  [ -f "$entry" ] || continue
+  if grep -q 'Straight.check' "$entry" 2>/dev/null; then
+    rm -f "$entry"
+  fi
+done
+
+exit 0

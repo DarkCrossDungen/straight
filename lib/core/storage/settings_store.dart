@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'storage_service.dart';
 
 class SettingsStore {
@@ -6,12 +8,11 @@ class SettingsStore {
   static const _whisperSmallMigrationKey = 'migratedToWhisperSmallDefault';
   static const _pushToTalkMigrationKey = 'migratedToPushToTalkDefault';
 
-  static const _defaultHotkey = {
-    'alt': false,
-    'ctrl': true,
-    'shift': false,
-    'key': 'Space',
-  };
+  // GNOME leaves Alt+Space free and Wayland cannot deliver a key release, so
+  // the Linux port defaults to the press-again-to-stop combination.
+  static final _defaultHotkey = Platform.isLinux
+      ? const {'alt': true, 'ctrl': false, 'shift': false, 'key': 'Space'}
+      : const {'alt': false, 'ctrl': true, 'shift': false, 'key': 'Space'};
 
   static const _oldReservedDefaultHotkey = {
     'alt': true,
@@ -22,6 +23,13 @@ class SettingsStore {
 
   static String getThemeMode() =>
       StorageService.settings.get('theme', defaultValue: 'light') as String;
+
+  static bool getSetupCompleted() =>
+      StorageService.settings.get('setupCompleted', defaultValue: false)
+          as bool;
+
+  static Future<void> setSetupCompleted(bool value) async =>
+      StorageService.settings.put('setupCompleted', value);
 
   static Future<void> setThemeMode(String value) async =>
       StorageService.settings.put('theme', value);
@@ -93,8 +101,13 @@ class SettingsStore {
   static Future<void> setLlmModel(String value) async =>
       StorageService.settings.put('llmModel', value);
 
+  // Linux has no in-app hotkey, so the shortcut is a desktop entry that needs
+  // an instance already listening. Autostart keeps the first press instant.
   static bool getStartOnBoot() =>
-      StorageService.settings.get('startOnBoot', defaultValue: false) as bool;
+      StorageService.settings.get(
+        'startOnBoot',
+        defaultValue: Platform.isLinux,
+      ) as bool;
 
   static Future<void> setStartOnBoot(bool value) async =>
       StorageService.settings.put('startOnBoot', value);

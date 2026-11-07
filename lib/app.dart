@@ -8,6 +8,7 @@ import 'features/dictionary/dictionary_page.dart';
 import 'features/dictionary/work_profiles_page.dart';
 import 'features/history/history_page.dart';
 import 'features/onboarding/onboarding_page.dart';
+import 'features/setup/setup_page.dart';
 
 class StraightApp extends StatelessWidget {
   const StraightApp({super.key});
@@ -22,8 +23,12 @@ class StraightApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-      home: const BubbleOverlay(),
+      home: SettingsStore.getSetupCompleted()
+          ? const BubbleOverlay()
+          : const SetupPage(),
       routes: {
+        '/': (_) => const BubbleOverlay(),
+        '/setup': (_) => const SetupPage(),
         '/settings': (_) => const SettingsPage(),
         '/dictionary': (_) => const DictionaryPage(),
         '/work-profiles': (_) => const WorkProfilesPage(),

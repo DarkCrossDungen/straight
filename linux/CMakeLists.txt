@@ -74,6 +74,17 @@ set_target_properties(${BINARY_NAME}
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+# Bundle the speech engine and the default Moonshine model so a release build
+# is self-contained: the loader and the coordinator find native/prebuilt/ and
+# models/ next to the executable, with no dev tree needed.
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/../native/prebuilt/"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/native/prebuilt"
+  COMPONENT Runtime
+  FILES_MATCHING REGEX "\\.so")
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/../models/moonshine/"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/models/moonshine"
+  COMPONENT Runtime)
+
 
 # === Installation ===
 # By default, "installing" just makes a relocatable bundle in the build
