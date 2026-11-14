@@ -60,11 +60,16 @@ class DesktopBubbleService {
     }
 
     await _ensureServer();
+    // Wayland gives a toplevel no way to resize or move itself once it is
+    // mapped, and the bubble has to widen and shrink as dictation runs. XWayland
+    // still honours gtk_window_resize and gtk_window_move, so the bubble is
+    // pinned to the X11 backend while the main app stays on Wayland.
     await Process.start(
       Platform.resolvedExecutable,
       ['--bubble-window', '--bubble-port=${_server!.port}'],
       workingDirectory: File(Platform.resolvedExecutable).parent.path,
       mode: ProcessStartMode.detached,
+      environment: {...Platform.environment, 'GDK_BACKEND': 'x11'},
     );
   }
 

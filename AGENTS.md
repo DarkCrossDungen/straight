@@ -4,11 +4,13 @@
 
 ## What this project is
 
-Free, offline, private Windows dictation app. Hotkey → speak → text typed into the
-active app. Flutter (Dart) desktop on Windows. Current stack: whisper.cpp
-Whisper Base as the working STT, rules-based cleanup (+ optional small Qwen helper),
-Hive local storage, `hotkey_manager`, `window_manager`, Win32 `SendInput` for
-text injection, `record` package + energy VAD for audio.
+Free, offline, private dictation app. Hotkey → speak → text typed into the
+active app. Flutter (Dart) desktop, **Windows and Linux**. On Windows this uses
+Win32 `SendInput` for text injection; on Linux (Wayland/GNOME) it uses AT-SPI, a
+GNOME custom keybinding instead of `hotkey_manager`, and evdev for hold-to-record.
+Current stack: Moonshine (Linux) / Whisper Base (Windows) as the STT,
+rules-based cleanup (+ optional small Qwen helper), Hive local storage,
+`window_manager`, `record` package + energy VAD for audio.
 
 Current model decision: use **Whisper Base** for STT. `Qwen3-ASR-0.6B` loads in
 the isolated smoke test, but the current `qwen_asr.dll` is too slow for real-time
@@ -236,7 +238,10 @@ These cannot be verified from code analysis alone:
 
 - Do NOT run Qwen DLL before Step 3 and Step 4 both pass.
 - Do NOT download models with `Invoke-WebRequest`.
-- Do NOT add snippets/sync/mac/linux features.
+- Do NOT add snippets/sync/mac features. **Linux is now an approved target**: the
+  Wayland/GNOME port (desktop shortcut hotkey, AT-SPI text injection, evdev
+  hold-to-record, non-activating bubble window) is active work on the
+  `agent/publish-straight-project` branch.
 - Do NOT load the helper Qwen LLM by default — opt-in only.
 - Do NOT start a fresh folder — keep this repo.
 - Do NOT make GUI changes that the user has not approved.

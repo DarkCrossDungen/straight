@@ -12,5 +12,5 @@ class TextInjector {
 
   void captureFocus() => _impl.captureFocus();
 
-  bool inject(String text) => _impl.inject(text);
+  Future<bool> inject(String text) => _impl.inject(text);
 }

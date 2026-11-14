@@ -10,9 +10,18 @@
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
+  gboolean is_bubble;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
+
+static gboolean args_contain(char** argv, const gchar* flag) {
+  if (argv == nullptr) return FALSE;
+  for (gint i = 0; argv[i] != nullptr; i++) {
+    if (g_strcmp0(argv[i], flag) == 0) return TRUE;
+  }
+  return FALSE;
+}
 
 // Called when first Flutter frame received.
 static void first_frame_cb(MyApplication* self, FlView* view) {
@@ -25,6 +34,25 @@ static void my_application_activate(GApplication* application) {
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
+  // The dictation bubble is a chip, not an app window. A GtkHeaderBar would
+  // drag ~46px of client chrome onto an 18px-tall window, and taking focus
+  // moves the caret out of the text box being dictated into.
+  if (self->is_bubble) {
+    gtk_window_set_title(window, "straight");
+    gtk_window_set_decorated(window, FALSE);
+    gtk_window_set_skip_taskbar_hint(window, TRUE);
+    gtk_window_set_accept_focus(window, FALSE);
+    gtk_window_set_default_size(window, 76, 18);
+    // An RGBA visual lets the compositor blend the window per pixel, so only
+    // the rounded chip shows instead of a square slab around it.
+    GdkScreen* bubble_screen = gtk_window_get_screen(window);
+    GdkVisual* rgba = gdk_screen_get_rgba_visual(bubble_screen);
+    if (rgba != nullptr && gdk_screen_is_composited(bubble_screen)) {
+      gtk_widget_set_visual(GTK_WIDGET(window), rgba);
+      gtk_widget_set_app_paintable(GTK_WIDGET(window), TRUE);
+    }
+  }
+
   // Use a header bar when running in GNOME as this is the common style used
   // by applications and is the setup most users will be using (e.g. Ubuntu
   // desktop).
@@ -32,7 +60,7 @@ static void my_application_activate(GApplication* application) {
   // in case the window manager does more exotic layout, e.g. tiling.
   // If running on Wayland assume the header bar will work (may need changing
   // if future cases occur).
-  gboolean use_header_bar = TRUE;
+  gboolean use_header_bar = FALSE;
 #ifdef GDK_WINDOWING_X11
   GdkScreen* screen = gtk_window_get_screen(window);
   if (GDK_IS_X11_SCREEN(screen)) {
@@ -52,7 +80,9 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "straight");
   }
 
-  gtk_window_set_default_size(window, 1280, 720);
+  if (!self->is_bubble) {
+    gtk_window_set_default_size(window, 1280, 720);
+  }
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(
@@ -60,9 +90,8 @@ static void my_application_activate(GApplication* application) {
 
   FlView* view = fl_view_new(project);
   GdkRGBA background_color;
-  // Background defaults to black, override it here if necessary, e.g. #00000000
-  // for transparent.
-  gdk_rgba_parse(&background_color, "#000000");
+  gdk_rgba_parse(&background_color,
+      self->is_bubble ? "rgba(0,0,0,0)" : "#000000");
   fl_view_set_background_color(view, &background_color);
   gtk_widget_show(GTK_WIDGET(view));
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
@@ -85,6 +114,7 @@ static gboolean my_application_local_command_line(GApplication* application,
   MyApplication* self = MY_APPLICATION(application);
   // Strip out the first argument as it is the binary name.
   self->dart_entrypoint_arguments = g_strdupv(*arguments + 1);
+  self->is_bubble = args_contain(self->dart_entrypoint_arguments, "--bubble-window");
 
   g_autoptr(GError) error = nullptr;
   if (!g_application_register(application, nullptr, &error)) {

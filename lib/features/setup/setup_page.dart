@@ -8,6 +8,7 @@ import 'package:straight/core/hotkey/input_access.dart';
 import 'package:straight/core/injection/typing_access.dart';
 import 'package:straight/core/startup/startup_service.dart';
 import 'package:straight/core/storage/settings_store.dart';
+import 'package:straight/features/bubble/bubble_overlay.dart';
 import 'package:straight/shared/widgets/app_surface.dart';
 import 'package:straight/shared/widgets/password_prompt_dialog.dart';
 
@@ -70,7 +71,12 @@ class _SetupPageState extends State<SetupPage> {
   Future<void> _finish() async {
     await SettingsStore.setSetupCompleted(true);
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, '/');
+    // Replace setup with the app directly. Navigating by name risked handing
+    // back the setup route (the '/'-loop that kept the app in setup forever).
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const BubbleOverlay()),
+      (_) => false,
+    );
   }
 
   @override
@@ -375,7 +381,7 @@ class _TypingStepState extends State<_TypingStep> {
 
   @override
   Widget build(BuildContext context) {
-    final done = _enabled == true || _enabled == null;
+    final done = _enabled == true;
     return _StepFrame(
       icon: Icons.text_fields_rounded,
       done: done && !_checking,
@@ -392,11 +398,30 @@ class _TypingStepState extends State<_TypingStep> {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           : done
-          ? _StatusChip(
-              label: _enabled == null
-                  ? 'Your desktop manages this itself'
-                  : 'Typing access is on',
-              good: true,
+          ? _StatusChip(label: 'Typing access is on', good: true)
+          : _enabled == null
+          ? Column(
+              children: [
+                Text(
+                  'This desktop does not expose an accessibility switch, so '
+                  'Straight cannot confirm typing from here. It still writes '
+                  'through the standard channel — to be sure, dictate one '
+                  'word into any text field after setup.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    height: 1.5,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.62),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _check,
+                  icon: const Icon(Icons.refresh, size: 16),
+                  label: const Text('CHECK AGAIN'),
+                ),
+              ],
             )
           : FilledButton.icon(
               onPressed: _enable,
@@ -585,23 +610,92 @@ class _DoneStep extends StatefulWidget {
 
 class _DoneStepState extends State<_DoneStep> {
   late bool _startOnBoot = SettingsStore.getStartOnBoot();
+  bool _checking = true;
+  bool _typingKnown = false;
+  bool _typingOn = false;
+  bool _keyboardOn = false;
+  bool _shortcutOn = false;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final holdReady = Platform.isLinux && coordinator.holdToRecordReady;
+  void initState() {
+    super.initState();
+    _recheck();
+  }
+
+  Future<void> _recheck() async {
+    setState(() => _checking = true);
+    final typingEnabled = await TypingAccess.isEnabled();
+    final keyboard = await InputAccess.isReadable();
+    final supported = await DesktopShortcutService.isSupported();
+    final binding = supported
+        ? await DesktopShortcutService.registeredBinding()
+        : null;
+    if (!mounted) return;
+    setState(() {
+      _checking = false;
+      _typingKnown = typingEnabled != null;
+      _typingOn = typingEnabled == true;
+      _keyboardOn = keyboard;
+      _shortcutOn = binding == DesktopShortcutService.bindingFor(SettingsStore.getHotkey());
+    });
+  }
+
+  String get _hotkeyLabel {
     final hotkey = SettingsStore.getHotkey();
-    final label = [
+    return [
       if (hotkey['ctrl'] == true) 'Ctrl',
       if (hotkey['alt'] == true) 'Alt',
       if (hotkey['shift'] == true) 'Shift',
       if (hotkey['meta'] == true) 'Super',
       (hotkey['key'] ?? 'Space').toString(),
     ].join(' + ');
+  }
+
+  bool get _allOk =>
+      (!_typingKnown || _typingOn) && _keyboardOn && _shortcutOn;
+
+  Widget _row(String title, bool ok, String whenOff, {Widget? fix}) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            ok ? Icons.check_circle : Icons.info_outline,
+            size: 16,
+            color: ok ? Colors.green.shade400 : scheme.onSurface,
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Text(title, style: const TextStyle(fontSize: 12.5))),
+          if (whenOff.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                whenOff,
+                style: const TextStyle(fontSize: 11.5)
+                    .copyWith(color: Colors.grey),
+              ),
+            ),
+          ],
+          if (fix != null) ...[
+            const SizedBox(width: 8),
+            fix,
+          ],
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final holdReady = Platform.isLinux && coordinator.holdToRecordReady;
+    final label = _hotkeyLabel;
 
     return _StepFrame(
       icon: Icons.check_rounded,
-      done: true,
+      done: _allOk && !_checking,
       title: 'You\'re set',
       description: holdReady
           ? 'Hold $label, talk, release — your words appear in the app in '
@@ -612,27 +706,66 @@ class _DoneStepState extends State<_DoneStep> {
                 'listening until the next tap.',
       child: Column(
         children: [
-          if (Platform.isLinux)
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text(
-                'Start Straight when I log in',
-                style: TextStyle(fontSize: 13),
-              ),
-              subtitle: Text(
-                'Keeps the first shortcut press instant',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: scheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-              value: _startOnBoot,
-              onChanged: (value) async {
-                setState(() => _startOnBoot = value);
-                await SettingsStore.setStartOnBoot(value);
-                await StartupService.setEnabled(value);
-              },
+          if (_checking)
+            const SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else ...[
+            _row(
+              'Typing into your other apps',
+              _typingOn,
+              _typingKnown
+                  ? 'Off — your words will be copied to the clipboard instead.'
+                  : 'Could not be verified on this desktop.',
+              fix: !_typingKnown || _typingOn
+                  ? null
+                  : FilledButton(
+                      onPressed: () async {
+                        await TypingAccess.enable();
+                        await _recheck();
+                      },
+                      child: const Text('TURN IT ON'),
+                    ),
             ),
+            _row('Hold-to-record', _keyboardOn,
+                'Off — the shortcut still works as tap-to-talk.'),
+            _row('Shortcut registered', _shortcutOn,
+                'Not registered — add it in Keyboard settings.'),
+            if (Platform.isLinux)
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text(
+                  'Start Straight when I log in',
+                  style: TextStyle(fontSize: 13),
+                ),
+                subtitle: Text(
+                  'Keeps the first shortcut press instant',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: scheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                value: _startOnBoot,
+                onChanged: (value) async {
+                  setState(() => _startOnBoot = value);
+                  await SettingsStore.setStartOnBoot(value);
+                  await StartupService.setEnabled(value);
+                },
+              ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const SizedBox(width: 36),
+                FilledButton.icon(
+                  onPressed: _allOk ? null : _recheck,
+                  icon: const Icon(Icons.refresh, size: 16),
+                  label: const Text('RE-CHECK'),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

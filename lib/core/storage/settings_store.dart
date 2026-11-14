@@ -3,7 +3,7 @@ import 'dart:io';
 import 'storage_service.dart';
 
 class SettingsStore {
-  static const defaultSttModel = 'moonshine-small-streaming-en';
+  static const defaultSttModel = 'whisper-base';
   static const defaultLlmModel = 'none';
   static const _whisperSmallMigrationKey = 'migratedToWhisperSmallDefault';
   static const _pushToTalkMigrationKey = 'migratedToPushToTalkDefault';
@@ -92,6 +92,19 @@ class SettingsStore {
       await StorageService.settings.put('pushToTalk', true);
     }
     await StorageService.settings.put(_pushToTalkMigrationKey, true);
+  }
+
+  /// Moves machines sitting on the small Moonshine model to Whisper Base.
+  ///
+  /// Moonshine small-streaming-en was the Linux default during the port, and it
+  /// transcribes noticeably worse than Whisper Base on everyday speech. This runs
+  /// once so existing installs get the better engine without a manual change.
+  static Future<void> migrateMoonshineToWhisperBase() async {
+    if (StorageService.settings.get('sttModel') !=
+        'moonshine-small-streaming-en') {
+      return;
+    }
+    await StorageService.settings.put('sttModel', defaultSttModel);
   }
 
   static String getLlmModel() =>

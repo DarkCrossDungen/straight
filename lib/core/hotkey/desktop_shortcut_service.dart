@@ -31,8 +31,23 @@ class DesktopShortcutService {
     return _supported = result.exitCode == 0;
   }
 
-  static String get toggleCommand =>
-      "'${Platform.resolvedExecutable}' --toggle";
+  /// What the desktop shortcut runs.
+  ///
+  /// This goes through `straight-toggle`, not the binary: `straight --toggle`
+  /// starts a Flutter engine to deliver one line, which costs ~5s. The helper
+  /// writes straight to the control socket and only falls back to the binary on
+  /// a cold start.
+  static String get toggleCommand => "${_helperPath}";
+
+  static String get _helperPath {
+    final helper = File(
+      '${File(Platform.resolvedExecutable).parent.path}${Platform.pathSeparator}'
+      'straight-toggle',
+    );
+    // Quoting keeps gsettings from splitting on the path; the file is executable
+    // so GNOME's `sh -c` reaches its shebang.
+    return "'${helper.path}'";
+  }
 
   /// The keybinding already pointing at Straight, e.g. `<Alt>space`.
   static Future<String?> registeredBinding() async {
@@ -41,6 +56,24 @@ class DesktopShortcutService {
       if (binding.isNotEmpty) return binding;
     }
     return null;
+  }
+
+  /// Repoints a shortcut that still runs the in-app launcher.
+  ///
+  /// The shortcut is registered once per machine, so an existing install would
+  /// otherwise keep paying the full Flutter engine startup on every press.
+  static Future<void> ensureCommandCurrent() async {
+    if (!Platform.isLinux) return;
+    if (!await isSupported()) return;
+    final path = await _slotPath();
+    if (path == null) return;
+    if (await registeredCommand() == toggleCommand) return;
+    await Process.run('gsettings', [
+      'set',
+      '$_slotSchema:$path',
+      'command',
+      _variant(toggleCommand),
+    ]);
   }
 
   /// The executable the registered shortcut runs, or null when unset.

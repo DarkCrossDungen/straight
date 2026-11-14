@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi' hide Size;
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -12,18 +11,14 @@ import 'package:window_manager/window_manager.dart';
 
 Future<void> runDesktopBubble(int port) async {
   await windowManager.ensureInitialized();
-  // Flutter's Linux host cannot make a window transparent, so a canvas larger
-  // than the pill would paint as a black slab over the desktop. There the
-  // window is exactly the chip and never takes focus away from the text box
-  // being dictated into.
+  // The window is a transparent canvas a little larger than the biggest chip,
+  // so the pill can grow and shrink smoothly inside it.
   final initialSize = Platform.isLinux
-      ? _BubbleChrome.linuxIdleSize
+      ? _BubbleChrome.linuxCanvasSize
       : _BubbleChrome.windowSize;
   final options = WindowOptions(
     size: initialSize,
-    backgroundColor: Platform.isLinux
-        ? _BubbleChrome.surface
-        : Colors.transparent,
+    backgroundColor: Colors.transparent,
     skipTaskbar: true,
     titleBarStyle: TitleBarStyle.hidden,
     windowButtonVisibility: false,
@@ -31,49 +26,25 @@ Future<void> runDesktopBubble(int port) async {
   unawaited(
     windowManager.waitUntilReadyToShow(options, () async {
       await windowManager.setAlwaysOnTop(true);
-      await windowManager.setResizable(false);
       await windowManager.setPreventClose(true);
-      if (Platform.isLinux) _neverTakeFocus();
-      await _placeAtBottomCenter(initialSize);
-      await windowManager.setOpacity(_BubbleChrome.compactOpacity);
+      // Geometry hints read the GdkWindow, which only exists once the window is
+      // realized, so the chip shows first and is pinned right after.
       await windowManager.show();
+      await _lockSize(initialSize);
+      await _placeAtBottomCenter(initialSize);
     }),
   );
   runApp(_DesktopBubbleApp(port: port));
 }
 
-/// Keeps the bubble from stealing the caret. AT-SPI types into whichever
-/// editable object holds focus, so a focused bubble would break dictation.
-void _neverTakeFocus() {
-  try {
-    final gtk = DynamicLibrary.open('libgtk-3.so.0');
-    final list = gtk
-        .lookupFunction<
-          Pointer<Void> Function(),
-          Pointer<Void> Function()
-        >('gtk_window_list_toplevel_windows')();
-    if (list.address == 0) return;
-    final node = list.cast<_GList>().ref;
-    final acceptFocus = gtk
-        .lookupFunction<
-          Void Function(Pointer<Void>, Int32),
-          void Function(Pointer<Void>, int)
-        >('gtk_window_set_accept_focus');
-    final freeList = gtk
-        .lookupFunction<Void Function(Pointer<Void>), void Function(Pointer<Void>)>(
-          'g_list_free',
-        );
-    acceptFocus(node.data, 0);
-    freeList(list);
-  } catch (_) {
-    // Without GTK the window simply behaves like any other small window.
-  }
-}
-
-base class _GList extends Struct {
-  external Pointer<Void> data;
-  external Pointer<_GList> next;
-  external Pointer<_GList> prev;
+/// On Linux the native window *is* the chip. A compositor that negotiates the
+/// size would stretch an 18px pill back to Flutter's 720p default, so min and
+/// max are pinned to the same value. The pins must follow every resize or they
+/// would clamp the transcript card shut.
+Future<void> _lockSize(Size size) async {
+  await windowManager.setMinimumSize(size);
+  await windowManager.setMaximumSize(size);
+  await windowManager.setSize(size);
 }
 
 Future<void> _placeAtBottomCenter(Size size) async {
@@ -105,19 +76,24 @@ class _BubbleChrome {
   static const processingVisualSize = Size(52, 9);
   static const edgeGap = 16.0;
 
-  // On Linux the window *is* the chip, so these are sized to be readable
-  // rather than to sit inside a larger transparent canvas.
-  static const linuxIdleSize = Size(76, 18);
-  static const linuxListeningSize = Size(152, 46);
-  static const linuxProcessingSize = Size(96, 20);
-  static const linuxCopySize = Size(380, 140);
-  static const linuxNoticeSize = Size(380, 62);
+  // At rest the chip is a slim glass capsule; after 5 idle seconds it thins to
+  // a hairline. Listening bulges to a solid black pill with a live waveform.
+  static const linuxCanvasSize = Size(120, 48);
+  static const linuxIdleSize = Size(46, 14);
+  static const linuxShrunkSize = Size(30, 6);
+  static const linuxListeningSize = Size(108, 40);
+  static const linuxProcessingSize = Size(76, 28);
+  static const linuxCopySize = Size(340, 130);
+  static const linuxNoticeSize = Size(340, 70);
 
-  static const compactOpacity = 0.94;
+  static const idleOpacity = 0.55;
+  static const shrunkOpacity = 0.40;
+  static const activeOpacity = 0.94;
+  static const morph = Duration(milliseconds: 250);
 
-  static const surface = Color(0xFF727272);
-  static const activeSurface = Color(0xFF000000);
-  static const copySurface = Color(0xFF000000);
+  static const surface = Color(0xFF1C1C1E);
+  static const activeSurface = Color(0xFF0A0A0A);
+  static const copySurface = Color(0xFF16161A);
   static const accent = Color(0xFFFF6C4C);
 }
 
@@ -160,6 +136,8 @@ class _DesktopBubbleState extends State<_DesktopBubble>
   double _speechLevel = 0;
   bool _copyConfirmed = false;
   bool _copyCollapsing = false;
+  bool _shrunk = false;
+  Timer? _shrinkTimer;
 
   @override
   void initState() {
@@ -183,6 +161,7 @@ class _DesktopBubbleState extends State<_DesktopBubble>
     _motion.dispose();
     _copyCountdown.dispose();
     _noticeTimer?.cancel();
+    _shrinkTimer?.cancel();
     _socket?.destroy();
     super.dispose();
   }
@@ -216,6 +195,7 @@ class _DesktopBubbleState extends State<_DesktopBubble>
             case 'level':
               final value = (data['value'] as num?)?.toDouble();
               if (value != null && mounted) {
+                _cancelShrink();
                 setState(() => _speechLevel = value.clamp(0, 1).toDouble());
               }
             case 'hide':
@@ -240,6 +220,7 @@ class _DesktopBubbleState extends State<_DesktopBubble>
 
   void _setPhase(_BubblePhase phase) {
     if (!mounted) return;
+    _cancelShrink();
     final wasCopyFallback = _phase == _BubblePhase.copyFallback;
     _copyCountdown.stop();
     _noticeTimer?.cancel();
@@ -252,17 +233,36 @@ class _DesktopBubbleState extends State<_DesktopBubble>
       if (phase != _BubblePhase.listening) _speechLevel = 0;
     });
     unawaited(_resizeForPhase());
+    if (phase == _BubblePhase.idle) {
+      // Wispr Flow auto-shrinks the bubble after 5 seconds of inactivity so
+      // it stays out of the way when no dictation is happening.
+      _shrinkTimer = Timer(const Duration(seconds: 5), () {
+        if (mounted && _phase == _BubblePhase.idle) {
+          setState(() => _shrunk = true);
+          unawaited(_resizeForPhase());
+        }
+      });
+    }
     if (wasCopyFallback && phase != _BubblePhase.copyFallback) {
-      unawaited(_placeAtBottomCenter(_visualSize));
-      unawaited(windowManager.setOpacity(_BubbleChrome.compactOpacity));
+      unawaited(_placeAtBottomCenter(_windowSize));
+      unawaited(windowManager.setOpacity(1));
     } else if (phase != _BubblePhase.copyFallback) {
       unawaited(_keepAboveOtherWindows());
     }
   }
 
+  void _cancelShrink() {
+    _shrinkTimer?.cancel();
+    _shrinkTimer = null;
+    if (_shrunk) {
+      setState(() => _shrunk = false);
+    }
+  }
+
   Size get _visualSize => Platform.isLinux
       ? switch (_phase) {
-          _BubblePhase.idle => _BubbleChrome.linuxIdleSize,
+          _BubblePhase.idle =>
+              _shrunk ? _BubbleChrome.linuxShrunkSize : _BubbleChrome.linuxIdleSize,
           _BubblePhase.listening => _BubbleChrome.linuxListeningSize,
           _BubblePhase.processing => _BubbleChrome.linuxProcessingSize,
           _BubblePhase.copyFallback => _BubbleChrome.linuxCopySize,
@@ -276,12 +276,30 @@ class _DesktopBubbleState extends State<_DesktopBubble>
           _BubblePhase.notice => _BubbleChrome.windowSize,
         };
 
+  /// Compact phases share one fixed canvas so the chip can morph inside it
+  /// without the window jumping; only the cards need a bigger window.
+  Size get _windowSize => switch (_phase) {
+        _BubblePhase.copyFallback => _BubbleChrome.linuxCopySize,
+        _BubblePhase.notice => _BubbleChrome.linuxNoticeSize,
+        _ => _BubbleChrome.linuxCanvasSize,
+      };
+
+  Size? _appliedWindowSize;
+
   Future<void> _resizeForPhase() async {
     if (!Platform.isLinux) return;
-    final size = _visualSize;
-    await windowManager.setSize(size);
+    final size = _windowSize;
+    if (size == _appliedWindowSize) return;
+    _appliedWindowSize = size;
+    await _lockSize(size);
     await _placeAtBottomCenter(size);
   }
+
+  double get _chipOpacity => switch (_phase) {
+        _BubblePhase.idle =>
+          _shrunk ? _BubbleChrome.shrunkOpacity : _BubbleChrome.idleOpacity,
+        _ => _BubbleChrome.activeOpacity,
+      };
 
   void _showCopy(String text) {
     if (!mounted) return;
@@ -292,7 +310,6 @@ class _DesktopBubbleState extends State<_DesktopBubble>
       _copyCollapsing = false;
     });
     unawaited(_resizeForPhase());
-    unawaited(_placeAtBottomCenter(_visualSize));
     unawaited(windowManager.setOpacity(1));
     unawaited(_keepAboveOtherWindows());
     _copyCountdown.forward(from: 0);
@@ -407,49 +424,54 @@ class _DesktopBubbleState extends State<_DesktopBubble>
 
   Widget _pill({
     required Size size,
-    required Widget child,
+    Widget child = const SizedBox.shrink(),
     Color surface = _BubbleChrome.surface,
+    bool glass = false,
   }) {
-    return Container(
-      width: size.width,
-      height: size.height,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(size.height),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: AnimatedOpacity(
+        opacity: _chipOpacity,
+        duration: _BubbleChrome.morph,
+        curve: Curves.easeOut,
+        child: AnimatedContainer(
+          duration: _BubbleChrome.morph,
+          curve: Curves.easeOutCubic,
+          width: size.width,
+          height: size.height,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(size.height / 2),
+            // A hairline rim keeps the resting capsule legible on dark and
+            // light wallpapers alike without adding visual weight.
+            border: Border.all(
+              color: Colors.white.withValues(alpha: glass ? 0.28 : 0.10),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
+          child: child,
+        ),
       ),
-      child: child,
     );
   }
 
-  Widget _idle() {
-    return _pill(
-      size: _visualSize,
-      child: _wave(
-        width: Platform.isLinux ? 44 : 27,
-        height: Platform.isLinux ? 7 : 5,
-        count: 7,
-        range: 0.05,
-        opacity: 0.72,
-        mode: _WaveMode.idle,
-      ),
-    );
-  }
+  Widget _idle() => _pill(size: _visualSize, glass: true);
 
   Widget _listening() {
     return _pill(
       size: _visualSize,
       surface: _BubbleChrome.activeSurface,
       child: _wave(
-        width: Platform.isLinux ? 108 : 50,
-        height: Platform.isLinux ? 26 : 13,
+        width: Platform.isLinux ? 80 : 50,
+        height: Platform.isLinux ? 24 : 13,
         count: Platform.isLinux ? 17 : 13,
         range: 0.78,
         speechLevel: _speechLevel,
@@ -508,10 +530,7 @@ class _DesktopBubbleState extends State<_DesktopBubble>
           height: _visualSize.height,
           decoration: BoxDecoration(
             color: _BubbleChrome.copySurface,
-            borderRadius:
-                Platform.isLinux
-                    ? BorderRadius.zero
-                    : BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.28),
@@ -615,30 +634,33 @@ class _DesktopBubbleState extends State<_DesktopBubble>
     );
   }
 
+  /// Voice level, eased so the bars breathe with the speaker instead of
+  /// snapping on every jump in input volume.
+  double _level = 0;
+
   List<double> _amplitudes(
     int count,
     double range,
     _WaveMode mode,
     double speechLevel,
   ) {
+    final wanted = mode == _WaveMode.speech ? speechLevel : 0;
+    // Fast on the way up, slow on the way down: bars that collapse the instant a
+    // word ends read as a glitch rather than as somebody speaking.
+    _level += (wanted - _level) * (wanted > _level ? 0.42 : 0.14);
     final t = _motion.value * math.pi * 2;
+    final voice = 0.16 + _level * 1.2;
     return List<double>.generate(count, (index) {
-      final centerBias = 1 - ((index - (count - 1) / 2).abs() / count);
-      final organic =
-          (math.sin(t * 0.9 + index * 0.52) + 1) * 0.28 +
-          (math.sin(t * 1.6 + index * 0.23) + 1) * 0.16;
+      // Mirrored about the centre bar, the way a level meter actually sits.
+      final mirrored = math.min(index, count - 1 - index);
+      final centerBias = 1 - mirrored / count;
+      final drift = math.sin(t * 1.3 + mirrored * 0.55) * 0.5 + 0.5;
       return switch (mode) {
-        _WaveMode.idle => 0.18 + math.sin(t + index * 0.42).abs() * range,
+        _WaveMode.idle => 0.16 + drift * range,
         _WaveMode.speech =>
-          0.12 +
-              organic *
-                  range *
-                  (0.2 + speechLevel * 1.05) *
-                  (0.7 + centerBias * 0.56),
-        _WaveMode.processing =>
-          0.18 +
-              math.sin(t * 0.8 + index * 0.35).abs() * range +
-              centerBias * 0.06,
+          // Flat at rest; bars only rise when the VAD reports speech level.
+          _level <= 0.02 ? 0.0 : voice * (0.32 + centerBias * 0.68) * (0.5 + drift * 0.5),
+        _WaveMode.processing => 0.16 + drift * range + centerBias * 0.05,
       };
     });
   }

@@ -10,6 +10,41 @@ import 'features/history/history_page.dart';
 import 'features/onboarding/onboarding_page.dart';
 import 'features/setup/setup_page.dart';
 
+/// Decides between first-run setup and the app itself.
+///
+/// Every build re-reads the flag, so once setup finishes and replaces this
+/// route the gate hands over to the app immediately and cannot bounce back.
+class _LaunchGate extends StatefulWidget {
+  const _LaunchGate();
+
+  @override
+  State<_LaunchGate> createState() => _LaunchGateState();
+}
+
+class _LaunchGateState extends State<_LaunchGate> {
+  bool get _setupDone => SettingsStore.getSetupCompleted();
+
+  @override
+  void initState() {
+    super.initState();
+    if (!_setupDone) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/setup');
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_setupDone) return const BubbleOverlay();
+    // The setup route takes over on the next frame.
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+    );
+  }
+}
+
 class StraightApp extends StatelessWidget {
   const StraightApp({super.key});
 
@@ -23,11 +58,8 @@ class StraightApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-      home: SettingsStore.getSetupCompleted()
-          ? const BubbleOverlay()
-          : const SetupPage(),
+      home: const _LaunchGate(),
       routes: {
-        '/': (_) => const BubbleOverlay(),
         '/setup': (_) => const SetupPage(),
         '/settings': (_) => const SettingsPage(),
         '/dictionary': (_) => const DictionaryPage(),

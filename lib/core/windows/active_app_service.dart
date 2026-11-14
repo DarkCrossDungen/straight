@@ -1,10 +1,19 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 import 'package:win32/win32.dart';
 
 class ActiveAppService {
+  /// Full path of the app that owns the foreground window, or null when the
+  /// desktop cannot or will not say.
+  ///
+  /// Win32 has no equivalent on Linux, and loading user32 there throws the
+  /// moment anything calls this. AT-SPI already tells us what has the caret, so
+  /// a null here only costs the vocabulary profile selection.
   String? foregroundExecutable() {
+    if (!Platform.isWindows) return null;
+
     final window = GetForegroundWindow();
     if (window == 0) return null;
 

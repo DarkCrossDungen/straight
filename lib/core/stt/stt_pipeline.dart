@@ -10,7 +10,7 @@ import 'moonshine_engine.dart';
 enum SttPipelineState { idle, listening, processing }
 
 class SttPipeline {
-  static const _noSpeechWindow = Duration(seconds: 8);
+  static const _noSpeechWindow = Duration(seconds: 4);
   static const _maxUtterance = Duration(seconds: 120);
   static const _watchdogInterval = Duration(milliseconds: 500);
   static const _lockedPauseMs = 5000;

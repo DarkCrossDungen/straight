@@ -6,5 +6,5 @@ abstract class TextInjectorPlatform {
 
   /// Returns false when the text could not be placed, which lets the caller
   /// offer a copy fallback instead of losing the transcript.
-  bool inject(String text);
+  Future<bool> inject(String text);
 }

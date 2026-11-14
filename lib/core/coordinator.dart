@@ -2,17 +2,20 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'app_navigation.dart';
 import 'hotkey/hotkey_service.dart';
 import 'hotkey/input_access.dart';
 import 'hotkey/keyboard_watcher.dart';
 import 'stt/stt_pipeline.dart';
 import 'injection/text_injector.dart';
+import 'injection/typing_access.dart';
 import 'pipeline/dictation_pipeline.dart';
 import 'llm/qwen_engine.dart';
 import 'storage/history_store.dart';
 import 'storage/settings_store.dart';
 import 'storage/dictionary_store.dart';
 import 'storage/work_profile_store.dart';
+import '../shared/widgets/typing_prompt_dialog.dart';
 import 'windows/active_app_service.dart';
 import 'windows/media_control_service.dart';
 
@@ -52,9 +55,11 @@ class StraightCoordinator extends ChangeNotifier {
   DateTime? _lastPressAt;
   KeyboardWatcher? _watcher;
   Timer? _tapGraceTimer;
-  DateTime? _rawKeyEventAt;
   Timer? _hotkeyReleaseWatcher;
   bool _mediaWasPaused = false;
+  bool _startInFlight = false;
+  bool _stopInFlight = false;
+  bool _modelLoadStarted = false;
   String? _lastActiveApp;
   String? get lastActiveApp => _lastActiveApp;
   double _speechLevel = 0;
@@ -88,6 +93,7 @@ class StraightCoordinator extends ChangeNotifier {
 
   Future<void> init() async {
     await SettingsStore.migrateDefaultBehaviorToPushToTalk();
+    await SettingsStore.migrateMoonshineToWhisperBase();
     unawaited(sttPipeline.prepareMicrophone());
 
     hotkeyService.init(
@@ -212,16 +218,6 @@ class StraightCoordinator extends ChangeNotifier {
   }
 
   void toggleDictation() {
-    // When raw keys are readable, the same physical press also arrives here
-    // through the desktop shortcut, which cannot report a release. The watcher
-    // owns that press instead.
-    final rawEvent = _rawKeyEventAt;
-    if (_watcher != null &&
-        rawEvent != null &&
-        DateTime.now().difference(rawEvent) < _doubleTapWindow) {
-      return;
-    }
-
     final now = DateTime.now();
     final sinceLastPress = _lastPressAt == null
         ? null
@@ -276,8 +272,6 @@ class StraightCoordinator extends ChangeNotifier {
   /// next tap. Only possible with raw key events, because Wayland hands a
   /// shortcut over as a press with no matching release.
   void _onRawKeyEvent(KeyboardEvent event) {
-    _rawKeyEventAt = DateTime.now();
-
     if (event.isDown) {
       final waitingForSecondTap = _tapGraceTimer != null;
       _tapGraceTimer?.cancel();
@@ -353,19 +347,63 @@ class StraightCoordinator extends ChangeNotifier {
 
   Future<void> _startDictation() async {
     if (!sttPipeline.isInitialized) {
-      _setStatus('Speech model missing', alert: true);
+      // The speech model is still loading (bootstrap runs after the first
+      // frame). Don't dead-end the press: kick off the load and tell the user
+      // to try again in a moment instead of showing a permanent error.
+      if (!_modelLoadStarted) {
+        _modelLoadStarted = true;
+        unawaited(refreshSpeechModel());
+      }
+      _setStatus('Loading speech model — press again in a moment');
       _setState(DictationState.idle);
       return;
     }
-    // AT-SPI must learn the typing target before the bubble takes focus.
-    textInjector.captureFocus();
-    _mediaWasPaused = await _mediaControlService.pauseIfPlaying();
+    // A second press arriving mid-start must not open two recorders on the same
+    // device; the state guard above is the only thing standing between them.
+    if (_startInFlight) return;
+    _startInFlight = true;
+    // The bubble must answer the press immediately so the hotkey feels live.
     _setStatus('Listening for speech...');
     _setState(DictationState.listening);
-    await sttPipeline.start();
+    try {
+      // The microphone opens before anything that could block on D-Bus, so
+      // speech is captured from the first frame the bubble is visible.
+      unawaited(sttPipeline.start().catchError((Object error) {
+        debugPrint('Recorder start failed: $error');
+        _setStatus('Microphone did not start — try again', alert: true);
+        _setState(DictationState.idle);
+        unawaited(_resumeMediaIfNeeded());
+      }));
+      // The typing target is captured next: Straight's bubble does not take
+      // focus, so the app underneath is still the focused one.
+      unawaited(_ensureTypingAccess());
+      textInjector.captureFocus();
+      _mediaWasPaused = await _mediaControlService.pauseIfPlaying();
+    } finally {
+      _startInFlight = false;
+    }
+  }
+
+  /// The accessibility switch that lets Straight type can be turned off after
+  /// setup (or by a system update). Check it before each dictation and offer
+  /// to put it back rather than silently falling back to the clipboard.
+  Future<void> _ensureTypingAccess() async {
+    if (!Platform.isLinux) return;
+    final enabled = await TypingAccess.isEnabled();
+    if (enabled != false) return;
+    final context = appNavigatorKey.currentContext;
+    if (context == null) return;
+    final restored = await requestTypingAccess(context);
+    if (restored) {
+      _setStatus('Typing is on again');
+    } else {
+      _setStatus('Typing is off — words will be copied to the clipboard');
+    }
   }
 
   Future<void> _stopDictation() async {
+    if (_stopInFlight) return;
+    _stopInFlight = true;
     _hotkeyReleaseWatcher?.cancel();
     _hotkeyReleaseWatcher = null;
     _tapGraceTimer?.cancel();
@@ -374,7 +412,14 @@ class StraightCoordinator extends ChangeNotifier {
       await sttPipeline.stop();
       _setStatus('Ready to dictate');
       _setState(DictationState.idle);
+    } catch (error) {
+      // A recorder that dies mid-session still ends the session: leaving the
+      // bubble listening is the failure the user sees as a stuck pill.
+      debugPrint('Stop failed: $error');
+      _setStatus('Dictation stopped', alert: true);
+      _setState(DictationState.idle);
     } finally {
+      _stopInFlight = false;
       await _resumeMediaIfNeeded();
     }
   }
@@ -401,43 +446,50 @@ class StraightCoordinator extends ChangeNotifier {
     }
 
     _setState(DictationState.processing);
+    try {
+      // The app executable is only used to select a locally stored vocabulary
+      // profile. Straight never reads window contents or monitors typing.
+      final activeApp = _activeAppService.foregroundExecutable();
+      if (activeApp != null && activeApp.toLowerCase() != 'straight.exe') {
+        _lastActiveApp = activeApp;
+      }
+      final profile = SettingsStore.getAutomaticProfileSwitching()
+          ? WorkProfileStore.findForExecutable(_lastActiveApp)
+          : null;
+      dictationPipeline.setDictionary(
+        DictionaryStore.getForProfile(profile?['id']?.toString()),
+      );
 
-    // The app executable is only used to select a locally stored vocabulary
-    // profile. Straight never reads window contents or monitors typing.
-    final activeApp = _activeAppService.foregroundExecutable();
-    if (activeApp != null && activeApp.toLowerCase() != 'straight.exe') {
-      _lastActiveApp = activeApp;
+      final pauseDuration = sttPipeline.lastPauseDurationMs;
+      final result = _cleanupModelReady
+          ? await dictationPipeline.processWithLlm(
+              rawText,
+              pauseDurationMs: pauseDuration,
+            )
+          : dictationPipeline.process(rawText, pauseDurationMs: pauseDuration);
+
+      final inserted = await textInjector.inject(result.text);
+      if (!inserted && result.text.trim().isNotEmpty) {
+        _copyFallbackText = result.text;
+      }
+
+      await HistoryStore.addEntry({
+        'text': rawText,
+        'appliedText': result.text,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'app': _lastActiveApp ?? '',
+        'profileId': profile?['id'] ?? '',
+      });
+
+      _setStatus(
+        inserted ? 'Text inserted' : 'Could not type — copied to clipboard',
+      );
+    } catch (error) {
+      debugPrint('Dictation processing failed: $error');
+      _setStatus('Dictation failed — try again', alert: true);
+    } finally {
+      _setState(DictationState.idle);
     }
-    final profile = SettingsStore.getAutomaticProfileSwitching()
-        ? WorkProfileStore.findForExecutable(_lastActiveApp)
-        : null;
-    dictationPipeline.setDictionary(
-      DictionaryStore.getForProfile(profile?['id']?.toString()),
-    );
-
-    final pauseDuration = sttPipeline.lastPauseDurationMs;
-    final result = _cleanupModelReady
-        ? await dictationPipeline.processWithLlm(
-            rawText,
-            pauseDurationMs: pauseDuration,
-          )
-        : dictationPipeline.process(rawText, pauseDurationMs: pauseDuration);
-
-    final inserted = textInjector.inject(result.text);
-    if (!inserted && result.text.trim().isNotEmpty) {
-      _copyFallbackText = result.text;
-    }
-
-    await HistoryStore.addEntry({
-      'text': rawText,
-      'appliedText': result.text,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-      'app': _lastActiveApp ?? '',
-      'profileId': profile?['id'] ?? '',
-    });
-
-    _setStatus(inserted ? 'Text inserted' : 'Copy transcription');
-    _setState(DictationState.idle);
   }
 
   String _devWhisperPath(String modelId) {
@@ -564,6 +616,8 @@ class StraightCoordinator extends ChangeNotifier {
     } catch (e) {
       _setStatus('Could not load speech model', alert: true);
       debugPrint('Model load error: $e');
+    } finally {
+      _modelLoadStarted = false;
     }
   }
 

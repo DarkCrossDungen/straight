@@ -1,0 +1,39 @@
+#!/bin/bash
+# Tells the running Straight instance to start or stop dictation.
+#
+# The desktop shortcut used to run `straight --toggle`, which boots a whole
+# Flutter engine - GL context, Impeller, Dart VM - only to write one line to a
+# loopback socket. That measured ~4.9s on a real GNOME session, so the hotkey
+# felt dead. This helper does the same write in milliseconds and only falls back
+# to the full binary when nothing is listening, which is a cold start where
+# being slow is expected.
+set -u
+
+data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
+port_file="$data_home/straight/bubble-control.port"
+
+# Deliberately held open long enough for the coordinator to read the line
+# before this process goes away.
+command='{"method":"toggle_dictation"}'
+
+send() {
+  local port="$1"
+  exec 3<>"/dev/tcp/127.0.0.1/$port" 2>/dev/null || return 1
+  printf '%s\n' "$command" >&3 2>/dev/null || return 1
+  sleep 0.15
+  exec 3>&-
+  return 0
+}
+
+port=""
+if [[ -r "$port_file" ]]; then
+  port="$(tr -dc '0-9' < "$port_file" | head -c 5)"
+fi
+
+if [[ -n "$port" ]] && send "$port"; then
+  exit 0
+fi
+
+# The recorded port belongs to an instance that is gone, or the file is stale.
+# Start one; the Dart side waits for its own control port before giving up.
+exec "$(cd "$(dirname "$0")" && pwd)/straight" --toggle

@@ -12,6 +12,7 @@ import 'core/app_paths.dart';
 import 'core/coordinator.dart';
 import 'core/hotkey/desktop_shortcut_service.dart';
 import 'core/hotkey/toggle_client.dart';
+import 'core/injection/text_injector.dart';
 import 'core/startup/startup_service.dart';
 import 'core/storage/settings_store.dart';
 import 'features/bubble/desktop_bubble.dart';
@@ -25,6 +26,21 @@ void main(List<String> args) async {
       stderr.writeln('Straight could not be reached or started. Shortcut port '
           'file: ${bubbleControlFile.path}');
     }
+    exit(delivered ? 0 : 1);
+  }
+
+  // Types [text] into whatever app currently has focus and reports what the
+  // injector managed. Diagnosing "no text arrived" in the field needs the real
+  // helper paths, which only exist beside the shipped executable.
+  final injectNow = args.where((a) => a.startsWith('--inject-now='));
+  if (injectNow.isNotEmpty) {
+    final text = injectNow.first.substring('--inject-now='.length);
+    WidgetsFlutterBinding.ensureInitialized();
+    final injector = TextInjector();
+    injector.captureFocus();
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    final delivered = await injector.inject(text);
+    stderr.writeln(delivered ? 'INJECT DELIVERED' : 'INJECT FAILED');
     exit(delivered ? 0 : 1);
   }
 
@@ -104,6 +120,8 @@ void main(List<String> args) async {
   if (SettingsStore.getStartOnBoot()) {
     await StartupService.setEnabled(true);
   }
+
+  await DesktopShortcutService.ensureCommandCurrent();
 
   runApp(const StraightApp());
   WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -105,6 +105,51 @@ set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 
+# The desktop shortcut's toggle launcher. It must sit next to the executable
+# because it resolves `straight` relative to itself, and it must be executable
+# for GNOME's `sh -c` invocation to reach the bash shebang.
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/runner/straight-toggle"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime
+  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+              GROUP_EXECUTE GROUP_READ
+              WORLD_EXECUTE WORLD_READ)
+
+# X11 and Xtst helpers for typing into apps that expose no AT-SPI text object.
+# Building either one first needs the C language: the runner project is declared
+# CXX only, and a C target added without it fails CMake generation.
+enable_language(C)
+if(UNIX AND NOT APPLE)
+  find_package(PkgConfig)
+  set(_xtype_link "")
+  if(PkgConfig_FOUND)
+    pkg_check_modules(_XT11 IMPORTED_TARGET x11 xtst)
+    if(_XT11_FOUND)
+      set(_xtype_link "PkgConfig::_XT11")
+    endif()
+  endif()
+  if(_xtype_link STREQUAL "")
+    find_package(X11 QUIET COMPONENTS X11 Xtst)
+    if(X11_FOUND AND X11_Xtst_FOUND)
+      set(_xtype_link "${X11_LIBRARIES};${X11_Xtst_LIBRARIES}")
+      include_directories("${X11_INCLUDE_DIR};${X11_Xtst_INCLUDE_DIR}")
+    endif()
+  endif()
+
+  if(NOT _xtype_link STREQUAL "")
+    add_executable(xtype "${CMAKE_CURRENT_SOURCE_DIR}/runner/xtype.c")
+    target_link_libraries(xtype PRIVATE ${_xtype_link})
+    install(TARGETS xtype RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
+      COMPONENT Runtime)
+  else()
+    message(STATUS "x11/xtst not found: building without the XTEST typing helper")
+  endif()
+
+  add_executable(ktype "${CMAKE_CURRENT_SOURCE_DIR}/runner/ktype.c")
+  install(TARGETS ktype RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
+    COMPONENT Runtime)
+endif()
+
 install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   COMPONENT Runtime)
 
