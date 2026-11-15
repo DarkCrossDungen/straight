@@ -80,7 +80,7 @@ class _BubbleChrome {
   // a hairline. Listening bulges to a solid black pill with a live waveform.
   static const linuxCanvasSize = Size(120, 48);
   static const linuxIdleSize = Size(46, 14);
-  static const linuxShrunkSize = Size(30, 6);
+  static const linuxShrunkSize = Size(44, 14);
   static const linuxListeningSize = Size(108, 40);
   static const linuxProcessingSize = Size(76, 28);
   static const linuxCopySize = Size(340, 130);
@@ -176,34 +176,39 @@ class _DesktopBubbleState extends State<_DesktopBubble>
         .cast<List<int>>()
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen((line) {
-          final data = jsonDecode(line) as Map<String, dynamic>;
-          switch (data['method'] as String?) {
-            case 'state':
-              final value = data['value'] as String? ?? 'idle';
-              _setPhase(switch (value) {
-                'listening' => _BubblePhase.listening,
-                'processing' => _BubblePhase.processing,
-                _ => _BubblePhase.idle,
-              });
-            case 'copy':
-              final text = data['text'] as String?;
-              if (text != null && text.trim().isNotEmpty) _showCopy(text);
-            case 'notice':
-              final text = data['text'] as String?;
-              if (text != null && text.trim().isNotEmpty) _showNotice(text);
-            case 'level':
-              final value = (data['value'] as num?)?.toDouble();
-              if (value != null && mounted) {
-                _cancelShrink();
-                setState(() => _speechLevel = value.clamp(0, 1).toDouble());
-              }
-            case 'hide':
-              unawaited(windowManager.hide());
-            case 'show':
-              _showIdle();
-          }
-        }, onDone: _quit, onError: (Object _) => _quit());
+        .listen(
+          (line) {
+            final data = jsonDecode(line) as Map<String, dynamic>;
+            switch (data['method'] as String?) {
+              case 'state':
+                final value = data['value'] as String? ?? 'idle';
+                _setPhase(switch (value) {
+                  'listening' => _BubblePhase.listening,
+                  'processing' => _BubblePhase.processing,
+                  _ => _BubblePhase.idle,
+                });
+              case 'copy':
+                final text = data['text'] as String?;
+                if (text != null && text.trim().isNotEmpty) _showCopy(text);
+              case 'notice':
+                final text = data['text'] as String?;
+                if (text != null && text.trim().isNotEmpty) _showNotice(text);
+              case 'level':
+                final value = (data['value'] as num?)?.toDouble();
+                if (value != null && mounted &&
+                    _phase == _BubblePhase.listening) {
+                  _cancelShrink();
+                  setState(() => _speechLevel = value.clamp(0, 1).toDouble());
+                }
+              case 'hide':
+                unawaited(windowManager.hide());
+              case 'show':
+                _showIdle();
+            }
+          },
+          onDone: _quit,
+          onError: (Object _) => _quit(),
+        );
     _sendToMain('bubble_ready');
   }
 
@@ -262,7 +267,9 @@ class _DesktopBubbleState extends State<_DesktopBubble>
   Size get _visualSize => Platform.isLinux
       ? switch (_phase) {
           _BubblePhase.idle =>
-              _shrunk ? _BubbleChrome.linuxShrunkSize : _BubbleChrome.linuxIdleSize,
+            _shrunk
+                ? _BubbleChrome.linuxShrunkSize
+                : _BubbleChrome.linuxIdleSize,
           _BubblePhase.listening => _BubbleChrome.linuxListeningSize,
           _BubblePhase.processing => _BubbleChrome.linuxProcessingSize,
           _BubblePhase.copyFallback => _BubbleChrome.linuxCopySize,
@@ -279,10 +286,10 @@ class _DesktopBubbleState extends State<_DesktopBubble>
   /// Compact phases share one fixed canvas so the chip can morph inside it
   /// without the window jumping; only the cards need a bigger window.
   Size get _windowSize => switch (_phase) {
-        _BubblePhase.copyFallback => _BubbleChrome.linuxCopySize,
-        _BubblePhase.notice => _BubbleChrome.linuxNoticeSize,
-        _ => _BubbleChrome.linuxCanvasSize,
-      };
+    _BubblePhase.copyFallback => _BubbleChrome.linuxCopySize,
+    _BubblePhase.notice => _BubbleChrome.linuxNoticeSize,
+    _ => _BubbleChrome.linuxCanvasSize,
+  };
 
   Size? _appliedWindowSize;
 
@@ -296,10 +303,10 @@ class _DesktopBubbleState extends State<_DesktopBubble>
   }
 
   double get _chipOpacity => switch (_phase) {
-        _BubblePhase.idle =>
-          _shrunk ? _BubbleChrome.shrunkOpacity : _BubbleChrome.idleOpacity,
-        _ => _BubbleChrome.activeOpacity,
-      };
+    _BubblePhase.idle =>
+      _shrunk ? _BubbleChrome.shrunkOpacity : _BubbleChrome.idleOpacity,
+    _ => _BubbleChrome.activeOpacity,
+  };
 
   void _showCopy(String text) {
     if (!mounted) return;
@@ -343,8 +350,7 @@ class _DesktopBubbleState extends State<_DesktopBubble>
   }
 
   Future<void> _toggleDictation() async {
-    if (_phase != _BubblePhase.processing &&
-        _phase != _BubblePhase.copyFallback) {
+    if (_phase != _BubblePhase.copyFallback) {
       _sendToMain('toggle_dictation');
     }
   }
@@ -659,7 +665,9 @@ class _DesktopBubbleState extends State<_DesktopBubble>
         _WaveMode.idle => 0.16 + drift * range,
         _WaveMode.speech =>
           // Flat at rest; bars only rise when the VAD reports speech level.
-          _level <= 0.02 ? 0.0 : voice * (0.32 + centerBias * 0.68) * (0.5 + drift * 0.5),
+          _level <= 0.02
+              ? 0.0
+              : voice * (0.32 + centerBias * 0.68) * (0.5 + drift * 0.5),
         _WaveMode.processing => 0.16 + drift * range + centerBias * 0.05,
       };
     });

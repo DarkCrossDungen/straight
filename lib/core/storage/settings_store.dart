@@ -3,9 +3,10 @@ import 'dart:io';
 import 'storage_service.dart';
 
 class SettingsStore {
-  static const defaultSttModel = 'whisper-base';
+  static final defaultSttModel = Platform.isLinux
+      ? 'moonshine-small-streaming-en'
+      : 'whisper-base';
   static const defaultLlmModel = 'none';
-  static const _whisperSmallMigrationKey = 'migratedToWhisperSmallDefault';
   static const _pushToTalkMigrationKey = 'migratedToPushToTalkDefault';
 
   // GNOME leaves Alt+Space free and Wayland cannot deliver a key release, so
@@ -59,24 +60,6 @@ class SettingsStore {
   static Future<void> setSttModel(String value) async =>
       StorageService.settings.put('sttModel', value);
 
-  static Future<void> migrateDefaultSttModelToWhisperSmall() async {
-    final migrated =
-        StorageService.settings.get(
-              _whisperSmallMigrationKey,
-              defaultValue: false,
-            )
-            as bool;
-    if (migrated) return;
-
-    final current =
-        StorageService.settings.get('sttModel', defaultValue: 'whisper-base')
-            as String;
-    if (current == 'whisper-base') {
-      await StorageService.settings.put('sttModel', defaultSttModel);
-    }
-    await StorageService.settings.put(_whisperSmallMigrationKey, true);
-  }
-
   static Future<void> migrateDefaultBehaviorToPushToTalk() async {
     final migrated =
         StorageService.settings.get(
@@ -94,17 +77,18 @@ class SettingsStore {
     await StorageService.settings.put(_pushToTalkMigrationKey, true);
   }
 
-  /// Moves machines sitting on the small Moonshine model to Whisper Base.
-  ///
-  /// Moonshine small-streaming-en was the Linux default during the port, and it
-  /// transcribes noticeably worse than Whisper Base on everyday speech. This runs
-  /// once so existing installs get the better engine without a manual change.
-  static Future<void> migrateMoonshineToWhisperBase() async {
-    if (StorageService.settings.get('sttModel') !=
-        'moonshine-small-streaming-en') {
-      return;
+  static Future<void> migrateSttModelForPlatform() async {
+    final current = getSttModel();
+    if (Platform.isLinux) {
+      if (current != 'moonshine-small-streaming-en') {
+        await StorageService.settings.put(
+          'sttModel',
+          'moonshine-small-streaming-en',
+        );
+      }
+    } else if (current == 'moonshine-small-streaming-en') {
+      await StorageService.settings.put('sttModel', defaultSttModel);
     }
-    await StorageService.settings.put('sttModel', defaultSttModel);
   }
 
   static String getLlmModel() =>

@@ -7,7 +7,7 @@ Directory? _dataDir;
 /// announces it during startup.
 Directory get appDataDir => _dataDir ?? straightDataDir();
 
-void useDataDir(Directory directory) => _dataDir = directory;
+void useDataDir(Directory? directory) => _dataDir = directory;
 
 Directory straightDataDir() {
   final home = Platform.environment['HOME'] ?? Directory.systemTemp.path;

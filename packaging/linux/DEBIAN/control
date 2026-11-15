@@ -5,7 +5,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: Dark <dark@localhost>
 Installed-Size: 530000
-Depends: libgtk-3-0t64 | libgtk-3-0, libatspi2.0-0t64 | libatspi2.0-0, libpulse0, libkeybinder-3.0-0, libglib2.0-bin, acl, sudo, desktop-file-utils, libgtk-3-bin
+Depends: libgtk-3-0t64 | libgtk-3-0, libatspi2.0-0t64 | libatspi2.0-0, libpulse0, libkeybinder-3.0-0, libglib2.0-bin, acl, sudo, desktop-file-utils, libgtk-3-bin, python3
 Description: Free, private, offline voice dictation
  Hold a shortcut, speak naturally, and Straight cleans up your words and
  types them into the app in front of you. Everything — speech recognition,

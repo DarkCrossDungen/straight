@@ -4,12 +4,11 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'app_navigation.dart';
 import 'hotkey/hotkey_service.dart';
-import 'hotkey/input_access.dart';
-import 'hotkey/keyboard_watcher.dart';
 import 'stt/stt_pipeline.dart';
 import 'injection/text_injector.dart';
 import 'injection/typing_access.dart';
 import 'pipeline/dictation_pipeline.dart';
+import 'pipeline/python_text_organizer.dart';
 import 'llm/qwen_engine.dart';
 import 'storage/history_store.dart';
 import 'storage/settings_store.dart';
@@ -22,15 +21,11 @@ import 'windows/media_control_service.dart';
 enum DictationState { idle, listening, processing }
 
 class StraightCoordinator extends ChangeNotifier {
-  static const _doubleTapWindow = Duration(milliseconds: 400);
-
-  /// How long a release waits before stopping, so a second tap can turn a hold
-  /// into locked dictation instead.
-  static const _tapGrace = Duration(milliseconds: 260);
   final HotkeyService hotkeyService = HotkeyService();
   final SttPipeline sttPipeline = SttPipeline();
   final TextInjector textInjector = TextInjector();
   final DictationPipeline dictationPipeline = DictationPipeline();
+  final PythonTextOrganizer _pythonTextOrganizer = PythonTextOrganizer();
   final QwenEngine _qwenEngine = QwenEngine();
   final ActiveAppService _activeAppService = ActiveAppService();
   final MediaControlService _mediaControlService = MediaControlService();
@@ -52,10 +47,8 @@ class StraightCoordinator extends ChangeNotifier {
   bool _discardNextTranscription = false;
   bool _hotkeyRegistered = true;
   DateTime? _hotkeyPressedAt;
-  DateTime? _lastPressAt;
-  KeyboardWatcher? _watcher;
-  Timer? _tapGraceTimer;
   Timer? _hotkeyReleaseWatcher;
+  bool _toggleQueuedDuringProcessing = false;
   bool _mediaWasPaused = false;
   bool _startInFlight = false;
   bool _stopInFlight = false;
@@ -93,7 +86,7 @@ class StraightCoordinator extends ChangeNotifier {
 
   Future<void> init() async {
     await SettingsStore.migrateDefaultBehaviorToPushToTalk();
-    await SettingsStore.migrateMoonshineToWhisperBase();
+    await SettingsStore.migrateSttModelForPlatform();
     unawaited(sttPipeline.prepareMicrophone());
 
     hotkeyService.init(
@@ -111,8 +104,6 @@ class StraightCoordinator extends ChangeNotifier {
         alert: true,
       );
     }
-    unawaited(_startWatcher());
-
     sttPipeline.onStateChanged = (s) {
       switch (s) {
         case SttPipelineState.listening:
@@ -122,16 +113,19 @@ class StraightCoordinator extends ChangeNotifier {
           _setState(DictationState.processing);
           break;
         case SttPipelineState.idle:
-          _setState(DictationState.idle);
+          if (_state != DictationState.processing) {
+            _setState(DictationState.idle);
+            unawaited(_resumeMediaIfNeeded());
+          }
           break;
       }
     };
 
-    sttPipeline.onResult = _onTranscription;
+    sttPipeline.onResult = (text) async => _onTranscription(text);
     sttPipeline.onNoSpeech = () {
       _setStatus(
         sttPipeline.microphoneWarning ??
-            'Heard no speech. Press the shortcut and start talking.',
+            'No speech detected. Check the microphone and try again.',
         alert: true,
       );
     };
@@ -160,30 +154,23 @@ class StraightCoordinator extends ChangeNotifier {
   }
 
   void _onKeyDown() {
-    if (!SettingsStore.getPushToTalk()) return;
-    // Ignore repeat key-down events. A push-to-talk session starts once and
-    // ends only when one of its keys is released.
-    if (_state != DictationState.idle || _hotkeyPressedAt != null) return;
+    if (!Platform.isWindows || !SettingsStore.getPushToTalk()) return;
+    if (_hotkeyPressedAt != null) return;
     _hotkeyPressedAt = DateTime.now();
-    _watchForHotkeyRelease();
+    _hotkeyReleaseWatcher = Timer.periodic(const Duration(milliseconds: 8), (
+      _,
+    ) {
+      if (!hotkeyService.isCurrentHotkeyHeld()) _handleHotkeyRelease();
+    });
     if (_state == DictationState.idle) {
       unawaited(_startDictation());
+    } else if (_state == DictationState.processing) {
+      _toggleQueuedDuringProcessing = true;
     }
   }
 
   void _onKeyUp() {
-    _handleHotkeyRelease();
-  }
-
-  void _watchForHotkeyRelease() {
-    _hotkeyReleaseWatcher?.cancel();
-    _hotkeyReleaseWatcher = Timer.periodic(const Duration(milliseconds: 8), (
-      _,
-    ) {
-      if (!hotkeyService.isCurrentHotkeyHeld()) {
-        _handleHotkeyRelease();
-      }
-    });
+    if (Platform.isWindows) _handleHotkeyRelease();
   }
 
   void _handleHotkeyRelease() {
@@ -191,8 +178,12 @@ class StraightCoordinator extends ChangeNotifier {
     _hotkeyReleaseWatcher = null;
     if (!SettingsStore.getPushToTalk()) return;
     _hotkeyPressedAt = null;
-    if (_state != DictationState.listening) return;
-    unawaited(_stopDictation());
+    if (_state == DictationState.listening &&
+        (_startInFlight || sttPipeline.state == SttPipelineState.listening)) {
+      unawaited(_stopDictation());
+    } else if (_state == DictationState.processing) {
+      _toggleQueuedDuringProcessing = false;
+    }
   }
 
   Future<void> refreshDictionary() async {
@@ -218,100 +209,20 @@ class StraightCoordinator extends ChangeNotifier {
   }
 
   void toggleDictation() {
-    final now = DateTime.now();
-    final sinceLastPress = _lastPressAt == null
-        ? null
-        : now.difference(_lastPressAt!);
-    _lastPressAt = now;
-
     switch (_state) {
       case DictationState.idle:
-        _startDictation();
+        unawaited(_startDictation());
         break;
       case DictationState.listening:
-        // A desktop shortcut only reports presses, never a release, so a quick
-        // second press is the only way to say "keep recording until I stop
-        // you". One press ends the session instead.
-        if (sinceLastPress != null &&
-            sinceLastPress < _doubleTapWindow &&
-            !sttPipeline.keepsListeningPastSilence) {
-          sttPipeline.keepsListeningPastSilence = true;
-          _setStatus('Locked. Press the shortcut again to stop.');
-          return;
-        }
-        _stopDictation();
+        unawaited(_stopDictation());
         break;
       case DictationState.processing:
+        _toggleQueuedDuringProcessing = !_toggleQueuedDuringProcessing;
         break;
     }
   }
 
-  /// Starts the raw-key reader when the machine allows it. Without read access
-  /// to /dev/input this returns quietly and presses-only behavior stays.
-  Future<void> _startWatcher() async {
-    if (!InputAccess.isSupported || _watcher != null) return;
-    final watcher = await KeyboardWatcher.start(
-      HotkeySpec.fromSettings(SettingsStore.getHotkey()),
-    );
-    if (watcher == null) return;
-    _watcher = watcher;
-    watcher.events.listen(_onRawKeyEvent);
-    notifyListeners();
-  }
-
-  /// Whether raw key events are readable, so a hold can be told from a tap.
-  bool get holdToRecordReady => _watcher != null;
-
-  /// Retries the raw-key reader after the user grants keyboard access.
-  Future<bool> enableHoldToRecord() async {
-    await _startWatcher();
-    return _watcher != null;
-  }
-
-  /// Hold to record, release to stop, double tap to lock dictation until the
-  /// next tap. Only possible with raw key events, because Wayland hands a
-  /// shortcut over as a press with no matching release.
-  void _onRawKeyEvent(KeyboardEvent event) {
-    if (event.isDown) {
-      final waitingForSecondTap = _tapGraceTimer != null;
-      _tapGraceTimer?.cancel();
-      _tapGraceTimer = null;
-
-      if (waitingForSecondTap && _state == DictationState.listening) {
-        sttPipeline.keepsListeningPastSilence = true;
-        _setStatus('Locked. Press again to stop.');
-        return;
-      }
-      switch (_state) {
-        case DictationState.idle:
-          _lastPressAt = DateTime.now();
-          unawaited(_startDictation());
-        case DictationState.listening:
-          unawaited(_stopDictation());
-        case DictationState.processing:
-          break;
-      }
-      return;
-    }
-
-    if (_state != DictationState.listening ||
-        sttPipeline.keepsListeningPastSilence) {
-      return;
-    }
-    // Releasing stops recording, but only after a tap has had a chance to be
-    // the second half of a double tap.
-    _tapGraceTimer = Timer(_tapGrace, () {
-      _tapGraceTimer = null;
-      if (_state == DictationState.listening) unawaited(_stopDictation());
-    });
-  }
-
-  /// Points every shortcut layer at the stored hotkey.
-  Future<bool> reloadHotkey() async {
-    final registered = await hotkeyService.reloadFromSettings();
-    _watcher?.updateSpec(HotkeySpec.fromSettings(SettingsStore.getHotkey()));
-    return registered;
-  }
+  Future<bool> reloadHotkey() => hotkeyService.reloadFromSettings();
 
   /// Captures one short hotkey dictation for a dictionary entry. The result is
   /// deliberately not inserted or added to normal history.
@@ -368,17 +279,23 @@ class StraightCoordinator extends ChangeNotifier {
     try {
       // The microphone opens before anything that could block on D-Bus, so
       // speech is captured from the first frame the bubble is visible.
-      unawaited(sttPipeline.start().catchError((Object error) {
-        debugPrint('Recorder start failed: $error');
-        _setStatus('Microphone did not start — try again', alert: true);
-        _setState(DictationState.idle);
-        unawaited(_resumeMediaIfNeeded());
-      }));
-      // The typing target is captured next: Straight's bubble does not take
-      // focus, so the app underneath is still the focused one.
+      final recorderStart = sttPipeline.start();
+      unawaited(
+        recorderStart.catchError((Object error) {
+          debugPrint('Recorder start failed: $error');
+          _setStatus('Microphone did not start — try again', alert: true);
+          _setState(DictationState.idle);
+          unawaited(_resumeMediaIfNeeded());
+        }),
+      );
       unawaited(_ensureTypingAccess());
       textInjector.captureFocus();
       _mediaWasPaused = await _mediaControlService.pauseIfPlaying();
+      if (_state == DictationState.listening) {
+        await recorderStart;
+      } else {
+        await _resumeMediaIfNeeded();
+      }
     } finally {
       _startInFlight = false;
     }
@@ -404,13 +321,8 @@ class StraightCoordinator extends ChangeNotifier {
   Future<void> _stopDictation() async {
     if (_stopInFlight) return;
     _stopInFlight = true;
-    _hotkeyReleaseWatcher?.cancel();
-    _hotkeyReleaseWatcher = null;
-    _tapGraceTimer?.cancel();
-    _tapGraceTimer = null;
     try {
       await sttPipeline.stop();
-      _setStatus('Ready to dictate');
       _setState(DictationState.idle);
     } catch (error) {
       // A recorder that dies mid-session still ends the session: leaving the
@@ -421,6 +333,10 @@ class StraightCoordinator extends ChangeNotifier {
     } finally {
       _stopInFlight = false;
       await _resumeMediaIfNeeded();
+      if (_toggleQueuedDuringProcessing) {
+        _toggleQueuedDuringProcessing = false;
+        unawaited(_startDictation());
+      }
     }
   }
 
@@ -430,7 +346,7 @@ class StraightCoordinator extends ChangeNotifier {
     await _mediaControlService.resumeIfPausedByStraight();
   }
 
-  void _onTranscription(String rawText) async {
+  Future<void> _onTranscription(String rawText) async {
     if (_pronunciationCapture != null) {
       _finishPronunciationCapture(rawText);
       _setStatus('Pronunciation captured');
@@ -461,21 +377,22 @@ class StraightCoordinator extends ChangeNotifier {
       );
 
       final pauseDuration = sttPipeline.lastPauseDurationMs;
-      final result = _cleanupModelReady
+      final cleaned = _cleanupModelReady
           ? await dictationPipeline.processWithLlm(
               rawText,
               pauseDurationMs: pauseDuration,
             )
           : dictationPipeline.process(rawText, pauseDurationMs: pauseDuration);
+      final organizedText = await _pythonTextOrganizer.organize(cleaned.text);
 
-      final inserted = await textInjector.inject(result.text);
-      if (!inserted && result.text.trim().isNotEmpty) {
-        _copyFallbackText = result.text;
+      final inserted = await textInjector.inject(organizedText);
+      if (!inserted && organizedText.trim().isNotEmpty) {
+        _copyFallbackText = organizedText;
       }
 
       await HistoryStore.addEntry({
         'text': rawText,
-        'appliedText': result.text,
+        'appliedText': organizedText,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'app': _lastActiveApp ?? '',
         'profileId': profile?['id'] ?? '',
@@ -688,8 +605,6 @@ class StraightCoordinator extends ChangeNotifier {
   @override
   void dispose() {
     _hotkeyReleaseWatcher?.cancel();
-    _tapGraceTimer?.cancel();
-    _watcher?.dispose();
     unawaited(_resumeMediaIfNeeded());
     _finishPronunciationCapture(null);
     hotkeyService.dispose();

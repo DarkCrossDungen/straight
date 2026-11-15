@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:straight/core/app_context.dart';
 import 'package:straight/core/hotkey/desktop_shortcut_service.dart';
 import 'package:straight/core/storage/settings_store.dart';
-import 'package:straight/shared/widgets/password_prompt_dialog.dart';
 
 class HotkeyCaptureTile extends StatefulWidget {
   const HotkeyCaptureTile({super.key});
@@ -71,7 +70,6 @@ class _HotkeyCaptureTileState extends State<HotkeyCaptureTile> {
           // Wayland will not hand a global key grab to an app, so the desktop
           // owns the shortcut and Straight is told when it is pressed.
           if (Platform.isLinux) _DesktopShortcutRow(hotkey: _hotkey),
-          if (Platform.isLinux) const _HoldToRecordRow(),
         ],
       ),
     );
@@ -320,100 +318,6 @@ class _DesktopShortcutRowState extends State<_DesktopShortcutRow> {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Hold-to-record needs the key release, which Wayland never hands to an app.
-/// Reading the raw keyboard devices does, once the user allows it.
-class _HoldToRecordRow extends StatefulWidget {
-  const _HoldToRecordRow();
-
-  @override
-  State<_HoldToRecordRow> createState() => _HoldToRecordRowState();
-}
-
-class _HoldToRecordRowState extends State<_HoldToRecordRow> {
-  bool _busy = false;
-  String? _message;
-
-  Future<void> _grant() async {
-    setState(() {
-      _busy = true;
-      _message = null;
-    });
-    final granted = await requestInputAccess(context);
-    final live = granted && await coordinator.enableHoldToRecord();
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      _message = live
-          ? null
-          : granted
-          ? 'Access granted. Log out and back in once, then hold the shortcut.'
-          : 'The permission window was dismissed or refused.';
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return AnimatedBuilder(
-      animation: coordinator,
-      builder: (context, _) {
-        final live = coordinator.holdToRecordReady;
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(52, 0, 16, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    live ? Icons.check_circle : Icons.mic_none_rounded,
-                    size: 16,
-                    color: live ? Colors.green.shade400 : scheme.tertiary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      live
-                          ? 'Hold the shortcut to talk, release to stop. '
-                                'Double tap to keep recording until you tap again.'
-                          : 'Hold to record needs one-time keyboard access. '
-                                'Until then a press starts and a press stops.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: scheme.onSurface.withValues(alpha: 0.72),
-                      ),
-                    ),
-                  ),
-                  if (!live)
-                    _busy
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : FilledButton.tonal(
-                            onPressed: _grant,
-                            child: const Text('Allow hold to record'),
-                          ),
-                ],
-              ),
-              if (_message != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    _message!,
-                    style: TextStyle(fontSize: 12, color: scheme.tertiary),
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

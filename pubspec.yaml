@@ -54,3 +54,4 @@ flutter:
     - assets/models/
     - assets/icons/
     - assets/fonts/
+    - tool/text_organizer.py

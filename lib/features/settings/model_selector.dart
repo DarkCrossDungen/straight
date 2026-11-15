@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:straight/core/app_context.dart';
 import 'package:straight/core/storage/settings_store.dart';
@@ -11,33 +13,31 @@ class ModelSelector extends StatefulWidget {
 }
 
 class _ModelSelectorState extends State<ModelSelector> {
-  static const _sttOptions = <_ModelOption>[
-    _ModelOption(
-      id: 'whisper-base',
-      title: 'Whisper Base',
-      subtitle: 'Safer start, lighter memory',
-    ),
-    _ModelOption(
-      id: 'whisper-small',
-      title: 'Whisper Small',
-      subtitle: 'Better accuracy, more RAM',
-    ),
-    _ModelOption(
-      id: 'moonshine-small-streaming-en',
-      title: 'Moonshine Small Streaming',
-      subtitle: 'English only, tuned for faster live dictation',
-    ),
-    _ModelOption(
-      id: 'whisper-medium',
-      title: 'Whisper Medium',
-      subtitle: 'Best accuracy, heaviest',
-    ),
-    _ModelOption(
-      id: 'qwen3-asr-0.6b',
-      title: 'Qwen3-ASR 0.6B',
-      subtitle: 'Target model for the final build',
-    ),
-  ];
+  static final _sttOptions = Platform.isLinux
+      ? const <_ModelOption>[
+          _ModelOption(
+            id: 'moonshine-small-streaming-en',
+            title: 'Moonshine Small Streaming',
+            subtitle: 'English only, tuned for faster live dictation',
+          ),
+        ]
+      : const <_ModelOption>[
+          _ModelOption(
+            id: 'whisper-base',
+            title: 'Whisper Base',
+            subtitle: 'Safer start, lighter memory',
+          ),
+          _ModelOption(
+            id: 'whisper-small',
+            title: 'Whisper Small',
+            subtitle: 'Better accuracy, more RAM',
+          ),
+          _ModelOption(
+            id: 'whisper-medium',
+            title: 'Whisper Medium',
+            subtitle: 'Best accuracy, heaviest',
+          ),
+        ];
 
   static const _llmOptions = <_ModelOption>[
     _ModelOption(

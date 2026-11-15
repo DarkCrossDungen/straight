@@ -2,22 +2,16 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:record/record.dart';
 import '../audio/vad.dart';
-import 'stt_engine.dart';
-import 'whisper_engine.dart';
-import 'qwen_asr_engine.dart';
-import 'moonshine_engine.dart';
+import 'stt_engine_worker.dart';
 
 enum SttPipelineState { idle, listening, processing }
 
 class SttPipeline {
-  static const _noSpeechWindow = Duration(seconds: 4);
-  static const _maxUtterance = Duration(seconds: 120);
-  static const _watchdogInterval = Duration(milliseconds: 500);
-  static const _lockedPauseMs = 5000;
-
   final AudioRecorder _recorder = AudioRecorder();
   final VoiceActivityDetector _vad = VoiceActivityDetector();
-  SttEngine? _engine;
+  SttEngineWorker? _engine;
+  Future<void>? _starting;
+  Future<void>? _stopping;
 
   StreamSubscription<Uint8List>? _subscription;
   Future<void>? _primingMicrophone;
@@ -25,21 +19,18 @@ class SttPipeline {
   List<int> _buffer = [];
   bool _initialized = false;
   bool _isProcessing = false;
-  Future<void>? _pendingTranscription;
+  bool _stopRequested = false;
   int _lastSpeechTimestamp = 0;
   bool _heardSpeechInBuffer = false;
-  bool _isAutoStopping = false;
-  DateTime? _startedAt;
-  Timer? _watchdog;
+  bool _captureRequested = false;
   double _peakClipping = 0;
 
   SttPipelineState _state = SttPipelineState.idle;
   SttPipelineState get state => _state;
   bool get isInitialized => _initialized;
-  int get lastPauseDurationMs {
-    if (_lastSpeechTimestamp == 0) return 0;
-    return DateTime.now().millisecondsSinceEpoch - _lastSpeechTimestamp;
-  }
+  int get lastPauseDurationMs => _lastSpeechTimestamp == 0
+      ? 0
+      : DateTime.now().millisecondsSinceEpoch - _lastSpeechTimestamp;
 
   /// Explains a silent session when the microphone, not the user, is at fault.
   /// Both conditions destroy speech before any engine can read it, and both
@@ -59,15 +50,9 @@ class SttPipeline {
 
   void Function(SttPipelineState state)? onStateChanged;
   void Function(double level)? onAudioLevel;
-  void Function(String text)? onResult;
-  void Function(Object error)? onError;
-
-  /// Fires when a listening session was closed because nothing was said.
+  Future<void> Function(String text)? onResult;
   void Function()? onNoSpeech;
-
-  /// When true a pause in speech does not end the session, so the user can
-  /// dictate across several sentences and stop with one press.
-  bool keepsListeningPastSilence = false;
+  void Function(Object error)? onError;
 
   Future<void> prepareMicrophone() async {
     if (_microphonePrimed) return;
@@ -85,6 +70,8 @@ class SttPipeline {
   }
 
   Future<void> _primeMicrophone() async {
+    if (_starting != null) await _starting;
+    if (_captureRequested) return;
     final hasPermission = await _recorder.hasPermission();
     if (!hasPermission) throw StateError('Microphone permission denied');
 
@@ -95,6 +82,11 @@ class SttPipeline {
         sampleRate: 16000,
       ),
     );
+    if (_captureRequested) {
+      final capture = stream.listen(_onAudioChunk);
+      _subscription = capture;
+      return;
+    }
     final subscription = stream.listen((_) {});
     await Future<void>.delayed(const Duration(milliseconds: 80));
     await subscription.cancel();
@@ -103,22 +95,8 @@ class SttPipeline {
   }
 
   Future<void> init(String modelPath) async {
-    if (_initialized) {
-      await unloadModel();
-    }
-
-    // Choose engine based on model path
-    final normalizedPath = modelPath.toLowerCase();
-    if (normalizedPath.contains('moonshine')) {
-      _engine = MoonshineEngine();
-    } else if (normalizedPath.contains('qwen3-asr') ||
-        normalizedPath.contains('qwen_asr')) {
-      _engine = QwenAsrEngine();
-    } else {
-      _engine = WhisperEngine();
-    }
-
-    await _engine!.init(modelPath);
+    if (_initialized) await unloadModel();
+    _engine = await SttEngineWorker.start(modelPath);
     _initialized = true;
   }
 
@@ -136,20 +114,38 @@ class SttPipeline {
   }
 
   Future<void> start() async {
-    if (!_initialized) return;
-    if (_isProcessing) return;
+    final stopping = _stopping;
+    if (stopping != null) await stopping;
+    if (!_initialized || _isProcessing || _starting != null) return;
+
+    _captureRequested = true;
+    _stopRequested = false;
     _setState(SttPipelineState.listening);
     _buffer = [];
     _vad.reset();
     _isProcessing = false;
     _heardSpeechInBuffer = false;
-    keepsListeningPastSilence = false;
-    _startedAt = DateTime.now();
+    _lastSpeechTimestamp = 0;
     _peakClipping = 0;
 
+    final priming = _primingMicrophone;
+    if (priming != null) await priming;
+    if (!_captureRequested || _subscription != null) return;
+
+    final starting = _openRecorder();
+    _starting = starting;
+    try {
+      await starting;
+    } finally {
+      if (identical(_starting, starting)) _starting = null;
+    }
+  }
+
+  Future<void> _openRecorder() async {
     try {
       final hasPermission = await _recorder.hasPermission();
       if (!hasPermission) throw StateError('Microphone permission denied');
+      if (!_captureRequested || _stopRequested) return;
       final stream = await _recorder.startStream(
         const RecordConfig(
           encoder: AudioEncoder.pcm16bits,
@@ -157,73 +153,25 @@ class SttPipeline {
           sampleRate: 16000,
         ),
       );
+      if (!_captureRequested || _stopRequested) {
+        await _recorder.stop();
+        return;
+      }
       _subscription = stream.listen(
         _onAudioChunk,
         onError: (Object error) {
           _subscription = null;
+          _captureRequested = false;
+          _stopRequested = true;
           _setState(SttPipelineState.idle);
           onError?.call(error);
         },
       );
-      _startWatchdog();
-    } catch (e) {
+    } catch (error) {
+      _captureRequested = false;
+      _stopRequested = true;
       _setState(SttPipelineState.idle);
-      onError?.call(e);
-    }
-  }
-
-  /// Wayland hands the shortcut over as a press with no matching release, so
-  /// nobody is guaranteed to be there to switch the microphone off. The
-  /// watchdog is what keeps a missed press from leaving it open.
-  void _startWatchdog() {
-    _watchdog?.cancel();
-    _watchdog = Timer.periodic(_watchdogInterval, (_) {
-      final started = _startedAt;
-      if (_state != SttPipelineState.listening || started == null) return;
-      if (_isAutoStopping || _isProcessing) return;
-      final elapsed = DateTime.now().difference(started);
-
-      if (!_heardSpeechInBuffer) {
-        if (elapsed >= _noSpeechWindow) {
-          _stopWatchdog();
-          unawaited(_abortAsSilence());
-        }
-        return;
-      }
-
-      final silenceFor =
-          DateTime.now().millisecondsSinceEpoch - _lastSpeechTimestamp;
-      final heldTooLong =
-          keepsListeningPastSilence &&
-          !_vad.isSpeaking &&
-          silenceFor >= _lockedPauseMs &&
-          _buffer.length > 16000;
-      if (heldTooLong || elapsed >= _maxUtterance) {
-        _stopWatchdog();
-        _pendingTranscription = _stopAfterSpeechPause();
-      }
-    });
-  }
-
-  void _stopWatchdog() {
-    _watchdog?.cancel();
-    _watchdog = null;
-  }
-
-  Future<void> _abortAsSilence() async {
-    if (_isAutoStopping) return;
-    _isAutoStopping = true;
-    try {
-      await _subscription?.cancel();
-      _subscription = null;
-      await _recorder.stop();
-    } finally {
-      _buffer = [];
-      _heardSpeechInBuffer = false;
-      _startedAt = null;
-      _setState(SttPipelineState.idle);
-      _isAutoStopping = false;
-      onNoSpeech?.call();
+      onError?.call(error);
     }
   }
 
@@ -240,38 +188,10 @@ class SttPipeline {
       _heardSpeechInBuffer = true;
     }
 
-    // Never ask Whisper to interpret an open microphone that has contained
-    // only silence. It can return labels such as [BLANK_AUDIO] for silence.
+    // Keep the rolling pre-speech buffer bounded while waiting for the first word.
     if (!_heardSpeechInBuffer) {
       if (_buffer.length > 16000) _buffer.clear();
       return;
-    }
-
-    if (!_vad.isSpeaking &&
-        !keepsListeningPastSilence &&
-        !_isProcessing &&
-        _buffer.length > 16000) {
-      _stopWatchdog();
-      _pendingTranscription = _stopAfterSpeechPause();
-    }
-  }
-
-  Future<void> _stopAfterSpeechPause() async {
-    if (_isAutoStopping) return;
-    _isAutoStopping = true;
-    try {
-      await _subscription?.cancel();
-      _subscription = null;
-      await _recorder.stop();
-      await _flushBuffer();
-    } finally {
-      _buffer = [];
-      _heardSpeechInBuffer = false;
-      _startedAt = null;
-      keepsListeningPastSilence = false;
-      _pendingTranscription = null;
-      _setState(SttPipelineState.idle);
-      _isAutoStopping = false;
     }
   }
 
@@ -282,20 +202,19 @@ class SttPipeline {
         _engine == null) {
       return;
     }
-    _isProcessing = true;
-    _setState(SttPipelineState.processing);
-
     final samples = List<int>.from(_buffer);
     _buffer.clear();
     _vad.reset();
     _heardSpeechInBuffer = false;
+    _isProcessing = true;
+    _setState(SttPipelineState.processing);
 
     try {
       final text = cleanTranscriptionForDictation(
         await _engine!.transcribe(samples),
       );
       if (text != null) {
-        onResult?.call(text);
+        await onResult?.call(text);
       }
     } catch (e) {
       onError?.call(e);
@@ -304,31 +223,43 @@ class SttPipeline {
     }
   }
 
-  Future<void> stop() async {
-    _stopWatchdog();
-    if (_isAutoStopping) {
-      await _pendingTranscription;
-      return;
-    }
-    // Stop incoming audio before beginning transcription. This releases the
-    // Windows microphone immediately when the user releases the hotkey.
-    await _subscription?.cancel();
-    _subscription = null;
-    await _recorder.stop();
+  Future<void> stop() {
+    final existing = _stopping;
+    if (existing != null) return existing;
+    _captureRequested = false;
+    _stopRequested = true;
+    final stopping = _stopCapture();
+    _stopping = stopping;
+    return stopping.whenComplete(() {
+      if (identical(_stopping, stopping)) _stopping = null;
+    });
+  }
 
-    if (_buffer.isNotEmpty && _heardSpeechInBuffer && !_isProcessing) {
-      await _flushBuffer();
+  Future<void> _stopCapture() async {
+    try {
+      final starting = _starting;
+      if (starting != null) await starting;
+      final priming = _primingMicrophone;
+      if (priming != null) await priming;
+
+      await _subscription?.cancel();
+      _subscription = null;
+      await _recorder.stop();
+
+      final heardSpeech = _heardSpeechInBuffer;
+      if (_buffer.isNotEmpty && heardSpeech && !_isProcessing) {
+        await _flushBuffer();
+      } else if (!heardSpeech) {
+        onNoSpeech?.call();
+      }
+    } finally {
+      _buffer = [];
+      _heardSpeechInBuffer = false;
+      _isProcessing = false;
+      _captureRequested = false;
+      _stopRequested = false;
+      _setState(SttPipelineState.idle);
     }
-    if (_pendingTranscription != null) {
-      await _pendingTranscription;
-    }
-    _buffer = [];
-    _heardSpeechInBuffer = false;
-    _startedAt = null;
-    keepsListeningPastSilence = false;
-    _isProcessing = false;
-    _pendingTranscription = null;
-    _setState(SttPipelineState.idle);
   }
 
   Future<void> dispose() async {

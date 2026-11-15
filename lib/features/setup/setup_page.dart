@@ -2,15 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
-import 'package:straight/core/app_context.dart';
 import 'package:straight/core/hotkey/desktop_shortcut_service.dart';
-import 'package:straight/core/hotkey/input_access.dart';
 import 'package:straight/core/injection/typing_access.dart';
 import 'package:straight/core/startup/startup_service.dart';
 import 'package:straight/core/storage/settings_store.dart';
 import 'package:straight/features/bubble/bubble_overlay.dart';
 import 'package:straight/shared/widgets/app_surface.dart';
-import 'package:straight/shared/widgets/password_prompt_dialog.dart';
 
 /// First-launch setup. Straight does everything it is allowed to do by itself
 /// and stops only for the one change that needs the user's password, which is
@@ -32,11 +29,7 @@ class _SetupPageState extends State<SetupPage> {
     super.initState();
     _pages = [
       const _WelcomeStep(),
-      if (Platform.isLinux) ...[
-        const _KeyboardStep(),
-        const _TypingStep(),
-        const _ShortcutStep(),
-      ],
+      if (Platform.isLinux) ...[const _TypingStep(), const _ShortcutStep()],
       const _MicrophoneStep(),
       const _DoneStep(),
     ];
@@ -274,74 +267,6 @@ class _WelcomeStep extends StatelessWidget {
   }
 }
 
-class _KeyboardStep extends StatefulWidget {
-  const _KeyboardStep();
-
-  @override
-  State<_KeyboardStep> createState() => _KeyboardStepState();
-}
-
-class _KeyboardStepState extends State<_KeyboardStep> {
-  bool _checking = true;
-  bool _granted = false;
-  bool _busy = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _check();
-  }
-
-  Future<void> _check() async {
-    final readable = await InputAccess.isReadable();
-    if (!mounted) return;
-    setState(() {
-      _checking = false;
-      _granted = readable;
-    });
-  }
-
-  Future<void> _grant() async {
-    setState(() => _busy = true);
-    final granted = await requestInputAccess(context);
-    if (granted) await coordinator.enableHoldToRecord();
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      _granted = granted;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _StepFrame(
-      icon: Icons.keyboard_outlined,
-      done: _granted,
-      title: 'Hold-to-record',
-      description:
-          'So you can hold the shortcut to talk and release to stop, Straight '
-          'needs to see key releases. Linux keeps that behind a one-time '
-          'permission.\n\n'
-          'This is the only step that asks for your password — typed into '
-          'Straight\'s own window, checked by the system, never saved. '
-          'Skip it and tap-to-talk still works.',
-      child: _checking || _busy
-          ? const SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : _granted
-          ? const _StatusChip(label: 'Keyboard access is on', good: true)
-          : FilledButton.icon(
-              onPressed: _grant,
-              icon: const Icon(Icons.lock_open, size: 16),
-              label: const Text('ENABLE HOLD-TO-RECORD'),
-            ),
-    );
-  }
-}
-
 class _TypingStep extends StatefulWidget {
   const _TypingStep();
 
@@ -461,7 +386,8 @@ class _ShortcutStepState extends State<_ShortcutStep> {
       _checking = false;
       _supported = supported;
       _registered =
-          binding == DesktopShortcutService.bindingFor(SettingsStore.getHotkey());
+          binding ==
+          DesktopShortcutService.bindingFor(SettingsStore.getHotkey());
     });
   }
 
@@ -613,7 +539,6 @@ class _DoneStepState extends State<_DoneStep> {
   bool _checking = true;
   bool _typingKnown = false;
   bool _typingOn = false;
-  bool _keyboardOn = false;
   bool _shortcutOn = false;
 
   @override
@@ -625,7 +550,6 @@ class _DoneStepState extends State<_DoneStep> {
   Future<void> _recheck() async {
     setState(() => _checking = true);
     final typingEnabled = await TypingAccess.isEnabled();
-    final keyboard = await InputAccess.isReadable();
     final supported = await DesktopShortcutService.isSupported();
     final binding = supported
         ? await DesktopShortcutService.registeredBinding()
@@ -635,8 +559,9 @@ class _DoneStepState extends State<_DoneStep> {
       _checking = false;
       _typingKnown = typingEnabled != null;
       _typingOn = typingEnabled == true;
-      _keyboardOn = keyboard;
-      _shortcutOn = binding == DesktopShortcutService.bindingFor(SettingsStore.getHotkey());
+      _shortcutOn =
+          binding ==
+          DesktopShortcutService.bindingFor(SettingsStore.getHotkey());
     });
   }
 
@@ -651,8 +576,7 @@ class _DoneStepState extends State<_DoneStep> {
     ].join(' + ');
   }
 
-  bool get _allOk =>
-      (!_typingKnown || _typingOn) && _keyboardOn && _shortcutOn;
+  bool get _allOk => (!_typingKnown || _typingOn) && _shortcutOn;
 
   Widget _row(String title, bool ok, String whenOff, {Widget? fix}) {
     final scheme = Theme.of(context).colorScheme;
@@ -673,15 +597,13 @@ class _DoneStepState extends State<_DoneStep> {
             Expanded(
               child: Text(
                 whenOff,
-                style: const TextStyle(fontSize: 11.5)
-                    .copyWith(color: Colors.grey),
+                style: const TextStyle(
+                  fontSize: 11.5,
+                ).copyWith(color: Colors.grey),
               ),
             ),
           ],
-          if (fix != null) ...[
-            const SizedBox(width: 8),
-            fix,
-          ],
+          if (fix != null) ...[const SizedBox(width: 8), fix],
         ],
       ),
     );
@@ -690,20 +612,15 @@ class _DoneStepState extends State<_DoneStep> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final holdReady = Platform.isLinux && coordinator.holdToRecordReady;
     final label = _hotkeyLabel;
 
     return _StepFrame(
       icon: Icons.check_rounded,
       done: _allOk && !_checking,
       title: 'You\'re set',
-      description: holdReady
-          ? 'Hold $label, talk, release — your words appear in the app in '
-                'front of you. Double-tap $label to keep listening until you '
-                'tap again.'
-          : 'Tap $label to start talking, tap again to stop — your words '
-                'appear in the app in front of you. Double-tap to keep '
-                'listening until the next tap.',
+      description:
+          'Tap $label to start talking, tap again to stop — your '
+          'words appear in the app in front of you.',
       child: Column(
         children: [
           if (_checking)
@@ -729,10 +646,11 @@ class _DoneStepState extends State<_DoneStep> {
                       child: const Text('TURN IT ON'),
                     ),
             ),
-            _row('Hold-to-record', _keyboardOn,
-                'Off — the shortcut still works as tap-to-talk.'),
-            _row('Shortcut registered', _shortcutOn,
-                'Not registered — add it in Keyboard settings.'),
+            _row(
+              'Shortcut registered',
+              _shortcutOn,
+              'Not registered — add it in Keyboard settings.',
+            ),
             if (Platform.isLinux)
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
